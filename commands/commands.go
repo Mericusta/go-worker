@@ -1,34 +1,31 @@
 package commands
 
-import "fmt"
+var commandFactory *CommandFactory
 
 // Command 指令枚举类型
-type Command int
-
-// CommandList 指令枚举列表
-var CommandList []Command
-
-// CommandExecutorList 指令执行列表
-var CommandExecutorList map[Command]func(string) error
+type CommandEnum int
 
 func init() {
-	CommandList = []Command{
-		Exit,
-		Worker,
-	}
-	CommandExecutorList = map[Command]func(string) error{
-		Exit:   ExitExecutor,
-		Worker: WorkerExecutor,
+	commandFactory = &CommandFactory{
+		commandNo: 0,
 	}
 }
 
-func Execute(inputString string, command Command) error {
-	executor, hasExecutor := CommandExecutorList[command]
-	if !hasExecutor {
-		return fmt.Errorf("command[%v] does not have executor", command)
-	}
-	if executor != nil {
-		return executor(inputString)
-	}
-	return nil
+type CommandInterface interface {
+	Execute() error
+	parseCommandParams() error
+}
+
+type CommandStruct struct {
+	No          int
+	Type        CommandEnum
+	InputString string
+	Param       CommandParam
+}
+
+type CommandParam struct {
+}
+
+func CreateCommand(commandEnum CommandEnum, inputString string) CommandInterface {
+	return commandFactory.CreateCommand(commandEnum, inputString)
 }

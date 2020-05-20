@@ -4,8 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
-	"github.com/go-worker/commands"
 	"github.com/go-worker/fsm"
 	"github.com/go-worker/global"
 	"github.com/go-worker/regexpscommands"
@@ -18,32 +18,33 @@ func init() {
 }
 
 func main() {
+	var input *bufio.Scanner
 	for {
+		// 等待输入
+		global.FsmState = fsm.Waitting
 		fmt.Print(ui.FSMWaitting)
-		input := bufio.NewScanner(os.Stdin)
+		input = bufio.NewScanner(os.Stdin)
+		if input.Scan() {
+			inputTextWithoutTrimSpace := strings.TrimSpace(input.Text())
+			utility.TestOutput("inputString = %v", inputTextWithoutTrimSpace)
 
-		hasInput := input.Scan()
-		if hasInput {
-			global.FsmState = fsm.Waitting
-			utility.TestOutput("inputString = %v", input.Text())
-
-			// TODO: fsm 作为独立携程存在
-
-			global.FsmState = fsm.Executing
-			command, parseCommandError := regexpscommands.ParseCommandByRegexp(input.Text())
+			// 解析输入
+			global.FsmState = fsm.Parsing
+			command, parseCommandError := regexpscommands.ParseCommandByRegexp(inputTextWithoutTrimSpace)
 			if parseCommandError != nil {
-				utility.ErrorOutput("%v", parseCommandError)
+				ui.OutputErrorInfo("%v", parseCommandError)
 				continue
 			}
 
-			utility.TestOutput("command = %v", command)
-			commandExecuteError := commands.Execute(input.Text(), command)
+			// 执行指令
+			global.FsmState = fsm.Executing
+			commandExecuteError := command.Execute()
 			if commandExecuteError != nil {
-				ui.OutputErrorInfo(commandExecuteError)
+				ui.OutputErrorInfo("%v", commandExecuteError)
 			}
 
+			// 状态机结果
 			if global.FsmState == fsm.Exiting {
-				utility.NoteOutput("Thanks for using!")
 				break
 			} else if global.FsmState == fsm.Error {
 				utility.TestOutput("FSM Error")

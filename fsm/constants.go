@@ -11,4 +11,6 @@ const (
 	Exiting FSMState = 3
 	// Executing 执行指令状态
 	Executing FSMState = 4
+	// Parsing 指令解析状态
+	Parsing FSMState = 5
 )

@@ -1,16 +1,20 @@
 package regexps
 
-// Exit 解析指令 exit
-var Exit Expression = `^exit$`
+// 指令表达式
 
-// Create 解析指令 create table [name] [column] [row]
-var Create Expression = `^create table [\w]+ [\d]+ [\d]+$`
+// ExpExit 解析指令 exit
+var ExpExit Expression = `^exit$`
 
-// Spider 解析指令 spider [project]
-var Spider Expression = `^spider [\w]+$`
+// ExpBind 解析指令 bind [operation] [option] [value]
+var ExpBind Expression = `^bind\s+(project|syntax)(\s+[-:\.~\\/\w]+)?$`
 
-// Simulator 解析指令 simulator [project]
-var Simulator Expression = `^simulator [\w]+$`
+// ExpCreate 解析指令 create [option] [value] [option value]
+var ExpCreate Expression = `^create\s+(package|file)(\s+[_\.\w-]+){1}(\s+parent(\s+[_\.\w-]+){1})?$`
 
-// Worker 解析指令 worker operation[ project]
-var Worker Expression = `^worker [\w]+( [\w]+)*$`
+// ExpConvert 解析指令 convert [option] [value] [option value] [option value]
+var ExpConvert Expression = `^convert\s+csv(\s+[_\w-]+){1}(\s+parent(\s+[_\.\w-]+){1})?(\s+(create|append)(\s+[_\.\w-]+){1})?$`
+
+// 内部逻辑表达式
+
+// ExpTemplateKeyword 模板关键词表达式
+var ExpTemplateKeyword Expression = `\$[\w_]+`

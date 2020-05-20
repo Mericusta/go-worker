@@ -29,7 +29,9 @@ type workerParams struct {
 
 func init() {
 	workerOperationList = []string{
+		"bind",
 		"run",
+		"create",
 		"help",
 		"quit",
 	}
@@ -47,7 +49,7 @@ func parseWorkerParams(inputString string) (*workerParams, error) {
 		params.Project = inputStringList[workerProjectIndex]
 		params.ProjectParams = append(params.ProjectParams, inputStringList[workerProjectParamsIndex:]...)
 	} else {
-		return nil, fmt.Errorf(ui.CommonError1)
+		return nil, fmt.Errorf(ui.FSMUnknownCommand)
 	}
 	return params, nil
 }
@@ -63,6 +65,10 @@ func WorkerExecutor(inputString string) error {
 		utility.TestOutput("WorkerExecutor, operation = %v", params.Operation)
 		utility.TestOutput("WorkerExecutor, project = %v", params.Project)
 		switch params.Operation {
+		case "bind":
+			{
+
+			}
 		case "run":
 			{
 				projectExecutor, hasProjectExecutor := workerProjectExecutorMap[params.Project]
@@ -103,7 +109,7 @@ const project0001OperationParamsIndex = 2
 
 func workerProject0001Executor(projectParams []string) error {
 	if project0001OperationParamsIndex > len(projectParams) {
-		return fmt.Errorf(ui.CommonError1)
+		return fmt.Errorf(ui.FSMUnknownCommand)
 	}
 
 	structName := projectParams[project0001StructNameIndex]
@@ -164,7 +170,7 @@ func workerProject0001Executor(projectParams []string) error {
 	case "help":
 		// 帮助
 	default:
-		return fmt.Errorf(ui.WorkerRun0001Text5)
+		return fmt.Errorf(ui.FSMUnknownCommand)
 	}
 
 	// 写入
@@ -176,7 +182,7 @@ func workerProject0001Executor(projectParams []string) error {
 }
 
 func openGoFile() (string, string, error) {
-	fmt.Printf(ui.WorkerRun0001Text1)
+	fmt.Printf(ui.FSMUnknownCommand)
 
 	input := bufio.NewScanner(os.Stdin)
 	if hasInput := input.Scan(); !hasInput {
@@ -202,7 +208,7 @@ func openGoFile() (string, string, error) {
 
 func appendGoStructMemberInfo(goStructLineList []string) (string, error) {
 	newGoStructMemberInfo := new(goStructMemberInfo)
-	fmt.Println(ui.WorkerRun0001Text2)
+	fmt.Println(ui.FSMUnknownCommand)
 	input := bufio.NewScanner(os.Stdin)
 	if hasInput := input.Scan(); hasInput {
 		inputStringList := strings.Split(input.Text(), "|")
@@ -237,7 +243,7 @@ func appendGoStructMemberInfo(goStructLineList []string) (string, error) {
 
 func removeGoStructMemberInfo(goStructLineList []string, memberToRemove []string) (string, error) {
 	if len(memberToRemove) == 0 {
-		return "", fmt.Errorf(ui.CommonError1)
+		return "", fmt.Errorf(ui.FSMUnknownCommand)
 	}
 	for _, operationParam := range memberToRemove {
 		for lineIndex, goStructLine := range goStructLineList {
@@ -271,7 +277,7 @@ func updateGoStructMemberInfo(goStructLineList []string, paramsList []string) (s
 				case "comment":
 					goStructMemberInfo.structComment = paramsList[project0001UpdateMemberValue]
 				default:
-					return "", fmt.Errorf(ui.WorkerRun0001Text4)
+					return "", fmt.Errorf(ui.FSMUnknownCommand)
 				}
 				found = true
 				newGoStructMemberInfoString := fmt.Sprintf("%v %v `csv:\"%v\"` //%v", goStructMemberInfo.structName, goStructMemberInfo.structType, goStructMemberInfo.structCsv, goStructMemberInfo.structComment)
@@ -280,10 +286,10 @@ func updateGoStructMemberInfo(goStructLineList []string, paramsList []string) (s
 			}
 		}
 		if !found {
-			return "", fmt.Errorf(ui.WorkerRun0001Text3)
+			return "", fmt.Errorf(ui.FSMUnknownCommand)
 		}
 	} else {
-		return "", fmt.Errorf(ui.CommonError1)
+		return "", fmt.Errorf(ui.FSMUnknownCommand)
 	}
 	return strings.Join(goStructLineList, "\n"), nil
 }

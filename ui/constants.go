@@ -1,22 +1,27 @@
 package ui
 
-// FSMWaitting 等待指令时显示文本
+// 状态机文本
+
+// FSMWaitting 等待指令
 var FSMWaitting string = "Waitting Orders: "
 
-// CommonError1 通用错误显示文本1：需要参数
-var CommonError1 string = "Params is required"
+// FSMUnknownCommand 未知指令
+var FSMUnknownCommand string = "Unknown command"
 
-// WorkerRun0001Text1 工作机任务0001显示文本1
-var WorkerRun0001Text1 string = "Please input go file name, press 'Enter' to use the last modified file: "
+// CommonError1 通用错误显示文本1：参数不足
+var CommonError1 string = "Params is not enough"
 
-// WorkerRun0001Text2 工作机任务0001显示文本2
-var WorkerRun0001Text2 string = "Please input struct member info, format: 'name|type|csv_field|comment'"
+// CommonError2 通用错误提示文本2：未定义显示内容
+var CommonError2 string = "UI output is undefined"
 
-// WorkerRun0001Text3 工作机任务0001显示文本3
-var WorkerRun0001Text3 string = "Unknown struct member"
+// CommonError3 通用错误提示文本3：文件夹创建失败
+var CommonError3 string = "Create directory failed, %v"
 
-// WorkerRun0001Text4 工作机任务0001显示文本4
-var WorkerRun0001Text4 string = "Unknown struct info"
+// CommonError4 通用错误提示文本4：文件创建失败
+var CommonError4 string = "Create file failed, %v"
 
-// WorkerRun0001Text5 工作机任务0001显示文本5
-var WorkerRun0001Text5 string = "Unknown Project Operation"
+// CommonNote1 通用提示文本1：未知选项
+var CommonNote1 string = "Unknown command option"
+
+// CommonWarn1 通用警告提示文本：待创建文件未指定后缀名
+var CommonWarn1 string = "File to create does not have suffix"
