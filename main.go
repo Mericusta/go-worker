@@ -10,7 +10,6 @@ import (
 	"github.com/go-worker/global"
 	"github.com/go-worker/regexpscommands"
 	"github.com/go-worker/ui"
-	"github.com/go-worker/utility"
 )
 
 func init() {
@@ -26,7 +25,6 @@ func main() {
 		input = bufio.NewScanner(os.Stdin)
 		if input.Scan() {
 			inputTextWithoutTrimSpace := strings.TrimSpace(input.Text())
-			utility.TestOutput("inputString = %v", inputTextWithoutTrimSpace)
 
 			// 解析输入
 			global.FsmState = fsm.Parsing
@@ -47,9 +45,7 @@ func main() {
 			if global.FsmState == fsm.Exiting {
 				break
 			} else if global.FsmState == fsm.Error {
-				utility.TestOutput("FSM Error")
 			} else {
-				utility.TestOutput("FSM state = %v", global.FsmState)
 			}
 		}
 	}

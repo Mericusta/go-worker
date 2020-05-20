@@ -32,9 +32,6 @@ func (command *Convert) Execute() error {
 		ui.OutputWarnInfo(ui.CommonWarn1)
 	}
 
-	utility.TestOutput("projectPath = %v, fileType = %v", projectPath, fileType)
-	utility.TestOutput("command.Params = %+v", command.Params)
-
 	filePath := fmt.Sprintf("%v/%v.%v", projectPath, command.Params.sourceValue, fileType)
 	if command.Params.sourceParentValue != "" {
 		filePath = fmt.Sprintf("%v/%v/%v.%v", projectPath, command.Params.sourceParentValue, command.Params.sourceValue, fileType)
@@ -60,8 +57,6 @@ func (command *Convert) Execute() error {
 		return convertError
 	}
 
-	utility.TestOutput("fileContent = %v", fileContent)
-
 	var toWriteFile *os.File
 	defer func() {
 		if toWriteFile != nil {
@@ -74,45 +69,33 @@ func (command *Convert) Execute() error {
 	case "create", "":
 		if command.Params.targetOption == "" {
 			toWriteFilePath = fmt.Sprintf("%v.%v", utility.Convert2CamelStyle(command.Params.sourceValue, false), toWriteFileType)
-			utility.TestOutput("toWriteFilePath = %v", toWriteFilePath)
-		}
-		if utility.IsExist(toWriteFilePath) {
-			var openFileError error
-			toWriteFile, openFileError = os.Open(toWriteFilePath)
-			if openFileError != nil {
-				utility.TestOutput("error 1")
-				return openFileError
-			}
-		} else {
-			var createFileError error
-			toWriteFile, createFileError = utility.CreateFile(toWriteFilePath)
-			if createFileError != nil {
-				utility.TestOutput("error 2")
-				return createFileError
-			}
 		}
 	case "append":
-		if utility.IsExist(toWriteFilePath) {
-			var openFileError error
-			toWriteFile, openFileError = os.Open(toWriteFilePath)
-			if openFileError != nil {
-				utility.TestOutput("error 3")
-				return openFileError
-			}
-		}
 	default:
 		ui.OutputNoteInfo(ui.CommonNote1)
 		return nil
 	}
 
+	if utility.IsExist(toWriteFilePath) {
+		var openFileError error
+		toWriteFile, openFileError = os.OpenFile(toWriteFilePath, os.O_RDWR|os.O_APPEND, 0644)
+		if openFileError != nil {
+			return openFileError
+		}
+	} else {
+		var createFileError error
+		toWriteFile, createFileError = utility.CreateFile(toWriteFilePath)
+		if createFileError != nil {
+			return createFileError
+		}
+	}
+
 	if toWriteFile == nil {
-		utility.TestOutput("error 4")
 		return fmt.Errorf("convert to write file is nil")
 	}
 
 	_, writeError := toWriteFile.WriteString(fileContent)
 	if writeError != nil {
-		utility.TestOutput("error 5")
 		return writeError
 	}
 

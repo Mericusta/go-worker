@@ -22,7 +22,7 @@
             - parent 指定父级包，不指定则默认在根目录
 
 ## 2020.5.20
-    - TODO: convert 指令
+    - NOTE: convert 指令
         - 在绑定目录下通过指定格式生成绑定语法的结构体
         - 格式：convert [csv] value [parent value] [create|append] value
         - 指令可选参数
