@@ -9,7 +9,7 @@ var ExpExit Expression = `^exit$`
 var ExpBind Expression = `^bind\s+(project|syntax)(\s+[-:\.~\\/\w]+)?$`
 
 // ExpCreate 解析指令 create [option] [value] [option value]
-var ExpCreate Expression = `^create\s+(package|file)(\s+[_\.\w-]+){1}(\s+parent(\s+[_\.\w-]+){1})?$`
+var ExpCreate Expression = `^create\s+(package|file)(\s+[_\.\w-]+){1}(\s+parent(\s+[/_\.\w-]+){1})?$`
 
 // ExpConvert 解析指令 convert [option] [value] [option value] [option value]
 var ExpConvert Expression = `^convert\s+csv(\s+[_\w-]+){1}(\s+parent(\s+[_\.\w-]+){1})?(\s+(create|append)(\s+[_\.\w-]+){1})?$`
