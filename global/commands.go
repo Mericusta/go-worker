@@ -1,4 +1,7 @@
-package commands
+package global
+
+// CommandEnum 指令枚举类型
+type CommandEnum int
 
 const (
 	// CmdUnknown 未知指令
@@ -11,4 +14,6 @@ const (
 	CmdCreate CommandEnum = 3
 	// CmdConvert 转化指令
 	CmdConvert CommandEnum = 4
+	// CmdAnalyze 分析指令
+	CmdAnalyze CommandEnum = 5
 )

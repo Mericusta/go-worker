@@ -1,9 +1,8 @@
 package commands
 
-var commandFactory *CommandFactory
+import "github.com/go-worker/global"
 
-// Command 指令枚举类型
-type CommandEnum int
+var commandFactory *CommandFactory
 
 func init() {
 	commandFactory = &CommandFactory{
@@ -18,7 +17,7 @@ type CommandInterface interface {
 
 type CommandStruct struct {
 	No          int
-	Type        CommandEnum
+	Type        global.CommandEnum
 	InputString string
 	Param       CommandParam
 }
@@ -26,6 +25,6 @@ type CommandStruct struct {
 type CommandParam struct {
 }
 
-func CreateCommand(commandEnum CommandEnum, inputString string) CommandInterface {
+func CreateCommand(commandEnum global.CommandEnum, inputString string) CommandInterface {
 	return commandFactory.CreateCommand(commandEnum, inputString)
 }

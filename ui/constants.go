@@ -25,3 +25,6 @@ var CommonNote1 string = "Unknown command option"
 
 // CommonWarn1 通用警告提示文本：待创建文件未指定后缀名
 var CommonWarn1 string = "File to create does not have suffix"
+
+// CommonWarn2 通用警告提示文本：指令
+var CommonWarn2 string = "Command %v option %v does not regist regexp"

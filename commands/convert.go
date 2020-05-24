@@ -192,19 +192,20 @@ func convertCsvToStruct(fileName string, file *os.File) (string, error) {
 
 	memberContent := ""
 	for index := 0; index != len(headStringList); index++ {
-		memberCommentFormatString := utility.ConvertTemplate2Format(ui.GoMemberCommentByCSV)
-		memberCommentString := fmt.Sprintf(memberCommentFormatString, headStringList[index])
-		memberFormatString := utility.ConvertTemplate2Format(ui.GoStructMemberTemplate)
-		memberString := fmt.Sprintf(memberFormatString, utility.Convert2CamelStyle(headStringList[index], true), typeStringList[index], memberCommentString)
-		if memberContent == "" {
-			memberContent = memberString
-		} else {
-			memberContent = fmt.Sprintf("%v\n\t%v", memberContent, memberString)
-		}
+		// memberCommentFormatString := utility.ConvertTemplate2Format(ui.GoMemberCommentByCSV)
+		// memberCommentString := fmt.Sprintf(memberCommentFormatString, headStringList[index])
+		// memberFormatString := utility.ConvertTemplate2Format(ui.GoStructMemberTemplate)
+		// memberString := fmt.Sprintf(memberFormatString, utility.Convert2CamelStyle(headStringList[index], true), typeStringList[index], memberCommentString)
+		// if memberContent == "" {
+		// 	memberContent = memberString
+		// } else {
+		// 	memberContent = fmt.Sprintf("%v\n\t%v", memberContent, memberString)
+		// }
 	}
 
-	structFormatString := utility.ConvertTemplate2Format(ui.GoStructTemplate)
-	structContent := fmt.Sprintf(structFormatString, utility.Convert2CamelStyle(fileName, true), memberContent)
+	// structFormatString := utility.ConvertTemplate2Format(ui.GoStructTemplate)
+	// structContent := fmt.Sprintf(structFormatString, utility.Convert2CamelStyle(fileName, true), memberContent)
+	structContent := memberContent
 
 	return structContent, nil
 }

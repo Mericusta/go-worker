@@ -1,10 +1,12 @@
 package commands
 
+import "github.com/go-worker/global"
+
 type CommandFactory struct {
 	commandNo int
 }
 
-func (commandFactory *CommandFactory) CreateCommand(commandEnum CommandEnum, inputString string) CommandInterface {
+func (commandFactory *CommandFactory) CreateCommand(commandEnum global.CommandEnum, inputString string) CommandInterface {
 	var commandInterface CommandInterface
 	command := &CommandStruct{
 		No:          commandFactory.commandNo,
@@ -12,26 +14,31 @@ func (commandFactory *CommandFactory) CreateCommand(commandEnum CommandEnum, inp
 		InputString: inputString,
 	}
 	switch commandEnum {
-	case CmdBind:
+	case global.CmdBind:
 		cmdBind := &Bind{
 			CommandStruct: command,
 		}
 		commandInterface = cmdBind
-	case CmdExit:
+	case global.CmdExit:
 		cmdExit := &Exit{
 			CommandStruct: command,
 		}
 		commandInterface = cmdExit
-	case CmdCreate:
+	case global.CmdCreate:
 		cmdCreate := &Create{
 			CommandStruct: command,
 		}
 		commandInterface = cmdCreate
-	case CmdConvert:
+	case global.CmdConvert:
 		cmdConvert := &Convert{
 			CommandStruct: command,
 		}
 		commandInterface = cmdConvert
+	case global.CmdAnalyze:
+		cmdAnalyze := &Analyze{
+			CommandStruct: command,
+		}
+		commandInterface = cmdAnalyze
 	}
 
 	commandFactory.commandNo++

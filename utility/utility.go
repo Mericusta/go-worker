@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/go-worker/global"
-	"github.com/go-worker/regexps"
 )
 
 // FormatOutput 格式化输出
@@ -74,13 +73,13 @@ func Convert2CamelStyle(otherStyleString string, capitalize bool) string {
 	return camelStyleString
 }
 
-// ConvertTemplate2Format 将模板字符串转换为格式字符串
-func ConvertTemplate2Format(templateString string) string {
-	if templateKeywordRegexp, hasTemplateKeywordRegexp := regexps.ExpressionRegexpMap[global.TemplateKeywordExpression]; hasTemplateKeywordRegexp {
-		return templateKeywordRegexp.ReplaceAllString(templateString, "%v")
-	}
-	return ""
-}
+// // ConvertTemplate2Format 将模板字符串转换为格式字符串
+// func ConvertTemplate2Format(templateString string) string {
+// 	if templateKeywordRegexp, hasTemplateKeywordRegexp := regexps.ExpressionRegexpMap[global.CommonKeywordTemplate]; hasTemplateKeywordRegexp {
+// 		return templateKeywordRegexp.ReplaceAllString(templateString, "%v")
+// 	}
+// 	return ""
+// }
 
 // TraitStructName 从含有结构体类型的 GO 组合类型中萃取结构体的名称，如：*Name -> Name
 func TraitStructName(structString string) string {

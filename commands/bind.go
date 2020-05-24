@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/go-worker/config"
 	"github.com/go-worker/ui"
@@ -57,13 +56,15 @@ type bindParam struct {
 }
 
 func (command *Bind) parseCommandParams() error {
-	inputStringList := strings.Split(command.InputString, " ")
-	if bindValueIndex >= len(inputStringList) {
-		return fmt.Errorf(ui.CommonError1)
-	}
-	command.BindParams = &bindParam{
-		option: inputStringList[bindOptionIndex],
-		value:  inputStringList[bindValueIndex],
-	}
+
+	// inputStringList := strings.Split(command.InputString, " ")
+	// if bindValueIndex >= len(inputStringList) {
+	// 	return fmt.Errorf(ui.CommonError1)
+	// }
+	// command.BindParams = &bindParam{
+	// 	option: inputStringList[bindOptionIndex],
+	// 	value:  inputStringList[bindValueIndex],
+	// }
+
 	return nil
 }

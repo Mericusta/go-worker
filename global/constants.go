@@ -12,9 +12,8 @@ var (
 
 // 配置常量
 var (
-	SyntaxGo                  = "go"
-	SyntaxCSV                 = "csv"
-	TemplateKeywordExpression = "TKExpression"
+	SyntaxGo  = "go"
+	SyntaxCSV = "csv"
 )
 
 // 外部常量
