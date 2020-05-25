@@ -10,4 +10,8 @@ const (
 	AEPath RegexpEnum = 2
 	// AEBindOptionValue bind 指令参数的表达式
 	AEBindOptionValue RegexpEnum = 3
+	// AECreateOptionValue create 指令参数的表达式
+	AECreateOptionValue RegexpEnum = 4
+	// AEConvertOptionValue convert 指令参数的表达式
+	AEConvertOptionValue RegexpEnum = 5
 )

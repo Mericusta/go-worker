@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/go-worker/config"
 	"github.com/go-worker/ui"
@@ -79,19 +78,27 @@ type createParam struct {
 }
 
 func (command *Create) parseCommandParams() error {
-	inputStringList := strings.Split(command.CommandStruct.InputString, " ")
-	if createValueIndex >= len(inputStringList) {
-		return fmt.Errorf(ui.CommonError1)
-	}
-	command.Params = &createParam{
-		option: inputStringList[createOptionIndex],
-		value:  inputStringList[createValueIndex],
-		parent: func() string {
-			if len(inputStringList) > createParentValue {
-				return inputStringList[createParentValue]
-			}
-			return ""
-		}(),
-	}
+	// optionValueString := ""
+	// if optionValueRegexp, hasOptionValueRegexp := regexps.ExpressionEnumRegexoMap[global.AEBindOptionValue]; hasOptionValueRegexp {
+	// 	optionValueString = optionValueRegexp.FindString(command.CommandStruct.InputString)
+	// } else {
+	// 	ui.OutputWarnInfo(ui.CommonWarn2, "create", "option")
+	// }
+
+	// inputStringList := strings.Split(command.CommandStruct.InputString, " ")
+	// if createValueIndex >= len(inputStringList) {
+	// 	return fmt.Errorf(ui.CommonError1)
+	// }
+	// command.Params = &createParam{
+	// 	option: inputStringList[createOptionIndex],
+	// 	value:  inputStringList[createValueIndex],
+	// 	parent: func() string {
+	// 		if len(inputStringList) > createParentValue {
+	// 			return inputStringList[createParentValue]
+	// 		}
+	// 		return ""
+	// 	}(),
+	// }
+
 	return nil
 }

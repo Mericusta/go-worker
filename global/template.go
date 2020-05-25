@@ -15,4 +15,8 @@ const (
 	OptionOutputValueTemplate TemplateEnum = 4
 	// BindOptionValueTemplate bind 选项模板
 	BindOptionValueTemplate TemplateEnum = 5
+	// CreateOptionValueTemplate create 选项模板
+	CreateOptionValueTemplate TemplateEnum = 6
+	// ConvertOptionValueTemplate convert 选项模板
+	ConvertOptionValueTemplate TemplateEnum = 7
 )

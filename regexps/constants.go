@@ -11,6 +11,12 @@ var AEPath Expression = `[/_\.\w-]+`
 // AEBindOptionValue 解析 bind 指令参数的表达式
 var AEBindOptionValue Expression = `(project|syntax)(\s+[-:\.~\\/\w]+)?`
 
+// AECreateOptionValue 解析 create 指令参数的表达式
+var AECreateOptionValue Expression = `(package|file)(\s+[_\.\w-]+){1}`
+
+// AEConvertOptionValue 解析 convert 指令参数的表达式
+var AEConvertOptionValue Expression = `csv(\s+[_\w-]+){1}`
+
 // 模板匹配式
 
 // 原子匹配式
@@ -18,8 +24,14 @@ var AEBindOptionValue Expression = `(project|syntax)(\s+[-:\.~\\/\w]+)?`
 // MTEPath 路径的模板匹配式
 var MTEPath Expression = `\$PATH`
 
-// MTEBindOption bind 指令的模板匹配式
+// MTEBindOption bind 指令 option 选项的模板匹配式
 var MTEBindOption Expression = `\$BOVExpression`
+
+// MTECreateOption create 指令 option 选项的模板匹配式
+var MTECreateOption Expression = `\$CreateOVExpression`
+
+// MTEConvertOption convert 指令 option 选项的模板匹配式
+var MTEConvertOption Expression = `\$ConvertOVExpression`
 
 // 组合匹配式
 

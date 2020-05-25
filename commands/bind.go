@@ -47,36 +47,25 @@ func (command Bind) Execute() error {
 	return nil
 }
 
-const (
-	bindCommandIndex = 0
-	bindOptionIndex  = 1
-	bindValueIndex   = 2
-)
-
 type bindParam struct {
 	option string
 	value  string
 }
 
 func (command *Bind) parseCommandParams() error {
-
-	inputStringList := strings.Split(command.InputString, " ")
-	if bindValueIndex >= len(inputStringList) {
-		return fmt.Errorf(ui.CommonError1)
-	}
-	command.BindParams = &bindParam{
-		option: inputStringList[bindOptionIndex],
-		value:  inputStringList[bindValueIndex],
-	}
-
-	optionValue := ""
+	optionValueString := ""
 	if optionValueRegexp, hasOptionValueRegexp := regexps.ExpressionEnumRegexoMap[global.AEBindOptionValue]; hasOptionValueRegexp {
-		optionValue = optionValueRegexp.FindString(command.CommandStruct.InputString)
+		optionValueString = optionValueRegexp.FindString(command.CommandStruct.InputString)
 	} else {
 		ui.OutputWarnInfo(ui.CommonWarn2, "bind", "option")
 	}
-
-	utility.TestOutput(optionValue)
-
+	if optionValueString == "" {
+		return fmt.Errorf(ui.CommonError1)
+	}
+	optionValueList := strings.Split(optionValueString, " ")
+	command.BindParams = &bindParam{
+		option: optionValueList[0],
+		value:  optionValueList[1],
+	}
 	return nil
 }

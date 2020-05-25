@@ -69,6 +69,8 @@ func registAtomicExpression() {
 		global.AETemplateCommonKeyword: AETemplateCommonKeyword,
 		global.AEPath:                  AEPath,
 		global.AEBindOptionValue:       AEBindOptionValue,
+		global.AECreateOptionValue:     AECreateOptionValue,
+		global.AEConvertOptionValue:    AEConvertOptionValue,
 	}
 }
 
@@ -84,17 +86,21 @@ func complieAtomicRegexp() {
 
 func registTemplateEnumAtomicExpressionMap() {
 	templateEnumAtomicExpressionMap = map[global.TemplateEnum]Expression{
-		global.PathTemplate:            AEPath,
-		global.BindOptionValueTemplate: AEBindOptionValue,
+		global.PathTemplate:               AEPath,
+		global.BindOptionValueTemplate:    AEBindOptionValue,
+		global.CreateOptionValueTemplate:  AECreateOptionValue,
+		global.ConvertOptionValueTemplate: AEConvertOptionValue,
 	}
 }
 
 func registTemplateMatchTemplateExpression() {
 	matchTemplateExpressionMap = map[global.TemplateEnum]Expression{
-		global.PathTemplate:              MTEPath,
-		global.OptionParentValueTemplate: MTEOptionParentValue,
-		global.OptionOutputValueTemplate: MTEOptionOutputValue,
-		global.BindOptionValueTemplate:   MTEBindOption,
+		global.PathTemplate:               MTEPath,
+		global.OptionParentValueTemplate:  MTEOptionParentValue,
+		global.OptionOutputValueTemplate:  MTEOptionOutputValue,
+		global.BindOptionValueTemplate:    MTEBindOption,
+		global.CreateOptionValueTemplate:  MTECreateOption,
+		global.ConvertOptionValueTemplate: MTEConvertOption,
 	}
 }
 
