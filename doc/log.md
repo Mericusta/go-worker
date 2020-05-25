@@ -74,3 +74,7 @@
         - 将 command 的枚举类型移到 global 中作为一个子模块，避免循环引用
         - 修改所有指令的 parseCommandParams 方法，采用正则表达式解析指令的参数
 - 移动 README 内容至 doc/log.md，记录开发日志
+
+## 2020.5.25
+
+- 模板解析式：通过正则表达式编译生成的 *regexp.Regexp 对象

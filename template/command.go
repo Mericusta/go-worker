@@ -1,5 +1,8 @@
 package template
 
+// TEBind 指令 bind 的模板表达式
+var TEBind TemplateExpression = `^bind\s+$BOVExpression$`
+
 // TECreate 指令 create 的模板表达式
 var TECreate TemplateExpression = `^create\s+(package|file)(\s+[_\.\w-]+){1}(\s+$OPVExpression)?$`
 

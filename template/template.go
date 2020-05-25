@@ -20,6 +20,7 @@ func init() {
 		global.OptionOutputValueTemplate: TEOptionOutputValue,
 	}
 	CommandTemplateExpressionMap = map[global.CommandEnum]TemplateExpression{
+		global.CmdBind:    TEBind,
 		global.CmdCreate:  TECreate,
 		global.CmdConvert: TEConvert,
 		global.CmdAnalyze: TEAnalyze,

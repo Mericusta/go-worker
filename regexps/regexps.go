@@ -6,10 +6,17 @@ import (
 	"github.com/go-worker/global"
 	"github.com/go-worker/template"
 	"github.com/go-worker/ui"
+	"github.com/go-worker/utility"
 )
 
 // Expression 正则表达式类型
 type Expression string
+
+// expressionEnumAtomicExpressionMap 正则表达式枚举与原子表达式映射
+var expressionEnumAtomicExpressionMap map[global.RegexpEnum]Expression
+
+// ExpressionEnumRegexoMap 正则表达式枚举与解析式映射
+var ExpressionEnumRegexoMap map[global.RegexpEnum]*regexp.Regexp
 
 // templateEnumAtomicExpressionMap 模板与原子表达式映射
 var templateEnumAtomicExpressionMap map[global.TemplateEnum]Expression
@@ -26,13 +33,17 @@ var commandExpressionMap map[global.CommandEnum]string
 // RegexpCommandEnumMap 解析式与指令映射
 var RegexpCommandEnumMap map[*regexp.Regexp]global.CommandEnum
 
-// // LogicRegexpMap 内部逻辑表达式枚举
-// var LogicRegexpMap map[string]*regexp.Regexp
-
 func init() {
+	ExpressionEnumRegexoMap = make(map[global.RegexpEnum]*regexp.Regexp)
 	MatchTemplateRegexpMap = make(map[global.TemplateEnum]*regexp.Regexp)
 	commandExpressionMap = make(map[global.CommandEnum]string)
 	RegexpCommandEnumMap = make(map[*regexp.Regexp]global.CommandEnum)
+
+	// 注册原子表达式
+	registAtomicExpression()
+
+	// 编译原子表达式的解析式
+	complieAtomicRegexp()
 
 	// 注册模板与原子表达式
 	registTemplateEnumAtomicExpressionMap()
@@ -40,7 +51,7 @@ func init() {
 	// 注册模板与模板匹配式
 	registTemplateMatchTemplateExpression()
 
-	// 编译模板匹配式
+	// 编译模板匹配式的解析式
 	complieMatchTemplateRegexp()
 
 	// 解析指令的模板表达式
@@ -49,13 +60,32 @@ func init() {
 	// 注册指令的原子表达式
 	registCommandAtomicExpression()
 
-	// 编译指令正则表达式
+	// 编译指令正则表达式的解析式
 	complieCommandRegexp()
+}
+
+func registAtomicExpression() {
+	expressionEnumAtomicExpressionMap = map[global.RegexpEnum]Expression{
+		global.AETemplateCommonKeyword: AETemplateCommonKeyword,
+		global.AEPath:                  AEPath,
+		global.AEBindOptionValue:       AEBindOptionValue,
+	}
+}
+
+func complieAtomicRegexp() {
+	for expressionEnum, atomicExpression := range expressionEnumAtomicExpressionMap {
+		atomicRegexp := regexp.MustCompile(string(atomicExpression))
+		if atomicRegexp == nil {
+			ui.OutputWarnInfo("complie atomic expression %v %v, but get nil", expressionEnum, atomicExpression)
+		}
+		ExpressionEnumRegexoMap[expressionEnum] = atomicRegexp
+	}
 }
 
 func registTemplateEnumAtomicExpressionMap() {
 	templateEnumAtomicExpressionMap = map[global.TemplateEnum]Expression{
-		global.PathTemplate: AEPath,
+		global.PathTemplate:            AEPath,
+		global.BindOptionValueTemplate: AEBindOptionValue,
 	}
 }
 
@@ -64,6 +94,7 @@ func registTemplateMatchTemplateExpression() {
 		global.PathTemplate:              MTEPath,
 		global.OptionParentValueTemplate: MTEOptionParentValue,
 		global.OptionOutputValueTemplate: MTEOptionOutputValue,
+		global.BindOptionValueTemplate:   MTEBindOption,
 	}
 }
 
@@ -104,11 +135,13 @@ func parseCommandTemplateExpression() {
 		}
 		commandExpressionMap[commandEnum] = replaceExpression
 	}
+	for commandEnum, expression := range commandExpressionMap {
+		utility.TestOutput("commandEnum = %v, expression = %v", commandEnum, expression)
+	}
 }
 
 func registCommandAtomicExpression() {
 	commandExpressionMap[global.CmdExit] = string(AECmdExit)
-	commandExpressionMap[global.CmdBind] = string(AECmdBind)
 }
 
 func complieCommandRegexp() {

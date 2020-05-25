@@ -2,8 +2,11 @@ package commands
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/go-worker/config"
+	"github.com/go-worker/global"
+	"github.com/go-worker/regexps"
 	"github.com/go-worker/ui"
 	"github.com/go-worker/utility"
 )
@@ -57,14 +60,23 @@ type bindParam struct {
 
 func (command *Bind) parseCommandParams() error {
 
-	// inputStringList := strings.Split(command.InputString, " ")
-	// if bindValueIndex >= len(inputStringList) {
-	// 	return fmt.Errorf(ui.CommonError1)
-	// }
-	// command.BindParams = &bindParam{
-	// 	option: inputStringList[bindOptionIndex],
-	// 	value:  inputStringList[bindValueIndex],
-	// }
+	inputStringList := strings.Split(command.InputString, " ")
+	if bindValueIndex >= len(inputStringList) {
+		return fmt.Errorf(ui.CommonError1)
+	}
+	command.BindParams = &bindParam{
+		option: inputStringList[bindOptionIndex],
+		value:  inputStringList[bindValueIndex],
+	}
+
+	optionValue := ""
+	if optionValueRegexp, hasOptionValueRegexp := regexps.ExpressionEnumRegexoMap[global.AEBindOptionValue]; hasOptionValueRegexp {
+		optionValue = optionValueRegexp.FindString(command.CommandStruct.InputString)
+	} else {
+		ui.OutputWarnInfo(ui.CommonWarn2, "bind", "option")
+	}
+
+	utility.TestOutput(optionValue)
 
 	return nil
 }
