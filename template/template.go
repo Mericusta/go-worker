@@ -8,21 +8,21 @@ type TemplateString string
 // TemplateExpression 模板表达式类型
 type TemplateExpression string
 
-// TemplateEnumExpressionMap 模板与模板表达式映射
-var TemplateEnumExpressionMap map[global.TemplateEnum]TemplateExpression
+// // TemplateEnumExpressionMap 模板与模板表达式映射
+// var TemplateEnumExpressionMap map[global.TemplateEnum]TemplateExpression
 
-// CommandTemplateExpressionMap 指令与模板表达式映射
+// CommandTemplateExpressionMap 指令枚举与模板表达式映射
 var CommandTemplateExpressionMap map[global.CommandEnum]TemplateExpression
 
 func init() {
-	TemplateEnumExpressionMap = map[global.TemplateEnum]TemplateExpression{
-		global.OptionParentValueTemplate: TEOptionParentValue,
-		global.OptionOutputValueTemplate: TEOptionOutputValue,
-	}
+	// TemplateEnumExpressionMap = map[global.TemplateEnum]TemplateExpression{
+	// 	global.OptionParentValueTemplate: TEOptionParentValue,
+	// 	global.OptionOutputValueTemplate: TEOptionOutputValue,
+	// }
 	CommandTemplateExpressionMap = map[global.CommandEnum]TemplateExpression{
-		global.CmdBind:    TEBind,
-		global.CmdCreate:  TECreate,
-		global.CmdConvert: TEConvert,
-		global.CmdAnalyze: TEAnalyze,
+		global.CmdBind:    TECommandBind,
+		global.CmdCreate:  TECommandCreate,
+		global.CmdConvert: TECommandConvert,
+		global.CmdAnalyze: TECommandAnalyze,
 	}
 }

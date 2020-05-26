@@ -79,26 +79,29 @@ type createParam struct {
 
 func (command *Create) parseCommandParams() error {
 	// optionValueString := ""
-	// if optionValueRegexp, hasOptionValueRegexp := regexps.ExpressionEnumRegexoMap[global.AEBindOptionValue]; hasOptionValueRegexp {
+	// if optionValueRegexp, hasOptionValueRegexp := regexps.ExpressionEnumRegexpMap[global.AECreateOptionValue]; hasOptionValueRegexp {
 	// 	optionValueString = optionValueRegexp.FindString(command.CommandStruct.InputString)
 	// } else {
 	// 	ui.OutputWarnInfo(ui.CommonWarn2, "create", "option")
 	// }
-
-	// inputStringList := strings.Split(command.CommandStruct.InputString, " ")
-	// if createValueIndex >= len(inputStringList) {
+	// if optionValueString == "" {
 	// 	return fmt.Errorf(ui.CommonError1)
 	// }
+	// optionValueList := strings.Split(optionValueString, " ")
 	// command.Params = &createParam{
-	// 	option: inputStringList[createOptionIndex],
-	// 	value:  inputStringList[createValueIndex],
-	// 	parent: func() string {
-	// 		if len(inputStringList) > createParentValue {
-	// 			return inputStringList[createParentValue]
-	// 		}
-	// 		return ""
-	// 	}(),
+	// 	option: optionValueList[0],
+	// 	value:  optionValueList[1],
 	// }
-
+	// parentValue := ""
+	// if parentValueRegexp, hasParentValueRegexp := regexps.MatchTemplateRegexpMap[global.OptionParentValueTemplate]; hasParentValueRegexp {
+	// 	parentValue = parentValueRegexp.FindString(command.CommandStruct.InputString)
+	// } else {
+	// 	ui.OutputWarnInfo(ui.CommonWarn2, "create", "parent")
+	// }
+	// utility.TestOutput("parentValue = %v", parentValue)
+	// if parentValue != "" {
+	// 	parentValueList := strings.Split(parentValue, " ")
+	// 	command.Params.parent = parentValueList[1]
+	// }
 	return nil
 }

@@ -1,13 +1,13 @@
 package template
 
-// TEBind 指令 bind 的模板表达式
-var TEBind TemplateExpression = `^bind\s+$BOVExpression$`
+// TECommandBind 指令 bind 的模板表达式
+var TECommandBind TemplateExpression = `^bind\s+TK_BOVExpression$`
 
-// TECreate 指令 create 的模板表达式
-var TECreate TemplateExpression = `^create\s+$CreateOVExpression(\s+$OPVExpression)?$`
+// TECommandCreate 指令 create 的模板表达式
+var TECommandCreate TemplateExpression = `^create\s+TK_CreateOVExpression(\s+TK_OPVExpression)?$`
 
-// TEConvert 指令 convert 的模板表达式
-var TEConvert TemplateExpression = `^convert\s+$ConvertOVExpression(\s+$OPVExpression)?(\s+(create|append)(\s+[_\.\w-]+){1})?$`
+// TECommandConvert 指令 convert 的模板表达式
+var TECommandConvert TemplateExpression = `^convert\s+TK_ConvertOVExpression(\s+TK_OPVExpression)?(\s+(create|append)(\s+[_\.\w-]+){1})?$`
 
-// TEAnalyze 指令 analyze 的模板表达式
-var TEAnalyze TemplateExpression = `^analyze\s+(file|directory|package)(\s+[_\.\w-]+)+(\s+$OPVExpression)?(\s+$OOVExpression)?$`
+// TECommandAnalyze 指令 analyze 的模板表达式
+var TECommandAnalyze TemplateExpression = `^analyze\s+(file|directory|package)(\s+[_\.\w-]+)+(\s+TK_OPVExpression)?(\s+TK_OOVExpression)?$`

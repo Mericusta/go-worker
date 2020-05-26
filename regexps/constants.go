@@ -1,42 +1,32 @@
 package regexps
 
-// 原子表达式
+import "regexp"
 
-// AETemplateCommonKeyword 通用模板关键词表达式，用于匹配模板字符串中的通用模板文本
-var AETemplateCommonKeyword Expression = `\$[\w_]+`
+// 模板解析式
 
-// AEPath 路径表达式
-var AEPath Expression = `[/_\.\w-]+`
+// templateCommonKeywordRegexp 通用模板关键词解析式
+var templateCommonKeywordRegexp *regexp.Regexp
 
-// AEBindOptionValue 解析 bind 指令参数的表达式
-var AEBindOptionValue Expression = `(project|syntax)(\s+[-:\.~\\/\w]+)?`
+// // 模板匹配式
 
-// AECreateOptionValue 解析 create 指令参数的表达式
-var AECreateOptionValue Expression = `(package|file)(\s+[_\.\w-]+){1}`
+// // 原子匹配式
 
-// AEConvertOptionValue 解析 convert 指令参数的表达式
-var AEConvertOptionValue Expression = `csv(\s+[_\w-]+){1}`
+// // MTEPath 路径的模板匹配式
+// var MTEPath Expression = `MTE_PATH`
 
-// 模板匹配式
+// // MTEBindOption bind 指令 option 选项的模板匹配式
+// var MTEBindOption Expression = `\$BOVExpression`
 
-// 原子匹配式
+// // MTECreateOption create 指令 option 选项的模板匹配式
+// var MTECreateOption Expression = `\$CreateOVExpression`
 
-// MTEPath 路径的模板匹配式
-var MTEPath Expression = `\$PATH`
+// // MTEConvertOption convert 指令 option 选项的模板匹配式
+// var MTEConvertOption Expression = `\$ConvertOVExpression`
 
-// MTEBindOption bind 指令 option 选项的模板匹配式
-var MTEBindOption Expression = `\$BOVExpression`
+// // 组合匹配式
 
-// MTECreateOption create 指令 option 选项的模板匹配式
-var MTECreateOption Expression = `\$CreateOVExpression`
+// // MTEOptionParentValue 指令选项 parent 的模板匹配式
+// var MTEOptionParentValue Expression = `\$OPVExpression`
 
-// MTEConvertOption convert 指令 option 选项的模板匹配式
-var MTEConvertOption Expression = `\$ConvertOVExpression`
-
-// 组合匹配式
-
-// MTEOptionParentValue 指令选项 parent 的模板匹配式
-var MTEOptionParentValue Expression = `\$OPVExpression`
-
-// MTEOptionOutputValue 指令选项 output 的模板匹配式
-var MTEOptionOutputValue Expression = `\$OOVExpression`
+// // MTEOptionOutputValue 指令选项 output 的模板匹配式
+// var MTEOptionOutputValue Expression = `\$OOVExpression`
