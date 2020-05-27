@@ -4,12 +4,14 @@ package template
 type TemplateKeyword string
 
 var (
-	// TK_BOVExpression bind 指令的 option 关键词
+	// TK_BOVExpression bind 指令的 project|syntax 选项关键词
 	TK_BOVExpression TemplateKeyword = "TK_BOVExpression"
-	// TK_CreateOVExpression create 指令的 option 关键词
+	// TK_CreateOVExpression create 指令的 package|file 选项关键词
 	TK_CreateOVExpression TemplateKeyword = "TK_CreateOVExpression"
-	// TK_ConvertOVExpression convert 指令的 option 关键词
+	// TK_ConvertOVExpression convert 指令的 csv 选项关键词
 	TK_ConvertOVExpression TemplateKeyword = "TK_ConvertOVExpression"
+	// TK_ConvertACOptionExpression convert 指令的 append|create 选项关键词
+	TK_ConvertACOptionExpression TemplateKeyword = "TK_ConvertACOptionExpression"
 	// TK_Path path 的关键词
 	TK_Path TemplateKeyword = "TK_PATH"
 

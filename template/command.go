@@ -7,7 +7,7 @@ var TECommandBind TemplateExpression = `^bind\s+TK_BOVExpression$`
 var TECommandCreate TemplateExpression = `^create\s+TK_CreateOVExpression(\s+TK_OPVExpression)?$`
 
 // TECommandConvert 指令 convert 的模板表达式
-var TECommandConvert TemplateExpression = `^convert\s+TK_ConvertOVExpression(\s+TK_OPVExpression)?(\s+(create|append)(\s+[_\.\w-]+){1})?$`
+var TECommandConvert TemplateExpression = `^convert\s+TK_ConvertOVExpression(\s+TK_OPVExpression)?(\s+TK_ConvertACOptionExpression)?$`
 
 // TECommandAnalyze 指令 analyze 的模板表达式
 var TECommandAnalyze TemplateExpression = `^analyze\s+(file|directory|package)(\s+[_\.\w-]+)+(\s+TK_OPVExpression)?(\s+TK_OOVExpression)?$`

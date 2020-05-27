@@ -17,3 +17,6 @@ var AECreateOptionValue AtomicExpression = `(package|file)(\s+[_\.\w-]+){1}`
 
 // AEConvertOptionValue 解析 convert 指令参数的表达式
 var AEConvertOptionValue AtomicExpression = `csv(\s+[_\w-]+){1}`
+
+// AEConvertACOptionValue 解析 convert 指令参数的表达式
+var AEConvertACOptionValue AtomicExpression = `(create|append)(\s+[_\.\w-]+){1}`

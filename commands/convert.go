@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-worker/config"
 	"github.com/go-worker/global"
+	"github.com/go-worker/regexps"
 	"github.com/go-worker/ui"
 	"github.com/go-worker/utility"
 )
@@ -102,12 +103,6 @@ func (command *Convert) Execute() error {
 	return nil
 }
 
-const (
-	convertCommandIndex     = 0
-	convertSourceTypeIndex  = 1
-	convertSourceValueIndex = 2
-)
-
 type convertParam struct {
 	sourceType        string
 	sourceValue       string
@@ -117,41 +112,40 @@ type convertParam struct {
 }
 
 func (command *Convert) parseCommandParams() error {
-	inputStringList := strings.Split(command.CommandStruct.InputString, " ")
-	if convertSourceValueIndex >= len(inputStringList) {
+	optionValueString := ""
+	if optionValueRegexp, hasOptionValueRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEConvertOptionValue]; hasOptionValueRegexp {
+		optionValueString = optionValueRegexp.FindString(command.CommandStruct.InputString)
+	} else {
+		ui.OutputWarnInfo(ui.CommonWarn2, "convert", "csv")
+	}
+	if optionValueString == "" {
 		return fmt.Errorf(ui.CommonError1)
 	}
-	_, inputStringList = utility.SlicePop(inputStringList)
-	pop := func() string {
-		var element string
-		element, inputStringList = utility.SlicePop(inputStringList)
-		return element
-	}
+	optionValueList := strings.Split(optionValueString, " ")
 	command.Params = &convertParam{
-		sourceType:  pop(),
-		sourceValue: pop(),
-		sourceParentValue: func() string {
-			if len(inputStringList) > 1 {
-				element, list := utility.SlicePop(inputStringList)
-				if element == "parent" {
-					inputStringList = list
-					return pop()
-				}
-			}
-			return ""
-		}(),
-		targetOption: func() string {
-			if len(inputStringList) > 1 {
-				return pop()
-			}
-			return ""
-		}(),
-		targetValue: func() string {
-			if len(inputStringList) > 0 {
-				return pop()
-			}
-			return ""
-		}(),
+		sourceType:  optionValueList[0],
+		sourceValue: optionValueList[1],
+	}
+	parentValue := ""
+	if parentValueRegexp := regexps.GetRegexpByTemplateEnum(global.OptionParentValueTemplate); parentValueRegexp != nil {
+		parentValue = parentValueRegexp.FindString(command.CommandStruct.InputString)
+	} else {
+		ui.OutputWarnInfo(ui.CommonWarn2, "convert", "parent")
+	}
+	if parentValue != "" {
+		parentValueList := strings.Split(parentValue, " ")
+		command.Params.sourceParentValue = parentValueList[1]
+	}
+	targetOptionValue := ""
+	if optionValueRegexp, hasOptionValueRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEConvertACOptionValue]; hasOptionValueRegexp {
+		targetOptionValue = optionValueRegexp.FindString(command.CommandStruct.InputString)
+	} else {
+		ui.OutputWarnInfo(ui.CommonWarn2, "convert", "append|create")
+	}
+	if targetOptionValue != "" {
+		targetOptionValueList := strings.Split(targetOptionValue, " ")
+		command.Params.targetOption = targetOptionValueList[0]
+		command.Params.targetOption = targetOptionValueList[1]
 	}
 	return nil
 }

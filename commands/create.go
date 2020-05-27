@@ -67,13 +67,6 @@ func (command *Create) Execute() error {
 	return nil
 }
 
-const (
-	createCommandIndex = 0
-	createOptionIndex  = 1
-	createValueIndex   = 2
-	createParentValue  = 4
-)
-
 type createParam struct {
 	option string
 	value  string
@@ -85,7 +78,7 @@ func (command *Create) parseCommandParams() error {
 	if optionValueRegexp, hasOptionValueRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AECreateOptionValue]; hasOptionValueRegexp {
 		optionValueString = optionValueRegexp.FindString(command.CommandStruct.InputString)
 	} else {
-		ui.OutputWarnInfo(ui.CommonWarn2, "create", "option")
+		ui.OutputWarnInfo(ui.CommonWarn2, "create", "package|file")
 	}
 	if optionValueString == "" {
 		return fmt.Errorf(ui.CommonError1)
@@ -101,7 +94,6 @@ func (command *Create) parseCommandParams() error {
 	} else {
 		ui.OutputWarnInfo(ui.CommonWarn2, "create", "parent")
 	}
-	utility.TestOutput("parentValue = %v", parentValue)
 	if parentValue != "" {
 		parentValueList := strings.Split(parentValue, " ")
 		command.Params.parent = parentValueList[1]

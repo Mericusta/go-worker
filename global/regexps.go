@@ -14,4 +14,6 @@ const (
 	AECreateOptionValue AtomicExpressionEnum = 4
 	// AEConvertOptionValue convert 指令参数的表达式
 	AEConvertOptionValue AtomicExpressionEnum = 5
+	// AEConvertACOptionValue convert 指令参数的表达式
+	AEConvertACOptionValue AtomicExpressionEnum = 6
 )

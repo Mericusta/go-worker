@@ -68,6 +68,7 @@ func registAtomicExpression() {
 		global.AEBindOptionValue:       AEBindOptionValue,
 		global.AECreateOptionValue:     AECreateOptionValue,
 		global.AEConvertOptionValue:    AEConvertOptionValue,
+		global.AEConvertACOptionValue:  AEConvertACOptionValue,
 	}
 }
 
@@ -84,12 +85,13 @@ func complieAtomicRegexp() {
 
 func registTemplateKeywordReplaceString() {
 	templateKeywordReplaceStringMap = map[template.TemplateKeyword]string{
-		template.TK_BOVExpression:       string(AEBindOptionValue),
-		template.TK_CreateOVExpression:  string(AECreateOptionValue),
-		template.TK_ConvertOVExpression: string(AEConvertOptionValue),
-		template.TK_Path:                string(AEPath),
-		template.TK_OPVExpression:       string(template.TEOptionParentValue),
-		template.TK_OOVExpression:       string(template.TEOptionOutputValue),
+		template.TK_BOVExpression:             string(AEBindOptionValue),
+		template.TK_CreateOVExpression:        string(AECreateOptionValue),
+		template.TK_ConvertOVExpression:       string(AEConvertOptionValue),
+		template.TK_ConvertACOptionExpression: string(AEConvertACOptionValue),
+		template.TK_Path:                      string(AEPath),
+		template.TK_OPVExpression:             string(template.TEOptionParentValue),
+		template.TK_OOVExpression:             string(template.TEOptionOutputValue),
 	}
 }
 
