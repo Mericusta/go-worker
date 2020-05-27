@@ -1,17 +1,17 @@
 package global
 
-// AtomicRegexpEnum 原子表达式枚举类型
-type AtomicRegexpEnum int
+// AtomicExpressionEnum 原子表达式枚举类型
+type AtomicExpressionEnum int
 
 const (
 	// AETemplateCommonKeyword 通用模板关键词表达式
-	AETemplateCommonKeyword AtomicRegexpEnum = 1
+	AETemplateCommonKeyword AtomicExpressionEnum = 1
 	// AEPath 路径表达式
-	AEPath AtomicRegexpEnum = 2
+	AEPath AtomicExpressionEnum = 2
 	// AEBindOptionValue bind 指令参数的表达式
-	AEBindOptionValue AtomicRegexpEnum = 3
+	AEBindOptionValue AtomicExpressionEnum = 3
 	// AECreateOptionValue create 指令参数的表达式
-	AECreateOptionValue AtomicRegexpEnum = 4
+	AECreateOptionValue AtomicExpressionEnum = 4
 	// AEConvertOptionValue convert 指令参数的表达式
-	AEConvertOptionValue AtomicRegexpEnum = 5
+	AEConvertOptionValue AtomicExpressionEnum = 5
 )

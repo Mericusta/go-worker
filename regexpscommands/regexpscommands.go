@@ -10,7 +10,7 @@ import (
 
 // ParseCommandByRegexp 根据输入使用正则表达式解析指令
 // @param  inputString 待解析的
-// @return 指令枚举，错误
+// @return
 func ParseCommandByRegexp(inputString string) (commands.CommandInterface, error) {
 	for regexp, commandEnum := range regexps.RegexpCommandEnumMap {
 		if regexp.MatchString(inputString) {

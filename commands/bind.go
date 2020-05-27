@@ -2,8 +2,11 @@ package commands
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/go-worker/config"
+	"github.com/go-worker/global"
+	"github.com/go-worker/regexps"
 	"github.com/go-worker/ui"
 	"github.com/go-worker/utility"
 )
@@ -29,6 +32,10 @@ func (command Bind) Execute() error {
 		return parseCommandParamsError
 	}
 
+	if command.BindParams == nil {
+		return fmt.Errorf("parse command bind, but param is nil")
+	}
+
 	config.WorkerConfig.ProjectPath = command.BindParams.value
 
 	optionUI, hasOptionUI := optionUIMap[command.BindParams.option]
@@ -50,19 +57,19 @@ type bindParam struct {
 }
 
 func (command *Bind) parseCommandParams() error {
-	// optionValueString := ""
-	// if optionValueRegexp, hasOptionValueRegexp := regexps.ExpressionEnumRegexpMap[global.AEBindOptionValue]; hasOptionValueRegexp {
-	// 	optionValueString = optionValueRegexp.FindString(command.CommandStruct.InputString)
-	// } else {
-	// 	ui.OutputWarnInfo(ui.CommonWarn2, "bind", "option")
-	// }
-	// if optionValueString == "" {
-	// 	return fmt.Errorf(ui.CommonError1)
-	// }
-	// optionValueList := strings.Split(optionValueString, " ")
-	// command.BindParams = &bindParam{
-	// 	option: optionValueList[0],
-	// 	value:  optionValueList[1],
-	// }
+	optionValueString := ""
+	if optionValueRegexp, hasOptionValueRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEBindOptionValue]; hasOptionValueRegexp {
+		optionValueString = optionValueRegexp.FindString(command.CommandStruct.InputString)
+	} else {
+		ui.OutputWarnInfo(ui.CommonWarn2, "bind", "option")
+	}
+	if optionValueString == "" {
+		return fmt.Errorf(ui.CommonError1)
+	}
+	optionValueList := strings.Split(optionValueString, " ")
+	command.BindParams = &bindParam{
+		option: optionValueList[0],
+		value:  optionValueList[1],
+	}
 	return nil
 }

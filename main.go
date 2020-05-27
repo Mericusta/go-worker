@@ -10,6 +10,7 @@ import (
 	"github.com/go-worker/global"
 	"github.com/go-worker/regexpscommands"
 	"github.com/go-worker/ui"
+	"github.com/go-worker/utility"
 )
 
 func init() {
@@ -37,6 +38,7 @@ func main() {
 			// 执行指令
 			global.FsmState = fsm.Executing
 			commandExecuteError := command.Execute()
+			utility.TestOutput("commandExecuteError = %v", commandExecuteError)
 			if commandExecuteError != nil {
 				ui.OutputErrorInfo("%v", commandExecuteError)
 			}
