@@ -8,6 +8,13 @@ var (
 	LogMarkNote  = "Note"
 	LogMarkError = "Error"
 	LogMarkWarn  = "Warn"
+
+	ConvertRPStructName    = "RP_STRUCT_NAME"
+	ConvertRPStructMember  = "RP_STRUCT_MEMBER"
+	ConvertRPMemberName    = "RP_MEMBER_NAME"
+	ConvertRPMemberType    = "RP_MEMBER_TYPE"
+	ConvertRPMemberComment = "RP_MEMBER_COMMENT"
+	ConvertRPCsvHead       = "RP_CSV_HEAD"
 )
 
 // 配置常量
