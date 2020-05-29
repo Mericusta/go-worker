@@ -12,6 +12,12 @@ var AEPath AtomicExpression = `[/_\.\w-]+`
 // AEDoubleQuotesContent 双引号的内容的表达式
 var AEDoubleQuotesContent AtomicExpression = `(?:").*?(?:")`
 
+// AEDoubleBracketContent 括号的内容的表达式
+var AEDoubleBracketContent AtomicExpression = `(?:\().*?(?:\))`
+
+// AEDoubleCurlyBracesContent 花括号的内容的表达式
+var AEDoubleCurlyBracesContent AtomicExpression = `(?:\{).*?(?:\})`
+
 // AEBindOptionValue 解析 bind 指令参数的表达式
 var AEBindOptionValue AtomicExpression = `(project|syntax)(\s+[-:\.~\\/\w]+)?`
 

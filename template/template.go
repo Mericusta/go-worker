@@ -25,6 +25,7 @@ func init() {
 		global.OptionParentValueTemplate:    TEOptionParentValue,
 		global.OptionOutputValueTemplate:    TEOptionOutputValue,
 		global.GoKeywordImportValueTemplate: TEGoKeywordImportValue,
+		global.GoFunctionDefinitionTemplate: TEGoFunctionDefinition,
 		global.CommandBindTemplate:          TECommandBind,
 		global.CommandCreateTemplate:        TECommandCreate,
 		global.CommandConverTemplate:        TECommandConvert,

@@ -8,3 +8,9 @@ var TEOptionOutputValue TemplateExpression = `output(\s+TK_PATH){1}`
 
 // TEGoKeywordImportValue go import 关键词的模板表达式
 var TEGoKeywordImportValue TemplateExpression = `(?ms)import\s+(\(.*?\)|TK_DoubleQuotesContent)`
+
+// TEGoFunctionDefinition go function 定义的模板表达式
+// var TEGoFunctionDefinition TemplateExpression = `(?ms)^func\s+.*?\{.*?\}$`
+var TEGoFunctionDefinition TemplateExpression = `(?ms)(func)(.*?)(?:func)`
+
+// `\{([^{}]|(?R))*\}`

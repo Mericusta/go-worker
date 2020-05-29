@@ -172,6 +172,9 @@ func analyzeGoFile(toAnalyzeFile, toWriteFile *os.File) error {
 	// 解析依赖包
 	analyzeGoImportPackage(goFileAnalysis, toAnalyzeContent)
 
+	// 解析函数定义
+	analyzeGoFunctionDefinition(goFileAnalysis, toAnalyzeContent)
+
 	return nil
 }
 
@@ -186,11 +189,12 @@ func analyzeGoKeywordPackage(goFileAnalysis *GoFileAnalysis, fileContentByte []b
 	}
 }
 
-func analyzeGoImportPackage(GoFileAnalysis *GoFileAnalysis, fileContentByte []byte) {
+func analyzeGoImportPackage(goFileAnalysis *GoFileAnalysis, fileContentByte []byte) {
 	if keywordImportValueRegexp := regexps.GetRegexpByTemplateEnum(global.GoKeywordImportValueTemplate); keywordImportValueRegexp != nil {
 		if doubleQuotesContentRegexp, hasDoubleQuotesContentRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEDoubleQuotesContent]; hasDoubleQuotesContentRegexp {
 			for _, matchedKeywordImportValue := range keywordImportValueRegexp.FindAll(fileContentByte, -1) {
 				for _, quotesContentByte := range doubleQuotesContentRegexp.FindAll(matchedKeywordImportValue, -1) {
+					goFileAnalysis.ImportList = append(goFileAnalysis.ImportList, string(quotesContentByte))
 					utility.TestOutput("import package = %v", string(quotesContentByte))
 				}
 			}
@@ -199,6 +203,17 @@ func analyzeGoImportPackage(GoFileAnalysis *GoFileAnalysis, fileContentByte []by
 		}
 	} else {
 		ui.OutputWarnInfo(ui.CMDAnalyzeGoKeywordRegexpNotExist, "import")
+	}
+}
+
+func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte []byte) {
+	if functionDefinitionRegexp := regexps.GetRegexpByTemplateEnum(global.GoFunctionDefinitionTemplate); functionDefinitionRegexp != nil {
+		functionDefinitionByteList := functionDefinitionRegexp.FindAll(fileContentByte, -1)
+		for _, functionDefinitionByte := range functionDefinitionByteList {
+			utility.TestOutput("function definition = %v", string(functionDefinitionByte))
+		}
+	} else {
+		ui.OutputWarnInfo(ui.CMDAnalyzeGoKeywordRegexpNotExist, "function")
 	}
 }
 
