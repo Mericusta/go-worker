@@ -36,24 +36,24 @@ func (command Bind) Execute() error {
 		return fmt.Errorf("parse command bind, but param is nil")
 	}
 
-	config.WorkerConfig.ProjectPath = command.BindParams.value
+	config.WorkerConfig.ProjectPath = command.BindParams.optionValue
 
 	optionUI, hasOptionUI := optionUIMap[command.BindParams.option]
 	if !hasOptionUI {
 		return fmt.Errorf(ui.CommonError2)
 	}
-	if command.BindParams.option == "project" && !utility.IsExist(command.BindParams.value) {
+	if command.BindParams.option == "project" && !utility.IsExist(command.BindParams.optionValue) {
 		ui.OutputNoteInfo(ui.CMDBindProjectNotExist)
 		return nil
 	}
-	ui.OutputNoteInfoWithFormat(optionUI, command.BindParams.value)
+	ui.OutputNoteInfoWithFormat(optionUI, command.BindParams.optionValue)
 
 	return nil
 }
 
 type bindParam struct {
-	option string
-	value  string
+	option      string
+	optionValue string
 }
 
 func (command *Bind) parseCommandParams() error {
@@ -68,8 +68,8 @@ func (command *Bind) parseCommandParams() error {
 	}
 	optionValueList := strings.Split(optionValueString, " ")
 	command.BindParams = &bindParam{
-		option: optionValueList[0],
-		value:  optionValueList[1],
+		option:      optionValueList[0],
+		optionValue: optionValueList[1],
 	}
 	return nil
 }

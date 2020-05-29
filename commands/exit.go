@@ -11,7 +11,7 @@ type Exit struct {
 }
 
 func (command *Exit) Execute() error {
-	ui.OutputNoteInfo("Thanks for using!")
+	ui.OutputNoteInfo(ui.CMDExit)
 	global.FsmState = fsm.Exiting
 	return nil
 }

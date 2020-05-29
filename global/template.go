@@ -10,13 +10,15 @@ const (
 	OptionParentValueTemplate TemplateEnum = 1
 	// OptionOutputValueTemplate output 选项模板
 	OptionOutputValueTemplate TemplateEnum = 2
+	// GoKeywordImportValueTemplate go import 关键词的模板
+	GoKeywordImportValueTemplate TemplateEnum = 3
 
 	// 外部模板
 
 	// CommandBindTemplate bind 指令模板
-	CommandBindTemplate TemplateEnum = 3
+	CommandBindTemplate TemplateEnum = 4
 	// CommandCreateTemplate create 指令模板
-	CommandCreateTemplate TemplateEnum = 4
+	CommandCreateTemplate TemplateEnum = 5
 	// CommandConverTemplate convert 指令模板
-	CommandConverTemplate TemplateEnum = 5
+	CommandConverTemplate TemplateEnum = 6
 )

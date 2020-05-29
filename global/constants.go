@@ -21,6 +21,7 @@ var (
 var (
 	SyntaxGo  = "go"
 	SyntaxCSV = "csv"
+	SyntaxCpp = "cpp"
 )
 
 // 外部常量

@@ -30,23 +30,23 @@ func (command *Create) Execute() error {
 		ui.OutputWarnInfo(ui.CommonWarn1)
 	}
 
-	if command.Params.parent != "" {
-		projectPath = fmt.Sprintf("%v/%v", projectPath, command.Params.parent)
+	if command.Params.parentValue != "" {
+		projectPath = fmt.Sprintf("%v/%v", projectPath, command.Params.parentValue)
 	}
 
-	createFilePath, filePackage := command.Params.value, command.Params.value
+	createFilePath, filePackage := command.Params.optionValue, command.Params.optionValue
 	switch command.Params.option {
 	case "package":
-		packagePath := fmt.Sprintf("%v/%v", projectPath, command.Params.value)
+		packagePath := fmt.Sprintf("%v/%v", projectPath, command.Params.optionValue)
 		createError := utility.CreateDir(packagePath)
 		if createError != nil {
 			return fmt.Errorf(ui.CommonError3, createError)
 		}
-		createFilePath = fmt.Sprintf("%v/%v.%v", packagePath, command.Params.value, fileType)
+		createFilePath = fmt.Sprintf("%v/%v.%v", packagePath, command.Params.optionValue, fileType)
 	case "file":
-		createFilePath = fmt.Sprintf("%v/%v.%v", projectPath, command.Params.value, fileType)
-		utility.TestOutput("command.Params.parent = %v", command.Params.parent)
-		filePackage = command.Params.parent
+		createFilePath = fmt.Sprintf("%v/%v.%v", projectPath, command.Params.optionValue, fileType)
+		utility.TestOutput("command.Params.parentValue = %v", command.Params.parentValue)
+		filePackage = command.Params.parentValue
 		if filePackage == "" {
 			filePackage = "main"
 		}
@@ -68,9 +68,9 @@ func (command *Create) Execute() error {
 }
 
 type createParam struct {
-	option string
-	value  string
-	parent string
+	option      string
+	optionValue string
+	parentValue string
 }
 
 func (command *Create) parseCommandParams() error {
@@ -85,18 +85,18 @@ func (command *Create) parseCommandParams() error {
 	}
 	optionValueList := strings.Split(optionValueString, " ")
 	command.Params = &createParam{
-		option: optionValueList[0],
-		value:  optionValueList[1],
+		option:      optionValueList[0],
+		optionValue: optionValueList[1],
 	}
 	parentValue := ""
 	if parentValueRegexp := regexps.GetRegexpByTemplateEnum(global.OptionParentValueTemplate); parentValueRegexp != nil {
 		parentValue = parentValueRegexp.FindString(command.CommandStruct.InputString)
 	} else {
-		ui.OutputWarnInfo(ui.CommonWarn2, "create", "parent")
+		ui.OutputWarnInfo(ui.CommonWarn2, "create", "parentValue")
 	}
 	if parentValue != "" {
 		parentValueList := strings.Split(parentValue, " ")
-		command.Params.parent = parentValueList[1]
+		command.Params.parentValue = parentValueList[1]
 	}
 	return nil
 }

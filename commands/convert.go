@@ -41,7 +41,7 @@ func (command *Convert) Execute() error {
 	file, inputError := os.Open(filePath)
 	defer file.Close()
 	if inputError != nil || file == nil {
-		return fmt.Errorf("open file %v error, file is nil or %v", filePath, inputError.Error())
+		return fmt.Errorf(ui.CommonError5, filePath, inputError.Error())
 	}
 
 	fileContent := ""
@@ -58,12 +58,6 @@ func (command *Convert) Execute() error {
 		return convertError
 	}
 
-	var toWriteFile *os.File
-	defer func() {
-		if toWriteFile != nil {
-			toWriteFile.Close()
-		}
-	}()
 	toWriteFileType := config.GetCurrentSyntaxFileSuffix()
 	toWriteFilePath := fmt.Sprintf("%v.%v", command.Params.targetValue, toWriteFileType)
 	switch command.Params.targetOption {
@@ -77,6 +71,12 @@ func (command *Convert) Execute() error {
 		return nil
 	}
 
+	var toWriteFile *os.File
+	defer func() {
+		if toWriteFile != nil {
+			toWriteFile.Close()
+		}
+	}()
 	if utility.IsExist(toWriteFilePath) {
 		var openFileError error
 		toWriteFile, openFileError = os.OpenFile(toWriteFilePath, os.O_RDWR|os.O_APPEND, 0644)

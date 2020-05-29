@@ -65,10 +65,13 @@ func registAtomicExpression() {
 	atomicExpressionMap = map[global.AtomicExpressionEnum]AtomicExpression{
 		global.AETemplateCommonKeyword: AETemplateCommonKeyword,
 		global.AEPath:                  AEPath,
+		global.AEDoubleQuotesContent:   AEDoubleQuotesContent,
 		global.AEBindOptionValue:       AEBindOptionValue,
 		global.AECreateOptionValue:     AECreateOptionValue,
 		global.AEConvertOptionValue:    AEConvertOptionValue,
 		global.AEConvertACOptionValue:  AEConvertACOptionValue,
+		global.AEAnalyzeOptionValue:    AEAnalyzeOptionValue,
+		global.AEGoKeywordPackageValue: AEGoKeywordPackageValue,
 	}
 }
 
@@ -85,13 +88,15 @@ func complieAtomicRegexp() {
 
 func registTemplateKeywordReplaceString() {
 	templateKeywordReplaceStringMap = map[template.TemplateKeyword]string{
+		template.TK_Path:                      string(AEPath),
+		template.TK_OPVExpression:             string(template.TEOptionParentValue),
+		template.TK_OOVExpression:             string(template.TEOptionOutputValue),
+		template.TK_DoubleQuotesContent:       string(AEDoubleQuotesContent),
 		template.TK_BOVExpression:             string(AEBindOptionValue),
 		template.TK_CreateOVExpression:        string(AECreateOptionValue),
 		template.TK_ConvertOVExpression:       string(AEConvertOptionValue),
 		template.TK_ConvertACOptionExpression: string(AEConvertACOptionValue),
-		template.TK_Path:                      string(AEPath),
-		template.TK_OPVExpression:             string(template.TEOptionParentValue),
-		template.TK_OOVExpression:             string(template.TEOptionOutputValue),
+		template.TK_AnalyzeOVExpression:       string(AEAnalyzeOptionValue),
 	}
 }
 
@@ -163,7 +168,7 @@ func GetRegexpByTemplateEnum(templateEnum global.TemplateEnum) *regexp.Regexp {
 		ui.OutputWarnInfo("parse template expression[%v] but get empty", templateExpression)
 		return nil
 	}
-	utility.TestOutput("templateExpression = %v", parsedCommand)
+	// utility.TestOutput("templateExpression = %v", parsedCommand)
 	templateExpressionRegexp := regexp.MustCompile(string(parsedCommand))
 	if templateExpressionRegexp == nil {
 		ui.OutputWarnInfo("complie template expression[%v], but get nil", parsedCommand)
@@ -177,18 +182,18 @@ func parseTemplateExpression(templateCommonKeywordRegexp *regexp.Regexp, templat
 	utility.TestOutput("templateExpression = %v, templateKeywordExpressionList = %v", templateExpression, templateKeywordExpressionList)
 	for len(templateKeywordExpressionList) != 0 {
 		for _, templateKeywordExpression := range templateKeywordExpressionList {
-			utility.TestOutput("templateKeywordExpression = %v", templateKeywordExpression)
+			// utility.TestOutput("templateKeywordExpression = %v", templateKeywordExpression)
 			if templateKeywordRegexp, hasKeywordRegexp := templateKeywordRegexpMap[template.TemplateKeyword(templateKeywordExpression)]; hasKeywordRegexp {
 				if toReplaceString, hasToReplaceString := templateKeywordReplaceStringMap[template.TemplateKeyword(templateKeywordExpression)]; hasToReplaceString {
 					// 替换模板关键词
-					utility.TestOutput("to replace %v", toReplaceString)
+					// utility.TestOutput("to replace %v", toReplaceString)
 					templateExpression = template.TemplateExpression(templateKeywordRegexp.ReplaceAllString(string(templateExpression), toReplaceString))
 				} else {
-					utility.TestOutput("%v does not have to replace string", templateKeywordExpression)
+					// utility.TestOutput("%v does not have to replace string", templateKeywordExpression)
 					return ""
 				}
 			} else {
-				utility.TestOutput("%v does not have regexp", templateKeywordExpression)
+				// utility.TestOutput("%v does not have regexp", templateKeywordExpression)
 				return ""
 			}
 		}
@@ -197,7 +202,7 @@ func parseTemplateExpression(templateCommonKeywordRegexp *regexp.Regexp, templat
 
 		// 查找模板关键词
 		templateKeywordExpressionList = templateCommonKeywordRegexp.FindAllString(string(templateExpression), -1)
-		utility.TestOutput("templateKeywordExpressionList = %v", templateKeywordExpressionList)
+		// utility.TestOutput("templateKeywordExpressionList = %v", templateKeywordExpressionList)
 	}
 	return Expression(templateExpression)
 }

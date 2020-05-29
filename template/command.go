@@ -10,4 +10,4 @@ var TECommandCreate TemplateExpression = `^create\s+TK_CreateOVExpression(\s+TK_
 var TECommandConvert TemplateExpression = `^convert\s+TK_ConvertOVExpression(\s+TK_OPVExpression)?(\s+TK_ConvertACOptionExpression)?$`
 
 // TECommandAnalyze 指令 analyze 的模板表达式
-var TECommandAnalyze TemplateExpression = `^analyze\s+(file|directory|package)(\s+[_\.\w-]+)+(\s+TK_OPVExpression)?(\s+TK_OOVExpression)?$`
+var TECommandAnalyze TemplateExpression = `^analyze\s+TK_AnalyzeOVExpression(\s+TK_OPVExpression)?(\s+TK_OOVExpression)?$`
