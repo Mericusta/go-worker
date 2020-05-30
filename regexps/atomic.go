@@ -10,13 +10,16 @@ var AETemplateCommonKeyword AtomicExpression = `TK_[\w_]+`
 var AEPath AtomicExpression = `[/_\.\w-]+`
 
 // AEDoubleQuotesContent 双引号的内容的表达式
-var AEDoubleQuotesContent AtomicExpression = `(?:").*?(?:")`
+var AEDoubleQuotesContent AtomicExpression = `(?:")(?P<CONTENT>.*?)(?:")`
 
-// AEDoubleBracketContent 括号的内容的表达式
-var AEDoubleBracketContent AtomicExpression = `(?:\().*?(?:\))`
+// AEBracketsContent 括号的内容的表达式
+var AEBracketsContent AtomicExpression = `(?:\()(?P<CONTENT>.*?)(?:\))`
 
-// AEDoubleCurlyBracesContent 花括号的内容的表达式
-var AEDoubleCurlyBracesContent AtomicExpression = `(?:\{).*?(?:\})`
+// AESquareBracketsContent 方括号的内容的表达式
+var AESquareBracketsContent AtomicExpression = `(?:\[)(?P<CONTENT>.*?)(?:\])`
+
+// AECurlyBracesContent 大括号的内容的表达式
+var AECurlyBracesContent AtomicExpression = `(?:\{)(?P<CONTENT>.*?)(?:\})`
 
 // AEBindOptionValue 解析 bind 指令参数的表达式
 var AEBindOptionValue AtomicExpression = `(project|syntax)(\s+[-:\.~\\/\w]+)?`

@@ -148,17 +148,28 @@ func (command *Analyze) parseCommandParams() error {
 	return nil
 }
 
+// 分析 GO 文件
+
+// GoFileAnalysis go 文件分析结果
 type GoFileAnalysis struct {
 	FilePath    string
 	PackageName string
 	ImportList  []string
+	FunctionMap map[string]*GoFunctionAnalysis
 }
 
-// 分析 GO 文件
+// GoFunctionAnalysis go 函数分析结果
+type GoFunctionAnalysis struct {
+	Member    string
+	Name      string
+	ParamsMap map[string]string
+	ReturnMap map[string]string
+}
 
 func analyzeGoFile(toAnalyzeFile, toWriteFile *os.File) error {
 	goFileAnalysis := &GoFileAnalysis{
-		ImportList: make([]string, 0),
+		ImportList:  make([]string, 0),
+		FunctionMap: make(map[string]*GoFunctionAnalysis),
 	}
 
 	toAnalyzeContent, readToAnalyzeContentError := ioutil.ReadAll(toAnalyzeFile)
@@ -207,14 +218,48 @@ func analyzeGoImportPackage(goFileAnalysis *GoFileAnalysis, fileContentByte []by
 }
 
 func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte []byte) {
-	if functionDefinitionRegexp := regexps.GetRegexpByTemplateEnum(global.GoFunctionDefinitionTemplate); functionDefinitionRegexp != nil {
-		functionDefinitionByteList := functionDefinitionRegexp.FindAll(fileContentByte, -1)
-		for _, functionDefinitionByte := range functionDefinitionByteList {
-			utility.TestOutput("function definition = %v", string(functionDefinitionByte))
-		}
-	} else {
-		ui.OutputWarnInfo(ui.CMDAnalyzeGoKeywordRegexpNotExist, "function")
+	bracketsContentRegexp, hasBracketsContentRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEBracketsContent]
+	if !hasBracketsContentRegexp {
+		ui.OutputWarnInfo(ui.CommonWarn3, global.AEBracketsContent)
+		return
 	}
+	functionDefinitionRegexp := regexps.GetRegexpByTemplateEnum(global.GoFunctionDefinitionTemplate)
+	if functionDefinitionRegexp == nil {
+		ui.OutputWarnInfo(ui.CMDAnalyzeGoKeywordRegexpNotExist, "function")
+		return
+	}
+	functionDefinitionByteList := functionDefinitionRegexp.FindAll(fileContentByte, -1)
+	// 解析函数定义
+	for _, functionDefinitionByte := range functionDefinitionByteList {
+		functionAnalysis := &GoFunctionAnalysis{}
+		// utility.TestOutput("MEMBER = %v", functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$MEMBER"))
+		for _, memberType := range utility.TraitPunctuationMarksContentAsNameTypeMap(functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$MEMBER"), bracketsContentRegexp, global.SyntaxGo) {
+			functionAnalysis.Member = memberType
+		}
+		// utility.TestOutput("NAME = %v", functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$NAME"))
+		functionAnalysis.Name = functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$NAME")
+		// utility.TestOutput("PARAM = %v", functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$PARAM"))
+		functionAnalysis.ParamsMap = utility.TraitPunctuationMarksContentAsNameTypeMap(functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$PARAM"), bracketsContentRegexp, global.SyntaxGo)
+		// utility.TestOutput("RETURN = %v", functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$RETURN"))
+		functionAnalysis.ReturnMap = utility.TraitPunctuationMarksContentAsNameTypeMap(functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$RETURN"), bracketsContentRegexp, global.SyntaxGo)
+		utility.TestOutput("function analysis = %+v", functionAnalysis)
+		goFileAnalysis.FunctionMap[functionAnalysis.Name] = functionAnalysis
+		utility.TestOutput("---------------- splitter ----------------")
+	}
+
+	// 解析函数体
+	// functionDefinitionIndexList := functionDefinitionRegexp.FindAllIndex(fileContentByte, -1)
+	// for index, functionDefinitionIndex := range functionDefinitionIndexList {
+	// 	definitionLength := utility.CalculatePunctuationMarksContentLength(string(fileContentByte[functionDefinitionIndex[1]+1:]), global.PunctuationMarkCurlyBraces)
+	// 	if definitionLength == -1 {
+	// 		ui.OutputWarnInfo(ui.CMDAnalyzeGoFunctionContentSyntax)
+	// 		continue
+	// 	}
+	// 	utility.TestOutput("function[%v] end index = %v", index, functionDefinitionIndex[1]+1+definitionLength)
+	// 	functionContent := fileContentByte[functionDefinitionIndex[0] : functionDefinitionIndex[1]+1+definitionLength]
+	// 	utility.TestOutput("function[%v] functionContent = |%v|", index, string(functionContent))
+	// 	utility.TestOutput("---------------- splitter ----------------")
+	// }
 }
 
 // 分析 CPP 文件

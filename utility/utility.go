@@ -3,6 +3,7 @@ package utility
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/go-worker/global"
@@ -73,13 +74,63 @@ func Convert2CamelStyle(otherStyleString string, capitalize bool) string {
 	return camelStyleString
 }
 
-// // ConvertTemplate2Format 将模板字符串转换为格式字符串
-// func ConvertTemplate2Format(templateString string) string {
-// 	if templateKeywordRegexp, hasTemplateKeywordRegexp := regexps.ExpressionRegexpMap[global.CommonKeywordTemplate]; hasTemplateKeywordRegexp {
-// 		return templateKeywordRegexp.ReplaceAllString(templateString, "%v")
-// 	}
-// 	return ""
-// }
+// TraitPunctuationMarksContentAsNameTypeMap 将标点符号内的内容萃取成名称，类型的映射
+func TraitPunctuationMarksContentAsNameTypeMap(contentWithPunctuationMark string, punctuationMarkContentRegexp *regexp.Regexp, sytax string) map[string]string {
+	nameTypeMap := make(map[string]string)
+	allContent := punctuationMarkContentRegexp.ReplaceAllString(contentWithPunctuationMark, "$CONTENT")
+	unknownType := ""
+	unknownTypeNameList := make([]string, 0)
+	typeIndex := 0
+	nameIndex := 1
+	switch sytax {
+	case global.SyntaxGo:
+		typeIndex = 1
+		nameIndex = 0
+	}
+	for _, eachContent := range strings.Split(allContent, ",") {
+		eachContentList := strings.Split(eachContent, " ")
+		if len(eachContentList) == typeIndex {
+			continue
+		} else if len(eachContentList) == nameIndex {
+			unknownTypeNameList = append(unknownTypeNameList, eachContentList[nameIndex])
+			nameTypeMap[eachContentList[nameIndex]] = unknownType
+		} else {
+			nameTypeMap[eachContentList[nameIndex]] = eachContentList[typeIndex]
+			if unknownType == "" {
+				for _, unknownTypeName := range unknownTypeNameList {
+					nameTypeMap[unknownTypeName] = eachContentList[typeIndex]
+				}
+			}
+		}
+	}
+	return nameTypeMap
+}
+
+// CalculatePunctuationMarksContentLength 计算成对标点符号的内容的长度
+func CalculatePunctuationMarksContentLength(afterLeftContent string, punctuationMark int) int {
+	leftCount := 1
+	rightCount := 0
+	leftPunctionMark := global.PunctuationMarkLeftQuote
+	rightPunctionMark := global.PunctuationMarkRightQuote
+	switch punctuationMark {
+	case global.PunctuationMarkBracket:
+		leftPunctionMark = global.PunctuationMarkLeftBracket
+		rightPunctionMark = global.PunctuationMarkRightBracket
+	case global.PunctuationMarkCurlyBraces:
+		leftPunctionMark = global.PunctuationMarkLeftCurlyBraces
+		rightPunctionMark = global.PunctuationMarkRightCurlyBraces
+	}
+	return strings.IndexFunc(afterLeftContent, func(r rune) bool {
+		if r == leftPunctionMark {
+			leftCount++
+		} else if r == rightPunctionMark {
+			rightCount++
+		} else if leftCount == rightCount {
+			return true
+		}
+		return false
+	})
+}
 
 // TraitStructName 从含有结构体类型的 GO 组合类型中萃取结构体的名称，如：*Name -> Name
 func TraitStructName(structString string) string {

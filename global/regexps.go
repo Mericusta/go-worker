@@ -9,10 +9,16 @@ const (
 
 	// AEPath 路径的表达式
 	AEPath AtomicExpressionEnum = 1
-	// AEDoubleQuotesContent 双引号的表达式
+	// AEDoubleQuotesContent 双引号的内容的表达式
 	AEDoubleQuotesContent AtomicExpressionEnum = 2
+	// AEBracketsContent 括号的内容的表达式
+	AEBracketsContent AtomicExpressionEnum = 3
+	// AESquareBracketsContent 中括号的内容的表达式
+	AESquareBracketsContent AtomicExpressionEnum = 4
+	// AECurlyBracesContent 大括号的内容的表达式
+	AECurlyBracesContent AtomicExpressionEnum = 5
 	// AEGoKeywordPackageValue go package 关键词的表达式
-	AEGoKeywordPackageValue AtomicExpressionEnum = 3
+	AEGoKeywordPackageValue AtomicExpressionEnum = 6
 
 	// AEBindOptionValue bind 指令参数的表达式
 	AEBindOptionValue AtomicExpressionEnum = 101
