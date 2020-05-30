@@ -112,3 +112,14 @@ func (example *ExampleStruct) ExampleFunc11(
 ) (a int, b int, c *ExampleStruct) {
 	return 0, 0, nil
 }
+
+func (example *ExampleStruct) ExampleFunc12(
+	str string,
+	value int,
+	example2 ExampleStruct,
+	example3 *ExampleStruct,
+	list []string,
+	asd ...string,
+) (a int, b int, c *ExampleStruct) {
+	return 0, 0, nil
+}

@@ -231,17 +231,60 @@ func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte
 	functionDefinitionByteList := functionDefinitionRegexp.FindAll(fileContentByte, -1)
 	// 解析函数定义
 	for _, functionDefinitionByte := range functionDefinitionByteList {
-		functionAnalysis := &GoFunctionAnalysis{}
-		// utility.TestOutput("MEMBER = %v", functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$MEMBER"))
-		for _, memberType := range utility.TraitPunctuationMarksContentAsNameTypeMap(functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$MEMBER"), bracketsContentRegexp, global.SyntaxGo) {
-			functionAnalysis.Member = memberType
+		functionAnalysis := &GoFunctionAnalysis{
+			ParamsMap: make(map[string]string),
+			ReturnMap: make(map[string]string),
 		}
+		// 解析所属类
+		// utility.TestOutput("MEMBER = %v", functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$MEMBER"))
+		memberStringWithPunctuationMark := functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$MEMBER")
+		if memberStringWithPunctuationMark != "" {
+			memberString := bracketsContentRegexp.ReplaceAllString(memberStringWithPunctuationMark, "$CONTENT")
+			memberStringList := strings.Split(strings.TrimSpace(memberString), " ")
+			if len(memberStringList) != 2 {
+				ui.OutputWarnInfo(ui.CMDAnalyzeGoFunctionDefinitionSyntaxError)
+				continue
+			}
+			functionAnalysis.Member = memberStringList[1]
+		}
+		// 解析函数名
 		// utility.TestOutput("NAME = %v", functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$NAME"))
 		functionAnalysis.Name = functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$NAME")
+		// 解析参数表
 		// utility.TestOutput("PARAM = %v", functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$PARAM"))
-		functionAnalysis.ParamsMap = utility.TraitPunctuationMarksContentAsNameTypeMap(functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$PARAM"), bracketsContentRegexp, global.SyntaxGo)
+		paramsStringWithPunctuationMark := functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$PARAM")
+		if paramsStringWithPunctuationMark != "" {
+			paramsString := bracketsContentRegexp.ReplaceAllString(paramsStringWithPunctuationMark, "$CONTENT")
+			typeString := ""
+			unknownTypeNameList := make([]string, 0)
+			for _, paramString := range strings.Split(paramsString, ",") {
+				paramStringList := strings.Split(strings.TrimSpace(paramString), " ")
+				if len(paramStringList) == 1 {
+					unknownTypeNameList = append(unknownTypeNameList, paramStringList[0])
+				} else {
+					functionAnalysis.ParamsMap[paramStringList[0]] = paramStringList[1]
+					if typeString == "" {
+						for _, unknownTypeName := range unknownTypeNameList {
+							functionAnalysis.ParamsMap[unknownTypeName] = paramStringList[1]
+						}
+					}
+				}
+			}
+		}
+		// 解析返回列表
 		// utility.TestOutput("RETURN = %v", functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$RETURN"))
-		functionAnalysis.ReturnMap = utility.TraitPunctuationMarksContentAsNameTypeMap(functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$RETURN"), bracketsContentRegexp, global.SyntaxGo)
+		returnStringWithPunctuationMark := functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$RETURN")
+		if returnStringWithPunctuationMark != "" {
+			returnContent := bracketsContentRegexp.ReplaceAllString(returnStringWithPunctuationMark, "$CONTENT")
+			for _, returnString := range strings.Split(returnContent, ",") {
+				returnStringList := strings.Split(strings.TrimSpace(returnString), " ")
+				if len(returnStringList) == 1 {
+					functionAnalysis.ReturnMap[fmt.Sprintf("%v", len(functionAnalysis.ReturnMap))] = returnStringList[0]
+				} else if len(returnStringList) == 2 {
+					functionAnalysis.ReturnMap[returnStringList[0]] = returnStringList[1]
+				}
+			}
+		}
 		utility.TestOutput("function analysis = %+v", functionAnalysis)
 		goFileAnalysis.FunctionMap[functionAnalysis.Name] = functionAnalysis
 		utility.TestOutput("---------------- splitter ----------------")

@@ -3,7 +3,6 @@ package utility
 import (
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
 
 	"github.com/go-worker/global"
@@ -72,38 +71,6 @@ func Convert2CamelStyle(otherStyleString string, capitalize bool) string {
 		camelStyleString = fmt.Sprintf("%v%v", strings.ToLower(camelStyleString[:1]), camelStyleString[1:])
 	}
 	return camelStyleString
-}
-
-// TraitPunctuationMarksContentAsNameTypeMap 将标点符号内的内容萃取成名称，类型的映射
-func TraitPunctuationMarksContentAsNameTypeMap(contentWithPunctuationMark string, punctuationMarkContentRegexp *regexp.Regexp, sytax string) map[string]string {
-	nameTypeMap := make(map[string]string)
-	allContent := punctuationMarkContentRegexp.ReplaceAllString(contentWithPunctuationMark, "$CONTENT")
-	unknownType := ""
-	unknownTypeNameList := make([]string, 0)
-	typeIndex := 0
-	nameIndex := 1
-	switch sytax {
-	case global.SyntaxGo:
-		typeIndex = 1
-		nameIndex = 0
-	}
-	for _, eachContent := range strings.Split(allContent, ",") {
-		eachContentList := strings.Split(eachContent, " ")
-		if len(eachContentList) == typeIndex {
-			continue
-		} else if len(eachContentList) == nameIndex {
-			unknownTypeNameList = append(unknownTypeNameList, eachContentList[nameIndex])
-			nameTypeMap[eachContentList[nameIndex]] = unknownType
-		} else {
-			nameTypeMap[eachContentList[nameIndex]] = eachContentList[typeIndex]
-			if unknownType == "" {
-				for _, unknownTypeName := range unknownTypeNameList {
-					nameTypeMap[unknownTypeName] = eachContentList[typeIndex]
-				}
-			}
-		}
-	}
-	return nameTypeMap
 }
 
 // CalculatePunctuationMarksContentLength 计算成对标点符号的内容的长度
