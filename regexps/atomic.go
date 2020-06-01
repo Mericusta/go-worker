@@ -13,7 +13,7 @@ var AEPath AtomicExpression = `[/_\.\w-]+`
 var AEDoubleQuotesContent AtomicExpression = `(?:")(?P<CONTENT>.*?)(?:")`
 
 // AEBracketsContent 括号的内容的表达式
-var AEBracketsContent AtomicExpression = `(?:\()(?P<CONTENT>.*?)(?:\))`
+var AEBracketsContent AtomicExpression = `(?:\()(?ms)(?P<CONTENT>.*?)(?:\))`
 
 // AESquareBracketsContent 方括号的内容的表达式
 var AESquareBracketsContent AtomicExpression = `(?:\[)(?P<CONTENT>.*?)(?:\])`
@@ -38,3 +38,6 @@ var AEAnalyzeOptionValue AtomicExpression = `(file|directory|package)(\s+[_\.\w-
 
 // AEGoKeywordPackageValue go package 关键词的表达式
 var AEGoKeywordPackageValue AtomicExpression = `^package\s+[_\w-]+`
+
+// AETemplateStyle 格式模板关键词表达式，用于匹配文本中指定的格式模板
+var AETemplateStyle AtomicExpression = `\((?P<CHAR>(?:\\t)*),(?P<NUM>\d+)\)`

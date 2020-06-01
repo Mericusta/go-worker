@@ -96,3 +96,87 @@
 ## 2020.5.28
 
 - 根据重构之后的 regxps 模块重构了 analyze 指令解析参数的逻辑
+
+## 2020.5.31
+
+- 完善了 analyze 指令解析 Go 语法函数的问题
+
+## 2020.6.1
+
+- 在 analyze 指令输出分析结果时，发现一个问题：文本格式的继承问题，如分析函数，函数其下的替换文本的“格式”是需要定义在替换文本外还是替换文本内？如下：
+
+```go
+// AnalyzeGoFileFunctionDefinitionListTemplate 分析 go 文件，函数列表的文本模板
+// “一个 \t+内容+换行”这种格式，在替换文本外
+var AnalyzeGoFileFunctionDefinitionListTemplate = `
+Function List:
+\tRP_FUNCTION_DEFINITION
+`
+
+// AnalyzeGoFileFunctionDefinitionTemplate 分析 go 文件，函数的定义的文本模板
+// “一个 \t+内容+换行”这种格式，在替换文本外，最终和外部 \t 组合起来，在 class 等内容就变成了“两个 \t+内容+换行”这种格式
+var AnalyzeGoFileFunctionDefinitionTemplate = `
+- RP_FUNC_NAME
+\tRP_FUNCTION_CLASS
+\tRP_FUNCTION_PARAM_LIST
+\tRP_FUNCTION_RETURN_LIST
+`
+```
+
+- RP_FUNCTION_DEFINITION 会替换成定义模板，模板中的内容也会被替换成对应的内容，结果示例：
+```markdown
+Function List:
+    - Function Name（存在类定义的情况）
+        - Class: Class Name
+        - Params: ...
+        - ...
+    - Function Name（不存在类定义的情况）
+        - Params: ...
+        - ...
+```
+
+- 想要在不存在可替换值的情况下不显示对应的文本模板
+    - 若在替换文本外定义替换文本的格式，则**需要侵入式的对替换文本处进行解析处理**生成最终的格式（多行替换文本的情况下，外层 \t 与内层 \t 组合的情况）
+    - 若在替换文本内定义替换文本的格式，则会导致定义的模板可读性极差，如：
+        ```go
+        // AnalyzeGoFileResultTemplate 分析 go 文件，输出结果的文本模板
+        var AnalyzeGoFileResultTemplate = `
+        File Path:    RP_FILE_PATH
+        Package Name: RP_PACKAGE_NAMERP_IMPORT_PACKAGE_LISTRP_FUNCTION_DEFINITION_LIST
+        `
+        // 若 RP_IMPORT_PACKAGE_LIST 或 RP_FUNCTION_DEFINITION_LIST 不存在替换内容，则可以直接使用空字符串而不用考虑空白行的问题
+
+        // AnalyzeGoFileImportPackageListTemplate 分析 go 文件，依赖包列表的文本模板
+        var AnalyzeGoFileImportPackageListTemplate = `
+        \nImport:
+        RP_IMPORT_PACKAGE
+        `
+
+        // AnalyzeGoFileImportPackageTemplate 分析 go 文件，依赖包的文本模板
+        var AnalyzeGoFileImportPackageTemplate = `\t- RP_IMPORT_PACKAGE\n`
+        ```
+
+- **想要在不存在可替换值的情况下不显示对应的文本模板，并且不做侵入式处理，仅通过文本文替换实现**，但对于固有的格式，文件路径，包名，不需要刻意处理格式问题，因为这些是固有数据，若不存在则属于语法级别错误，如：
+```go
+// AnalyzeGoFileResultTemplate 分析 go 文件，输出结果的文本模板
+var AnalyzeGoFileResultTemplate = `
+File Path:    RP_FILE_PATH
+Package Name: RP_PACKAGE_NAME
+RP_IMPORT_PACKAGE_LIST
+RP_FUNCTION_DEFINITION_LIST
+`
+```
+
+- 由于在模板中，使用了 换行符，若无替换内容，则会出现空白行的情况，考虑一种做法：
+    - 全部替换后，使用方法去除空白行（非侵入式的做法）
+    - 将 \t 格式定义在替换文本外，但若内容存在多行文本，则将之移动到更底层的定义中（此举在层级越来越深之后会手写大量 \t）
+
+- **想要在上述做法的基础上优化在层级嵌套越来越深的情况下多行替换文本需要大量定义 \t 的做法**
+- 设计一种机制，可以让 \t 这种格式在多行文本中，针对每一行都应用
+- 需要注意一点，代码编写或运行时一定是先从最底层的开始生成文本，然后再替换回父级，这样底层文本就无法得知父级文本指定的样式
+- 另外，描述 \t 也需要一种模板，如定义三个 \t，以 `(\t,3)` 的形式定义而非 `\t\t\t`，同时要注意模板中多处定义格式模板的情况
+- 参考之前空白行的处理方式：在替换时若父级存在格式定义，则针对替换文本的每一行都应用，**此为侵入式的做法**，需要解析模板的定义
+- 最终决定的做法：
+    - 全部替换后，使用方法去除空白行
+    - 将 \t 格式定义在替换文本外，但若内容存在多行文本，则将之移动到更底层的定义中
+    - 格式以`(格式字符,循环次数)`的形式定义，称为格式模板，添加原子表达式`\((?P<CHAR>(?:\\t)*),(?P<NUM>\d+)\)`用于匹配格式模板，该原子表达式限定了当前支持的格式字符

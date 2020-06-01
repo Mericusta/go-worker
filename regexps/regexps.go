@@ -75,6 +75,7 @@ func registAtomicExpression() {
 		global.AEConvertACOptionValue:  AEConvertACOptionValue,
 		global.AEAnalyzeOptionValue:    AEAnalyzeOptionValue,
 		global.AEGoKeywordPackageValue: AEGoKeywordPackageValue,
+		global.AETemplateStyle:         AETemplateStyle,
 	}
 }
 

@@ -19,6 +19,8 @@ const (
 	AECurlyBracesContent AtomicExpressionEnum = 5
 	// AEGoKeywordPackageValue go package 关键词的表达式
 	AEGoKeywordPackageValue AtomicExpressionEnum = 6
+	// AETemplateStyle 格式模板关键词表达式，用于匹配文本中指定的格式模板
+	AETemplateStyle AtomicExpressionEnum = 7
 
 	// AEBindOptionValue bind 指令参数的表达式
 	AEBindOptionValue AtomicExpressionEnum = 101
