@@ -16,3 +16,5 @@ func TrimSpaceLine(content string) string {
 	replaceContent := spaceLineRegexp.ReplaceAllString(content, "\n")
 	return replaceContent
 }
+
+// func Trait

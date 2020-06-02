@@ -211,7 +211,7 @@ func analyzeGoImportPackage(goFileAnalysis *GoFileAnalysis, fileContentByte []by
 		if doubleQuotesContentRegexp, hasDoubleQuotesContentRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEDoubleQuotesContent]; hasDoubleQuotesContentRegexp {
 			for _, matchedKeywordImportValue := range keywordImportValueRegexp.FindAll(fileContentByte, -1) {
 				for _, quotesContentByte := range doubleQuotesContentRegexp.FindAll(matchedKeywordImportValue, -1) {
-					goFileAnalysis.ImportList = append(goFileAnalysis.ImportList, string(quotesContentByte))
+					goFileAnalysis.ImportList = append(goFileAnalysis.ImportList, strings.Trim(string(quotesContentByte), "\""))
 				}
 			}
 		} else {
@@ -249,7 +249,7 @@ func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte
 				ui.OutputWarnInfo(ui.CMDAnalyzeGoFunctionDefinitionSyntaxError)
 				continue
 			}
-			functionAnalysis.Class = memberStringList[1]
+			functionAnalysis.Class = utility.TraitStructName(memberStringList[1])
 		}
 		// 解析函数名
 		functionAnalysis.Name = functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$NAME")

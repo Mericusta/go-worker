@@ -60,7 +60,7 @@ func Convert2CamelStyle(otherStyleString string, capitalize bool) string {
 	return camelStyleString
 }
 
-// TraitStructName 从含有结构体类型的 GO 组合类型中萃取结构体的名称，如：*Name -> Name
+// TraitStructName 从含有结构体类型的组合类型中萃取结构体的名称，如：*Name -> Name
 func TraitStructName(structString string) string {
 	structName := strings.TrimLeft(structString, "*")
 	return structName

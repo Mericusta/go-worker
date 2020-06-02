@@ -2,19 +2,22 @@
 ## File: ./resources/example.go
 - Package: main
 - Import
-	- "bufio"
-	- "fmt"
-	- "os"
-	- "strings"
-	- "github.com/go-worker/fsm"
-	- "github.com/go-worker/global"
-	- "github.com/go-worker/regexpscommands"
-	- "github.com/go-worker/ui"
+	- bufio
+	- fmt
+	- os
+	- strings
+	- github.com/go-worker/fsm
+	- github.com/go-worker/global
+	- github.com/go-worker/regexpscommands
+	- github.com/go-worker/ui
 - Function
-	- ExampleFunc5
-		- Class: ExampleStruct
+	- ExampleFunc2
 		- Params
 			- str: string
+		- Return
+			- 0: int
+	- ExampleFunc4
+		- Class: ExampleStruct
 	- ExampleFunc9
 		- Class: ExampleStruct
 		- Params
@@ -24,51 +27,28 @@
 		- Return
 			- 0: int
 			- 1: int
-	- ExampleFunc10
-		- Class: *ExampleStruct
-		- Params
-			- example3: *ExampleStruct
-			- str: string
-			- value: int
-			- example2: ExampleStruct
-		- Return
-			- 0: int
-			- 1: int
-			- 2: *ExampleStruct
-	- ExampleFunc11
-		- Class: *ExampleStruct
-		- Params
-			- example3: *ExampleStruct
-			- str: string
-			- value: int
-			- example2: ExampleStruct
-		- Return
-			- c: *ExampleStruct
-			- a: int
-			- b: int
 	- ExampleFunc12
-		- Class: *ExampleStruct
+		- Class: ExampleStruct
 		- Params
+			- str: string
+			- value: int
+			- example2: ExampleStruct
+			- example3: *ExampleStruct
 			- list: []string
 			- asd: ...string
-			- str: string
-			- value: int
-			- example2: ExampleStruct
-			- example3: *ExampleStruct
 		- Return
 			- a: int
 			- b: int
 			- c: *ExampleStruct
-	- main
-	- ExampleFunc4
-		- Class: ExampleStruct
-	- ExampleFunc8
-		- Class: ExampleStruct
+	- ExampleFunc1
+		- Params
+			- str: string
+	- ExampleFunc3
 		- Params
 			- str: string
 		- Return
-			- 1: int
 			- 0: int
+			- 1: int
 	- ExampleFunc6
 		- Class: ExampleStruct
 		- Params
@@ -81,18 +61,38 @@
 			- ex: *ExampleStruct
 		- Return
 			- 0: *ExampleStruct
-	- ExampleFunc2
-		- Params
-			- str: string
-		- Return
-			- 0: int
-	- ExampleFunc3
+	- ExampleFunc8
+		- Class: ExampleStruct
 		- Params
 			- str: string
 		- Return
 			- 0: int
 			- 1: int
+	- ExampleFunc10
+		- Class: ExampleStruct
+		- Params
+			- str: string
+			- value: int
+			- example2: ExampleStruct
+			- example3: *ExampleStruct
+		- Return
+			- 2: *ExampleStruct
+			- 0: int
+			- 1: int
+	- ExampleFunc11
+		- Class: ExampleStruct
+		- Params
+			- str: string
+			- value: int
+			- example2: ExampleStruct
+			- example3: *ExampleStruct
+		- Return
+			- b: int
+			- c: *ExampleStruct
+			- a: int
 	- init
-	- ExampleFunc1
+	- main
+	- ExampleFunc5
+		- Class: ExampleStruct
 		- Params
 			- str: string
