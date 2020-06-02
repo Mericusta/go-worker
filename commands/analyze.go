@@ -147,10 +147,11 @@ func (command *Analyze) parseCommandParams() error {
 
 // GoFileAnalysis go 文件分析结果
 type GoFileAnalysis struct {
-	FilePath    string
-	PackageName string
-	ImportList  []string
-	FunctionMap map[string]*GoFunctionAnalysis
+	FilePath     string
+	PackageName  string
+	ImportList   []string
+	FunctionMap  map[string]*GoFunctionAnalysis
+	functionList []string
 }
 
 // GoFunctionAnalysis go 函数分析结果
@@ -163,8 +164,9 @@ type GoFunctionAnalysis struct {
 
 func analyzeGoFile(toAnalyzeFile, toWriteFile *os.File) error {
 	goFileAnalysis := &GoFileAnalysis{
-		ImportList:  make([]string, 0),
-		FunctionMap: make(map[string]*GoFunctionAnalysis),
+		ImportList:   make([]string, 0),
+		FunctionMap:  make(map[string]*GoFunctionAnalysis),
+		functionList: make([]string, 0),
 	}
 
 	toAnalyzeContent, readToAnalyzeContentError := ioutil.ReadAll(toAnalyzeFile)
@@ -287,6 +289,7 @@ func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte
 			}
 		}
 		goFileAnalysis.FunctionMap[functionAnalysis.Name] = functionAnalysis
+		goFileAnalysis.functionList = append(goFileAnalysis.functionList, functionAnalysis.Name)
 	}
 
 	// 解析函数体
@@ -342,9 +345,10 @@ func outputAnalyzeGoFileResult(goFileAnalysis *GoFileAnalysis) string {
 
 	// function 内容
 	functionDefinitionListContent := ""
-	if len(goFileAnalysis.FunctionMap) != 0 {
+	if len(goFileAnalysis.functionList) != 0 {
 		functionDefinitionListString := ""
-		for _, functionAnalysis := range goFileAnalysis.FunctionMap {
+		for _, functionName := range goFileAnalysis.functionList {
+			functionAnalysis := goFileAnalysis.FunctionMap[functionName]
 			functionDefinitionContent := ui.AnalyzeGoFileFunctionDefinitionTemplate
 
 			// sytle template
