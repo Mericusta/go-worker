@@ -15,6 +15,9 @@ var CMDAnalyzeGoFunctionDefinitionSyntaxError string = "Analyze Go file, functio
 // CMDAnalyzeGoFunctionContentSyntaxError 分析 go 文件，函数体语法错误
 var CMDAnalyzeGoFunctionContentSyntaxError string = "Analyze Go file, function content syntax error"
 
+// CMDAnalyzeGoFunctionError 分析 go 文件，函数体语法错误
+var CMDAnalyzeGoFunctionError string = "Analyze Go file, function definition does not match body on index %v"
+
 // AnalyzeGoFileResultTemplate 分析 go 文件，输出结果的文本模板
 var AnalyzeGoFileResultTemplate = `
 ## File: RP_FILE_PATH

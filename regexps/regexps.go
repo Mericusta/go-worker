@@ -77,6 +77,7 @@ func registAtomicExpression() {
 		global.AEGoKeywordPackageValue: AEGoKeywordPackageValue,
 		global.AETemplateStyle:         AETemplateStyle,
 		global.AESpaceLine:             AESpaceLine,
+		global.AEIdentifier:            AEIdentifier,
 	}
 }
 
@@ -102,6 +103,7 @@ func registTemplateKeywordReplaceString() {
 		template.TK_ConvertOVExpression:       string(AEConvertOptionValue),
 		template.TK_ConvertACOptionExpression: string(AEConvertACOptionValue),
 		template.TK_AnalyzeOVExpression:       string(AEAnalyzeOptionValue),
+		template.TK_Identifier:                string(AEIdentifier),
 	}
 }
 

@@ -14,6 +14,8 @@ const (
 	GoKeywordImportValueTemplate TemplateEnum = 3
 	// GoFunctionDefinitionTemplate go function 定义的模板
 	GoFunctionDefinitionTemplate TemplateEnum = 4
+	// GoFunctionCallTemplate go function 调用的模板
+	GoFunctionCallTemplate TemplateEnum = 5
 
 	// 外部模板
 

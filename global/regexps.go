@@ -23,6 +23,8 @@ const (
 	AETemplateStyle AtomicExpressionEnum = 7
 	// AESpaceLine 空白行的表达式
 	AESpaceLine AtomicExpressionEnum = 8
+	// AEIdentifier 标识符的表达式
+	AEIdentifier AtomicExpressionEnum = 9
 
 	// AEBindOptionValue bind 指令参数的表达式
 	AEBindOptionValue AtomicExpressionEnum = 101

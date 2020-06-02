@@ -160,6 +160,7 @@ type GoFunctionAnalysis struct {
 	Name      string
 	ParamsMap map[string]string
 	ReturnMap map[string]string
+	CallMap   map[string]int
 }
 
 func analyzeGoFile(toAnalyzeFile, toWriteFile *os.File) error {
@@ -235,12 +236,15 @@ func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte
 		ui.OutputWarnInfo(ui.CMDAnalyzeGoKeywordRegexpNotExist, "function")
 		return
 	}
-	functionDefinitionByteList := functionDefinitionRegexp.FindAll(fileContentByte, -1)
+
 	// 解析函数定义
+	functionDefinitionByteList := functionDefinitionRegexp.FindAll(fileContentByte, -1)
+	utility2.TestOutput("len(functionDefinitionByteList) = %v", len(functionDefinitionByteList))
 	for _, functionDefinitionByte := range functionDefinitionByteList {
 		functionAnalysis := &GoFunctionAnalysis{
 			ParamsMap: make(map[string]string),
 			ReturnMap: make(map[string]string),
+			CallMap:   make(map[string]int),
 		}
 		// 解析所属类
 		memberStringWithPunctuationMark := functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$MEMBER")
@@ -293,18 +297,27 @@ func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte
 	}
 
 	// 解析函数体
-	// functionDefinitionIndexList := functionDefinitionRegexp.FindAllIndex(fileContentByte, -1)
-	// for index, functionDefinitionIndex := range functionDefinitionIndexList {
-	// 	definitionLength := utility.CalculatePunctuationMarksContentLength(string(fileContentByte[functionDefinitionIndex[1]+1:]), global.PunctuationMarkCurlyBraces)
-	// 	if definitionLength == -1 {
-	// 		ui.OutputWarnInfo(ui.CMDAnalyzeGoFunctionContentSyntax)
-	// 		continue
-	// 	}
-	// 	utility2.TestOutput("function[%v] end index = %v", index, functionDefinitionIndex[1]+1+definitionLength)
-	// 	functionContent := fileContentByte[functionDefinitionIndex[0] : functionDefinitionIndex[1]+1+definitionLength]
-	// 	utility2.TestOutput("function[%v] functionContent = |%v|", index, string(functionContent))
-	// 	utility2.TestOutput("---------------- splitter ----------------")
-	// }
+	if goFunctionCallRegexp := regexps.GetRegexpByTemplateEnum(global.GoFunctionCallTemplate); goFunctionCallRegexp != nil {
+		functionDefinitionIndexList := functionDefinitionRegexp.FindAllIndex(fileContentByte, -1)
+		utility2.TestOutput("len(functionDefinitionIndexList) = %v", len(functionDefinitionIndexList))
+		for index, functionDefinitionIndex := range functionDefinitionIndexList {
+			if index > len(goFileAnalysis.functionList[index]) {
+				ui.OutputWarnInfo(ui.CMDAnalyzeGoFunctionError, index)
+				continue
+			}
+			goFunctionAnalysis := goFileAnalysis.FunctionMap[goFileAnalysis.functionList[index]]
+
+			definitionLength := utility2.CalculatePunctuationMarksContentLength(string(fileContentByte[functionDefinitionIndex[1]+1:]), global.PunctuationMarkCurlyBraces)
+			if definitionLength == 0 {
+				ui.OutputWarnInfo(ui.CMDAnalyzeGoFunctionContentSyntaxError)
+				continue
+			}
+			functionBodyContent := fileContentByte[functionDefinitionIndex[1] : functionDefinitionIndex[1]+1+definitionLength]
+			for _, subMatchList := range goFunctionCallRegexp.FindAllSubmatch(functionBodyContent, -1) {
+				goFunctionAnalysis.CallMap[string(subMatchList[1])]++
+			}
+		}
+	}
 }
 
 func outputAnalyzeGoFileResult(goFileAnalysis *GoFileAnalysis) string {
@@ -395,7 +408,7 @@ func outputAnalyzeGoFileResult(goFileAnalysis *GoFileAnalysis) string {
 	// clear space line
 	resultContent = utility3.TrimSpaceLine(resultContent)
 
-	ui.OutputNoteInfo(resultContent)
+	// ui.OutputNoteInfo(resultContent)
 
 	return resultContent
 }

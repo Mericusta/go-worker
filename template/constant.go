@@ -7,6 +7,8 @@ var (
 	// 通用关键词
 	// TK_Path path 的关键词
 	TK_Path TemplateKeyword = "TK_PATH"
+	// TK_IDENTIFIER 标识符的关键词
+	TK_Identifier TemplateKeyword = "TK_IDENTIFIER"
 
 	// 通用选项关键词
 	// TK_OPVExpression 选项 parent 的关键词

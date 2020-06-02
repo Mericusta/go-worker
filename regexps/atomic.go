@@ -44,3 +44,6 @@ var AETemplateStyle AtomicExpression = `\((?P<CHAR>\d+),(?P<NUM>\d+)\)`
 
 // AESpaceLine 空白行的表达式
 var AESpaceLine AtomicExpression = `(?ms)\n\s*\n`
+
+// AEIdentifier 标识符的表达式，以字母开头，字母，数字或下划线组合
+var AEIdentifier AtomicExpression = `[[:alpha:]][_\.\w]*`

@@ -11,3 +11,6 @@ var TEGoKeywordImportValue TemplateExpression = `(?ms)import\s+(\(.*?\)|TK_Doubl
 
 // TEGoFunctionDefinition go function 定义的模板表达式
 var TEGoFunctionDefinition TemplateExpression = `(?ms)^func\s*(?P<MEMBER>\(.*?\))?\s*(?P<NAME>\w+)\s*(?P<PARAM>\(.*?\)){1}\s*(?P<RETURN>\(.*?\)|[\*\w]+)?\s*\{`
+
+// TEGoFunctionCall go function 调用的模板表达式
+var TEGoFunctionCall TemplateExpression = `(?ms)(?P<NAME>TK_IDENTIFIER)\(.*?\)`
