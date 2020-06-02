@@ -1,0 +1,98 @@
+
+## File: ./resources/example.go
+- Package: main
+- Import
+	- "bufio"
+	- "fmt"
+	- "os"
+	- "strings"
+	- "github.com/go-worker/fsm"
+	- "github.com/go-worker/global"
+	- "github.com/go-worker/regexpscommands"
+	- "github.com/go-worker/ui"
+- Function
+	- ExampleFunc5
+		- Class: ExampleStruct
+		- Params
+			- str: string
+	- ExampleFunc9
+		- Class: ExampleStruct
+		- Params
+			- str: string
+			- value: int
+			- example2: ExampleStruct
+		- Return
+			- 0: int
+			- 1: int
+	- ExampleFunc10
+		- Class: *ExampleStruct
+		- Params
+			- example3: *ExampleStruct
+			- str: string
+			- value: int
+			- example2: ExampleStruct
+		- Return
+			- 0: int
+			- 1: int
+			- 2: *ExampleStruct
+	- ExampleFunc11
+		- Class: *ExampleStruct
+		- Params
+			- example3: *ExampleStruct
+			- str: string
+			- value: int
+			- example2: ExampleStruct
+		- Return
+			- c: *ExampleStruct
+			- a: int
+			- b: int
+	- ExampleFunc12
+		- Class: *ExampleStruct
+		- Params
+			- list: []string
+			- asd: ...string
+			- str: string
+			- value: int
+			- example2: ExampleStruct
+			- example3: *ExampleStruct
+		- Return
+			- a: int
+			- b: int
+			- c: *ExampleStruct
+	- main
+	- ExampleFunc4
+		- Class: ExampleStruct
+	- ExampleFunc8
+		- Class: ExampleStruct
+		- Params
+			- str: string
+		- Return
+			- 1: int
+			- 0: int
+	- ExampleFunc6
+		- Class: ExampleStruct
+		- Params
+			- str: string
+		- Return
+			- 0: int
+	- ExampleFunc7
+		- Class: ExampleStruct
+		- Params
+			- ex: *ExampleStruct
+		- Return
+			- 0: *ExampleStruct
+	- ExampleFunc2
+		- Params
+			- str: string
+		- Return
+			- 0: int
+	- ExampleFunc3
+		- Params
+			- str: string
+		- Return
+			- 0: int
+			- 1: int
+	- init
+	- ExampleFunc1
+		- Params
+			- str: string

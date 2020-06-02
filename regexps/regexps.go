@@ -6,7 +6,7 @@ import (
 	"github.com/go-worker/global"
 	"github.com/go-worker/template"
 	"github.com/go-worker/ui"
-	"github.com/go-worker/utility"
+	"github.com/go-worker/utility2"
 )
 
 // Expression 正则表达式类型
@@ -76,6 +76,7 @@ func registAtomicExpression() {
 		global.AEAnalyzeOptionValue:    AEAnalyzeOptionValue,
 		global.AEGoKeywordPackageValue: AEGoKeywordPackageValue,
 		global.AETemplateStyle:         AETemplateStyle,
+		global.AESpaceLine:             AESpaceLine,
 	}
 }
 
@@ -172,7 +173,7 @@ func GetRegexpByTemplateEnum(templateEnum global.TemplateEnum) *regexp.Regexp {
 		ui.OutputWarnInfo("parse template expression[%v] but get empty", templateExpression)
 		return nil
 	}
-	// utility.TestOutput("templateExpression = %v", parsedCommand)
+	// utility2.TestOutput("templateExpression = %v", parsedCommand)
 	templateExpressionRegexp := regexp.MustCompile(string(parsedCommand))
 	if templateExpressionRegexp == nil {
 		ui.OutputWarnInfo("complie template expression[%v], but get nil", parsedCommand)
@@ -183,30 +184,30 @@ func GetRegexpByTemplateEnum(templateEnum global.TemplateEnum) *regexp.Regexp {
 func parseTemplateExpression(templateCommonKeywordRegexp *regexp.Regexp, templateExpression template.TemplateExpression) Expression {
 	// 查找模板关键词
 	templateKeywordExpressionList := templateCommonKeywordRegexp.FindAllString(string(templateExpression), -1)
-	utility.TestOutput("templateExpression = %v, templateKeywordExpressionList = %v", templateExpression, templateKeywordExpressionList)
+	utility2.TestOutput("templateExpression = %v, templateKeywordExpressionList = %v", templateExpression, templateKeywordExpressionList)
 	for len(templateKeywordExpressionList) != 0 {
 		for _, templateKeywordExpression := range templateKeywordExpressionList {
-			// utility.TestOutput("templateKeywordExpression = %v", templateKeywordExpression)
+			// utility2.TestOutput("templateKeywordExpression = %v", templateKeywordExpression)
 			if templateKeywordRegexp, hasKeywordRegexp := templateKeywordRegexpMap[template.TemplateKeyword(templateKeywordExpression)]; hasKeywordRegexp {
 				if toReplaceString, hasToReplaceString := templateKeywordReplaceStringMap[template.TemplateKeyword(templateKeywordExpression)]; hasToReplaceString {
 					// 替换模板关键词
-					// utility.TestOutput("to replace %v", toReplaceString)
+					// utility2.TestOutput("to replace %v", toReplaceString)
 					templateExpression = template.TemplateExpression(templateKeywordRegexp.ReplaceAllString(string(templateExpression), toReplaceString))
 				} else {
-					// utility.TestOutput("%v does not have to replace string", templateKeywordExpression)
+					// utility2.TestOutput("%v does not have to replace string", templateKeywordExpression)
 					return ""
 				}
 			} else {
-				// utility.TestOutput("%v does not have regexp", templateKeywordExpression)
+				// utility2.TestOutput("%v does not have regexp", templateKeywordExpression)
 				return ""
 			}
 		}
 
-		utility.TestOutput("after replace, templateExpression = %v", templateExpression)
+		utility2.TestOutput("after replace, templateExpression = %v", templateExpression)
 
 		// 查找模板关键词
 		templateKeywordExpressionList = templateCommonKeywordRegexp.FindAllString(string(templateExpression), -1)
-		// utility.TestOutput("templateKeywordExpressionList = %v", templateKeywordExpressionList)
+		// utility2.TestOutput("templateKeywordExpressionList = %v", templateKeywordExpressionList)
 	}
 	return Expression(templateExpression)
 }

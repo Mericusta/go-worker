@@ -16,7 +16,7 @@ var (
 	ConvertRPMemberComment = "RP_MEMBER_COMMENT"
 	ConvertRPCsvHead       = "RP_CSV_HEAD"
 
-	AnalyzeRPFileName                   = "RP_FILE_PATH"
+	AnalyzeRPFilePath                   = "RP_FILE_PATH"
 	AnalyzeRPPackageName                = "RP_PACKAGE_NAME"
 	AnalyzeRPImportPackageList          = "RP_IMPORT_PACKAGE_LIST"
 	AnalyzeRPFunctionDefinitionList     = "RP_FUNCTION_DEFINITION_LIST"
@@ -25,7 +25,7 @@ var (
 	AnalyzeRPFunctionDefinition         = "RP_FUNCTION_DEFINITION"
 	AnalyzeRPFunctionName               = "RP_FUNCTION_NAME"
 	AnalyzeRPFunctionClass              = "RP_FUNCTION_CLASS"
-	AnalyzeRPFunctionParamsList         = "RP_FUNCTION_PARAM_LIST"
+	AnalyzeRPFunctionParamList          = "RP_FUNCTION_PARAM_LIST"
 	AnalyzeRPFunctionReturnList         = "RP_FUNCTION_RETURN_LIST"
 	AnalyzeRPFunctionClassName          = "RP_FUNCTION_CLASS_NAME"
 	AnalyzeRPFunctionParamNameTypeList  = "RP_FUNCTION_PARAM_NAME_TYPE_LIST"
@@ -51,9 +51,10 @@ const (
 
 // 配置常量
 var (
-	SyntaxGo  = "go"
-	SyntaxCSV = "csv"
-	SyntaxCpp = "cpp"
+	SyntaxGo       = "go"
+	SyntaxCSV      = "csv"
+	SyntaxCpp      = "cpp"
+	SyntaxMarkdown = "md"
 )
 
 // 外部常量

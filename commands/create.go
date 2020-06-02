@@ -9,6 +9,7 @@ import (
 	"github.com/go-worker/regexps"
 	"github.com/go-worker/ui"
 	"github.com/go-worker/utility"
+	"github.com/go-worker/utility2"
 )
 
 type Create struct {
@@ -45,7 +46,7 @@ func (command *Create) Execute() error {
 		createFilePath = fmt.Sprintf("%v/%v.%v", packagePath, command.Params.optionValue, fileType)
 	case "file":
 		createFilePath = fmt.Sprintf("%v/%v.%v", projectPath, command.Params.optionValue, fileType)
-		utility.TestOutput("command.Params.parentValue = %v", command.Params.parentValue)
+		utility2.TestOutput("command.Params.parentValue = %v", command.Params.parentValue)
 		filePackage = command.Params.parentValue
 		if filePackage == "" {
 			filePackage = "main"
@@ -55,7 +56,7 @@ func (command *Create) Execute() error {
 		return nil
 	}
 
-	utility.TestOutput("create file %v", createFilePath)
+	utility2.TestOutput("create file %v", createFilePath)
 	file, createFileError := utility.CreateFile(createFilePath)
 	defer file.Close()
 	if createFileError != nil {

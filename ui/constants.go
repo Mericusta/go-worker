@@ -23,6 +23,9 @@ var CommonError4 string = "Create file failed, %v"
 // CommonError5 通用错误提示文本：文件打开失败
 var CommonError5 string = "Open file %v error, file is nil or %v"
 
+// CommonError6 通用错误提示文本：解析数值错误
+var CommonError6 string = "Parse alpha to integer error: %v"
+
 // CommonNote1 通用提示文本1：未知选项
 var CommonNote1 string = "Unknown command option"
 

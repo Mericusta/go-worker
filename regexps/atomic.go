@@ -40,4 +40,7 @@ var AEAnalyzeOptionValue AtomicExpression = `(file|directory|package)(\s+[_\.\w-
 var AEGoKeywordPackageValue AtomicExpression = `^package\s+[_\w-]+`
 
 // AETemplateStyle 格式模板关键词表达式，用于匹配文本中指定的格式模板
-var AETemplateStyle AtomicExpression = `\((?P<CHAR>(?:\\t)*),(?P<NUM>\d+)\)`
+var AETemplateStyle AtomicExpression = `\((?P<CHAR>\d+),(?P<NUM>\d+)\)`
+
+// AESpaceLine 空白行的表达式
+var AESpaceLine AtomicExpression = `(?ms)\n\s*\n`

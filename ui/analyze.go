@@ -17,31 +17,31 @@ var CMDAnalyzeGoFunctionContentSyntaxError string = "Analyze Go file, function c
 
 // AnalyzeGoFileResultTemplate 分析 go 文件，输出结果的文本模板
 var AnalyzeGoFileResultTemplate = `
-File Path:    RP_FILE_PATH
-Package Name: RP_PACKAGE_NAME
+## File: RP_FILE_PATH
+- Package: RP_PACKAGE_NAME
 RP_IMPORT_PACKAGE_LIST
 RP_FUNCTION_DEFINITION_LIST
 `
 
 // AnalyzeGoFileImportPackageListTemplate 分析 go 文件，依赖包列表的文本模板
 var AnalyzeGoFileImportPackageListTemplate = `
-Import:
-(\t,1)RP_IMPORT_PACKAGE
+- Import
+RP_IMPORT_PACKAGE
 `
 
 // AnalyzeGoFileImportPackageTemplate 分析 go 文件，依赖包的文本模板
-var AnalyzeGoFileImportPackageTemplate = `- PACKAGE_PATH`
+var AnalyzeGoFileImportPackageTemplate = `(9,1)- PACKAGE_PATH`
 
 // AnalyzeGoFileFunctionDefinitionListTemplate 分析 go 文件，函数列表的文本模板
 var AnalyzeGoFileFunctionDefinitionListTemplate = `
-Function List:
+- Function
 RP_FUNCTION_DEFINITION
 `
 
 // AnalyzeGoFileFunctionDefinitionTemplate 分析 go 文件，函数的定义的文本模板
 var AnalyzeGoFileFunctionDefinitionTemplate = `
-(\t,1)- RP_FUNCTION_NAME
-(\t,2)RP_FUNCTION_CLASS
+(9,1)- RP_FUNCTION_NAME
+(9,2)RP_FUNCTION_CLASS
 RP_FUNCTION_PARAM_LIST
 RP_FUNCTION_RETURN_LIST
 `
@@ -49,20 +49,20 @@ RP_FUNCTION_RETURN_LIST
 // AnalyzeGoFileFunctionClassTemplate 分析 go 文件，函数的定义的类的文本模板
 var AnalyzeGoFileFunctionClassTemplate = `- Class: RP_FUNCTION_CLASS_NAME`
 
-// AnalyzeGoFileFunctionParamsListTemplate 分析 go 文件，函数的定义的参数表的文本模板
-var AnalyzeGoFileFunctionParamsListTemplate = `
-(\t,2)- Params:
+// AnalyzeGoFileFunctionParamListTemplate 分析 go 文件，函数的定义的参数表的文本模板
+var AnalyzeGoFileFunctionParamListTemplate = `
+(9,2)- Params
 RP_FUNCTION_PARAM_NAME_TYPE_LIST
 `
 
 // AnalyzeGoFileFunctionParamNameTypeTemplate 分析 go 文件，函数定义中的名称，类型的文本模板
-var AnalyzeGoFileFunctionParamNameTypeTemplate = `(\t,3)- RP_NAME: RP_TYPE`
+var AnalyzeGoFileFunctionParamNameTypeTemplate = `(9,3)- RP_NAME: RP_TYPE`
 
 // AnalyzeGoFileFunctionReturnListTemplate 分析 go 文件，函数的返回值列表的文本模板
 var AnalyzeGoFileFunctionReturnListTemplate = `
-(\t,2)- Return:
+(9,2)- Return
 RP_FUNCTION_RETURN_NAME_TYPE_LIST
 `
 
 // AnalyzeGoFileFunctionReturnNameTypeTemplate 分析 go 文件，函数定义中的名称，类型的文本模板
-var AnalyzeGoFileFunctionReturnNameTypeTemplate = `(\t,3)- RP_NAME: RP_TYPE`
+var AnalyzeGoFileFunctionReturnNameTypeTemplate = `(9,3)- RP_NAME: RP_TYPE`
