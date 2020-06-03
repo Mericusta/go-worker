@@ -147,11 +147,11 @@ func (command *Analyze) parseCommandParams() error {
 
 // GoFileAnalysis go 文件分析结果
 type GoFileAnalysis struct {
-	FilePath     string
-	PackageName  string
-	ImportList   []string
-	FunctionMap  map[string]*GoFunctionAnalysis
-	functionList []string
+	FilePath       string
+	PackageName    string
+	ImportAliasMap map[string]string
+	FunctionMap    map[string]*GoFunctionAnalysis
+	functionList   []string
 }
 
 // GoFunctionAnalysis go 函数分析结果
@@ -160,14 +160,14 @@ type GoFunctionAnalysis struct {
 	Name      string
 	ParamsMap map[string]string
 	ReturnMap map[string]string
-	CallMap   map[string]int
+	CallMap   map[string]map[string]int
 }
 
 func analyzeGoFile(toAnalyzeFile, toWriteFile *os.File) error {
 	goFileAnalysis := &GoFileAnalysis{
-		ImportList:   make([]string, 0),
-		FunctionMap:  make(map[string]*GoFunctionAnalysis),
-		functionList: make([]string, 0),
+		ImportAliasMap: make(map[string]string),
+		FunctionMap:    make(map[string]*GoFunctionAnalysis),
+		functionList:   make([]string, 0),
 	}
 
 	toAnalyzeContent, readToAnalyzeContentError := ioutil.ReadAll(toAnalyzeFile)
@@ -211,15 +211,45 @@ func analyzeGoKeywordPackage(goFileAnalysis *GoFileAnalysis, fileContentByte []b
 
 func analyzeGoImportPackage(goFileAnalysis *GoFileAnalysis, fileContentByte []byte) {
 	if keywordImportValueRegexp := regexps.GetRegexpByTemplateEnum(global.GoKeywordImportValueTemplate); keywordImportValueRegexp != nil {
-		if doubleQuotesContentRegexp, hasDoubleQuotesContentRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEDoubleQuotesContent]; hasDoubleQuotesContentRegexp {
-			for _, matchedKeywordImportValue := range keywordImportValueRegexp.FindAll(fileContentByte, -1) {
-				for _, quotesContentByte := range doubleQuotesContentRegexp.FindAll(matchedKeywordImportValue, -1) {
-					goFileAnalysis.ImportList = append(goFileAnalysis.ImportList, strings.Trim(string(quotesContentByte), "\""))
+		if goKeywordImportAliasRegexp := regexps.GetRegexpByTemplateEnum(global.GoKeywordImportAliasTemplate); goKeywordImportAliasRegexp != nil {
+			keywordImportValueSubMatchNameIndexMap := make(map[string]int)
+			for index, subMatchName := range keywordImportValueRegexp.SubexpNames() {
+				keywordImportValueSubMatchNameIndexMap[subMatchName] = index
+			}
+			goKeywordImportAliasSubMatchNameIndexMap := make(map[string]int)
+			for index, subMatchName := range goKeywordImportAliasRegexp.SubexpNames() {
+				goKeywordImportAliasSubMatchNameIndexMap[subMatchName] = index
+			}
+			for _, keywordImportValueSubmatchList := range keywordImportValueRegexp.FindAllSubmatch(fileContentByte, -1) {
+				packageName := make([]byte, 0)
+				if aliasIndex, hasAliasIndex := keywordImportValueSubMatchNameIndexMap["ALIAS"]; hasAliasIndex {
+					packageName = keywordImportValueSubmatchList[aliasIndex]
+				}
+				if keywordImportValueSubMatchIndex, hasKeywordImportValueSubMatchIndex := keywordImportValueSubMatchNameIndexMap["VALUE"]; hasKeywordImportValueSubMatchIndex {
+					keywordImportValueSubmatchValue := keywordImportValueSubmatchList[keywordImportValueSubMatchIndex]
+					// 处理多行形式下的包引用
+					for _, goKeywordImportAliasSubMatchList := range goKeywordImportAliasRegexp.FindAllSubmatch(keywordImportValueSubmatchValue, -1) {
+						if goKeywordImportAliasSubMatchIndex, hasGoKeywordImportAliasSubMatchIndex := goKeywordImportAliasSubMatchNameIndexMap["ALIAS"]; hasGoKeywordImportAliasSubMatchIndex {
+							packageName = goKeywordImportAliasSubMatchList[goKeywordImportAliasSubMatchIndex]
+						}
+						packagePath := make([]byte, 0)
+						if goKeywordImportAliasSubMatchIndex, hasGoKeywordImportAliasSubMatchIndex := goKeywordImportAliasSubMatchNameIndexMap["CONTENT"]; hasGoKeywordImportAliasSubMatchIndex && len(goKeywordImportAliasSubMatchList) > goKeywordImportAliasSubMatchIndex {
+							packagePath = goKeywordImportAliasSubMatchList[goKeywordImportAliasSubMatchIndex]
+						}
+						if len(packageName) == 0 {
+							packagePathList := strings.Split(strings.Trim(string(packagePath), "\""), "/")
+							packageName = []byte(packagePathList[len(packagePathList)-1])
+						}
+						goFileAnalysis.ImportAliasMap[strings.TrimSpace(string(packageName))] = strings.Trim(string(packagePath), "\"")
+						// clear package name
+						packageName = make([]byte, 0)
+					}
 				}
 			}
 		} else {
-			ui.OutputWarnInfo(ui.CommonWarn3, global.AEDoubleQuotesContent)
+			ui.OutputWarnInfo(ui.CommonWarn3, global.GoKeywordImportAliasTemplate)
 		}
+
 	} else {
 		ui.OutputWarnInfo(ui.CMDAnalyzeGoKeywordRegexpNotExist, "import")
 	}
@@ -239,12 +269,11 @@ func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte
 
 	// 解析函数定义
 	functionDefinitionByteList := functionDefinitionRegexp.FindAll(fileContentByte, -1)
-	utility2.TestOutput("len(functionDefinitionByteList) = %v", len(functionDefinitionByteList))
 	for _, functionDefinitionByte := range functionDefinitionByteList {
 		functionAnalysis := &GoFunctionAnalysis{
 			ParamsMap: make(map[string]string),
 			ReturnMap: make(map[string]string),
-			CallMap:   make(map[string]int),
+			CallMap:   make(map[string]map[string]int),
 		}
 		// 解析所属类
 		memberStringWithPunctuationMark := functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$MEMBER")
@@ -299,7 +328,6 @@ func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte
 	// 解析函数体
 	if goFunctionCallRegexp := regexps.GetRegexpByTemplateEnum(global.GoFunctionCallTemplate); goFunctionCallRegexp != nil {
 		functionDefinitionIndexList := functionDefinitionRegexp.FindAllIndex(fileContentByte, -1)
-		utility2.TestOutput("len(functionDefinitionIndexList) = %v", len(functionDefinitionIndexList))
 		for index, functionDefinitionIndex := range functionDefinitionIndexList {
 			if index > len(goFileAnalysis.functionList[index]) {
 				ui.OutputWarnInfo(ui.CMDAnalyzeGoFunctionError, index)
@@ -314,7 +342,17 @@ func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte
 			}
 			functionBodyContent := fileContentByte[functionDefinitionIndex[1] : functionDefinitionIndex[1]+1+definitionLength]
 			for _, subMatchList := range goFunctionCallRegexp.FindAllSubmatch(functionBodyContent, -1) {
-				goFunctionAnalysis.CallMap[string(subMatchList[1])]++
+				packageFunctionList := strings.Split(string(subMatchList[1]), ".")
+				callFromPackage := goFileAnalysis.PackageName
+				callFunction := packageFunctionList[0]
+				if len(packageFunctionList) == 2 {
+					callFromPackage = packageFunctionList[0]
+					callFunction = packageFunctionList[1]
+				}
+				if _, hasPackage := goFunctionAnalysis.CallMap[callFromPackage]; !hasPackage {
+					goFunctionAnalysis.CallMap[callFromPackage] = make(map[string]int)
+				}
+				goFunctionAnalysis.CallMap[callFromPackage][callFunction]++
 			}
 		}
 	}
@@ -335,21 +373,24 @@ func outputAnalyzeGoFileResult(goFileAnalysis *GoFileAnalysis) string {
 
 	// import 内容
 	importPackageListContent := ""
-	if len(goFileAnalysis.ImportList) != 0 {
+	if len(goFileAnalysis.ImportAliasMap) != 0 {
 		importPackageListString := ""
-		for _, packagePath := range goFileAnalysis.ImportList {
-			packagePathContent := ui.AnalyzeGoFileImportPackageTemplate
+		for packageAlias, packagePath := range goFileAnalysis.ImportAliasMap {
+			packageAliasPathContent := ui.AnalyzeGoFileImportPackageTemplate
 
 			// style template
-			packagePathContent = ui.ParseStyleTemplate(templateStyleRegexp, packagePathContent)
+			packageAliasPathContent = ui.ParseStyleTemplate(templateStyleRegexp, packageAliasPathContent)
+
+			// package alias
+			packageAliasPathContent = strings.Replace(packageAliasPathContent, global.AnalyzeRPPackageAlias, packageAlias, -1)
 
 			// package path
-			packagePathContent = strings.Replace(packagePathContent, global.AnalyzeRPPackagePath, packagePath, -1)
+			packageAliasPathContent = strings.Replace(packageAliasPathContent, global.AnalyzeRPPackagePath, packagePath, -1)
 
 			if importPackageListString == "" {
-				importPackageListString = packagePathContent
+				importPackageListString = packageAliasPathContent
 			} else {
-				importPackageListString = fmt.Sprintf("%v\n%v", importPackageListString, packagePathContent)
+				importPackageListString = fmt.Sprintf("%v\n%v", importPackageListString, packageAliasPathContent)
 			}
 		}
 		importPackageListContent = strings.Replace(ui.AnalyzeGoFileImportPackageListTemplate, global.AnalyzeRPImportPackage, importPackageListString, -1)
@@ -391,8 +432,12 @@ func outputAnalyzeGoFileResult(goFileAnalysis *GoFileAnalysis) string {
 			}
 			functionDefinitionContent = strings.Replace(functionDefinitionContent, global.AnalyzeRPFunctionReturnList, functionReturnListContent, -1)
 
-			// clear space line
-			functionDefinitionContent = utility3.TrimSpaceLine(functionDefinitionContent)
+			// function body call map
+			functionCallMapContent := ""
+			if len(functionAnalysis.CallMap) != 0 {
+				functionCallMapContent = parseGoFunctionCallMapContent(templateStyleRegexp, functionAnalysis.CallMap)
+			}
+			functionDefinitionContent = strings.Replace(functionDefinitionContent, global.AnalyzeRPFunctionCallMap, functionCallMapContent, -1)
 
 			// add to function definition list content
 			if functionDefinitionListString == "" {
@@ -440,6 +485,23 @@ func parseGoFunctionParamOrReturnListContent(templateStyleRegexp *regexp.Regexp,
 		}
 	}
 	return strings.Replace(ui.ParseStyleTemplate(templateStyleRegexp, nameTypeListTemplate), replaceString, nameTypeListContent, -1)
+}
+
+func parseGoFunctionCallMapContent(templateStyleRegexp *regexp.Regexp, nameTypeMap map[string]map[string]int) string {
+	callMapContent := ""
+	for callPackage, functionMap := range nameTypeMap {
+		for functionName := range functionMap {
+			packageFunctionContent := ui.ParseStyleTemplate(templateStyleRegexp, ui.AnalyzeGoFileFunctionCallPackageMap)
+			packageFunctionContent = strings.Replace(packageFunctionContent, global.AnalyzeRPPackage, callPackage, -1)
+			packageFunctionContent = strings.Replace(packageFunctionContent, global.AnalyzeRPIdentifier, functionName, -1)
+			if callMapContent == "" {
+				callMapContent = packageFunctionContent
+			} else {
+				callMapContent = fmt.Sprintf("%v\n%v", callMapContent, packageFunctionContent)
+			}
+		}
+	}
+	return strings.Replace(ui.ParseStyleTemplate(templateStyleRegexp, ui.AnalyzeGoFileFunctionCallMapTemplate), global.AnalyzeRPFunctionCallPackageMap, callMapContent, -1)
 }
 
 // 分析 CPP 文件

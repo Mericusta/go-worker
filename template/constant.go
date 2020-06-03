@@ -9,14 +9,17 @@ var (
 	TK_Path TemplateKeyword = "TK_PATH"
 	// TK_IDENTIFIER 标识符的关键词
 	TK_Identifier TemplateKeyword = "TK_IDENTIFIER"
+	// TK_DoubleQuotesContent 双引号的内容的关键词
+	TK_DoubleQuotesContent TemplateKeyword = "TK_DoubleQuotesContent"
 
-	// 通用选项关键词
+	// 逻辑关键词
+	TK_GoKeywordImportAlias TemplateKeyword = "TK_GoKeywordImportAlias"
+
+	// 通用指令选项关键词
 	// TK_OPVExpression 选项 parent 的关键词
 	TK_OPVExpression TemplateKeyword = "TK_OPVExpression"
 	// TK_OOVExpression 选项 output 的关键词
 	TK_OOVExpression TemplateKeyword = "TK_OOVExpression"
-	// TK_DoubleQuotesContent 双引号的内容的关键词
-	TK_DoubleQuotesContent TemplateKeyword = "TK_DoubleQuotesContent"
 
 	// 指令特有关键词
 	// TK_BOVExpression bind 指令的 project|syntax 选项关键词

@@ -33,7 +33,7 @@ RP_IMPORT_PACKAGE
 `
 
 // AnalyzeGoFileImportPackageTemplate 分析 go 文件，依赖包的文本模板
-var AnalyzeGoFileImportPackageTemplate = `(9,1)- PACKAGE_PATH`
+var AnalyzeGoFileImportPackageTemplate = `(9,1)- PACKAGE_ALIAS: PACKAGE_PATH`
 
 // AnalyzeGoFileFunctionDefinitionListTemplate 分析 go 文件，函数列表的文本模板
 var AnalyzeGoFileFunctionDefinitionListTemplate = `
@@ -47,6 +47,7 @@ var AnalyzeGoFileFunctionDefinitionTemplate = `
 (9,2)RP_FUNCTION_CLASS
 RP_FUNCTION_PARAM_LIST
 RP_FUNCTION_RETURN_LIST
+RP_FUNCTION_CALL_MAP
 `
 
 // AnalyzeGoFileFunctionClassTemplate 分析 go 文件，函数的定义的类的文本模板
@@ -69,3 +70,14 @@ RP_FUNCTION_RETURN_NAME_TYPE_LIST
 
 // AnalyzeGoFileFunctionReturnNameTypeTemplate 分析 go 文件，函数定义中的名称，类型的文本模板
 var AnalyzeGoFileFunctionReturnNameTypeTemplate = `(9,3)- RP_NAME: RP_TYPE`
+
+// AnalyzeGoFileFunctionCallMapTemplate 分析 go 文件，函数体内调用其他函数的列表的文本模板
+var AnalyzeGoFileFunctionCallMapTemplate = `
+(9,2)- Call
+RP_FUNCTION_CALL_PACKAGE_MAP
+`
+
+// AnalyzeGoFileFunctionCallPackageMap 分析 go 文件，函数体内调用其他函数的文本模板
+var AnalyzeGoFileFunctionCallPackageMap = `
+(9,3)- RP_PACKAGE: RP_IDENTIFIER
+`

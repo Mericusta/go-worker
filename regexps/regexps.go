@@ -98,6 +98,7 @@ func registTemplateKeywordReplaceString() {
 		template.TK_OPVExpression:             string(template.TEOptionParentValue),
 		template.TK_OOVExpression:             string(template.TEOptionOutputValue),
 		template.TK_DoubleQuotesContent:       string(AEDoubleQuotesContent),
+		template.TK_GoKeywordImportAlias:      string(template.TEGoKeywordImportAlias),
 		template.TK_BOVExpression:             string(AEBindOptionValue),
 		template.TK_CreateOVExpression:        string(AECreateOptionValue),
 		template.TK_ConvertOVExpression:       string(AEConvertOptionValue),

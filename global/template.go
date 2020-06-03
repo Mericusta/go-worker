@@ -12,10 +12,12 @@ const (
 	OptionOutputValueTemplate TemplateEnum = 2
 	// GoKeywordImportValueTemplate go import 关键词的模板
 	GoKeywordImportValueTemplate TemplateEnum = 3
+	// GoKeywordImportAliasTemplate go import 关键词的重命名形式的模板表达式
+	GoKeywordImportAliasTemplate TemplateEnum = 4
 	// GoFunctionDefinitionTemplate go function 定义的模板
-	GoFunctionDefinitionTemplate TemplateEnum = 4
+	GoFunctionDefinitionTemplate TemplateEnum = 5
 	// GoFunctionCallTemplate go function 调用的模板
-	GoFunctionCallTemplate TemplateEnum = 5
+	GoFunctionCallTemplate TemplateEnum = 6
 
 	// 外部模板
 
