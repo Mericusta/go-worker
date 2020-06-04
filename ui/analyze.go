@@ -21,7 +21,7 @@ var CMDAnalyzeGoFunctionError string = "Analyze Go file, function definition doe
 // AnalyzeGoFileResultTemplate 分析 go 文件，输出结果的文本模板
 var AnalyzeGoFileResultTemplate = `
 ## File: RP_FILE_PATH
-- Package: RP_PACKAGE_NAME
+- Package: RP_PACKAGE_PATH/RP_PACKAGE_NAME
 RP_IMPORT_PACKAGE_LIST
 RP_FUNCTION_DEFINITION_LIST
 `
@@ -33,7 +33,7 @@ RP_IMPORT_PACKAGE
 `
 
 // AnalyzeGoFileImportPackageTemplate 分析 go 文件，依赖包的文本模板
-var AnalyzeGoFileImportPackageTemplate = `(9,1)- PACKAGE_ALIAS: PACKAGE_PATH`
+var AnalyzeGoFileImportPackageTemplate = `(9,1)- RP_PACKAGE_ALIAS: RP_PACKAGE_PATH`
 
 // AnalyzeGoFileFunctionDefinitionListTemplate 分析 go 文件，函数列表的文本模板
 var AnalyzeGoFileFunctionDefinitionListTemplate = `

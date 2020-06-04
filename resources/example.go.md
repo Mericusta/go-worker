@@ -1,23 +1,30 @@
 
 ## File: ./resources/example.go
-- Package: main
+- Package: github.com/go-worker/main
 - Import
-	- bufio: bufio
 	- fmt: fmt
 	- os: os
 	- strings: strings
+	- newFSM: github.com/go-worker/fsm
 	- otherName: github.com/go-worker/global
 	- regexpscommands: github.com/go-worker/regexpscommands
 	- ui: github.com/go-worker/ui
-	- newFSM: github.com/go-worker/fsm
+	- bufio: bufio
 - Function
 	- init
 	- main
 		- Call
-			- command: Execute
 			- fmt: Print
 			- bufio: NewScanner
-			- input: Scan
 			- strings: TrimSpace
 			- regexpscommands: ParseCommandByRegexp
 			- ui: OutputErrorInfo
+	- ExampleFunc2
+		- Params
+			- str2: string
+			- str1: *ExampleStruct
+			- example: *ExampleStruct
+		- Return
+			- 0: int
+	- ExampleFunc4
+		- Class: ExampleStruct

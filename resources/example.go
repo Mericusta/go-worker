@@ -1,12 +1,12 @@
 package main
 
-import newFSM "github.com/go-worker/fsm"
-import "bufio"
-
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"strings"
+
+	newFSM "github.com/go-worker/fsm"
 
 	otherName "github.com/go-worker/global"
 	"github.com/go-worker/regexpscommands"
@@ -56,21 +56,22 @@ func main() {
 
 // }
 
-// func ExampleFunc2(str string) int {
-// 	return 0
-// }
+func ExampleFunc2(str1, str2 string, example *ExampleStruct) int {
+	example.ExampleFunc4()
+	return 0
+}
 
 // func ExampleFunc3(str string) (int, int) {
 // 	return 0, 0
 // }
 
-// type ExampleStruct struct {
-// 	value int
-// }
+type ExampleStruct struct {
+	value int
+}
 
-// func (example ExampleStruct) ExampleFunc4() {
+func (example ExampleStruct) ExampleFunc4() {
 
-// }
+}
 
 // func (example ExampleStruct) ExampleFunc5(str string) {
 
