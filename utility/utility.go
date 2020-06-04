@@ -60,8 +60,14 @@ func Convert2CamelStyle(otherStyleString string, capitalize bool) string {
 	return camelStyleString
 }
 
-// TraitStructName 从含有结构体类型的组合类型中萃取结构体的名称，如：*Name -> Name
+// TraitStructName 从含有结构体类型的组合类型中萃取结构体的名称，如：*Name -> Name，packageName.Name -> Name，*packageName.Name -> Name
 func TraitStructName(structString string) string {
 	structName := strings.TrimLeft(structString, "*")
+	structNameList := strings.Split(structName, ".")
+	if len(structNameList) == 1 {
+		return structNameList[0]
+	} else if len(structNameList) == 2 {
+		return structNameList[1]
+	}
 	return structName
 }

@@ -1,7 +1,7 @@
 package ui
 
-// CMDAnalyzeFileNotExist 待分析的文件不存在
-var CMDAnalyzeFileNotExist string = "File to analyze does not exist"
+// CMDAnalyzeFileOrDirectoryNotExist 待分析的文件不存在
+var CMDAnalyzeFileOrDirectoryNotExist string = "File or Directory %v to analyze does not exist"
 
 // CMDAnalyzeOccursError 分析出错
 var CMDAnalyzeOccursError string = "File to analyze occurs error: %v"

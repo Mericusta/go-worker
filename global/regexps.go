@@ -25,6 +25,8 @@ const (
 	AESpaceLine AtomicExpressionEnum = 8
 	// AEIdentifier 标识符的表达式
 	AEIdentifier AtomicExpressionEnum = 9
+	// AEFileNameType 文件名与类型的表达式
+	AEFileNameType AtomicExpressionEnum = 10
 
 	// AEBindOptionValue bind 指令参数的表达式
 	AEBindOptionValue AtomicExpressionEnum = 101

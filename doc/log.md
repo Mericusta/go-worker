@@ -205,3 +205,7 @@ RP_FUNCTION_DEFINITION_LIST
 ## 2020.6.4
 
 - Note: go 文件的 package 需要知晓其全路径，以便于项目整体的分析
+- Note: analyze 指令，去掉 package 选项
+- Note: analyze 目录级分析，递归分析指定目录及其所有子目录下的所有绑定类型的文件
+- TODO: analyze 项目级分析
+- TODO: go 函数分析，参数表，返回值类型萃取

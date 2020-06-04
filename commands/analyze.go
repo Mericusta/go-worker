@@ -44,57 +44,84 @@ func (command *Analyze) Execute() error {
 		return fmt.Errorf(ui.CommonError1)
 	}
 
-	toAnalyzeFilePath := fmt.Sprintf("%v/%v.%v", projectPath, command.Params.sourceValue, fileType)
-	if !utility.IsExist(toAnalyzeFilePath) {
-		return fmt.Errorf(ui.CMDAnalyzeFileNotExist)
+	toAnalyzePath := fmt.Sprintf("%v/%v", projectPath, command.Params.sourceValue)
+	if !utility.IsExist(toAnalyzePath) {
+		return fmt.Errorf(ui.CMDAnalyzeFileOrDirectoryNotExist, toAnalyzePath)
 	}
 
-	toWriteFilePath := fmt.Sprintf("%v/%v.%v.%v", projectPath, command.Params.sourceValue, fileType, global.SyntaxMarkdown)
-	if command.Params.outputValue != "" {
-		toWriteFilePath = fmt.Sprintf("%v/%v", projectPath, command.Params.outputValue)
-	}
+	utility2.TestOutput("toAnalyzePath = %v", toAnalyzePath)
 
-	var toWriteFile *os.File
-	defer func() {
-		if toWriteFile != nil {
-			toWriteFile.Close()
+	toAnalyzeWriteFilePathMap := make(map[string]string, 0)
+	switch command.Params.sourceType {
+	case "file":
+		toAnalyzeFilePath := fmt.Sprintf("%v/%v.%v", projectPath, command.Params.sourceValue, fileType)
+		if !utility.IsExist(toAnalyzeFilePath) {
+			return fmt.Errorf(ui.CMDAnalyzeFileOrDirectoryNotExist, toAnalyzeFilePath)
 		}
-	}()
-	if utility.IsExist(toWriteFilePath) {
-		var openFileError error
-		toWriteFile, openFileError = os.OpenFile(toWriteFilePath, os.O_RDWR|os.O_APPEND, 0644)
-		if openFileError != nil {
-			return openFileError
+		toAnalyzeWriteFilePathMap[toAnalyzeFilePath] = fmt.Sprintf("%v.%v", toAnalyzeFilePath, global.SyntaxMarkdown)
+	case "directory":
+		directoryStat, getStatError := os.Stat(toAnalyzePath)
+		if getStatError != nil {
+			return fmt.Errorf(ui.CommonError7, toAnalyzePath, getStatError)
 		}
-	} else {
-		var createFileError error
-		toWriteFile, createFileError = utility.CreateFile(toWriteFilePath)
-		if createFileError != nil {
-			return createFileError
+		if !directoryStat.IsDir() {
+			ui.OutputWarnInfo(ui.CommonError8, toAnalyzePath)
+			return nil
 		}
+		for _, toAnalyzeFilePath := range utility3.TraverseDirectorySpecificFile(toAnalyzePath, fileType) {
+			if !utility.IsExist(toAnalyzeFilePath) {
+				ui.OutputWarnInfo(ui.CMDAnalyzeFileOrDirectoryNotExist, toAnalyzeFilePath)
+				continue
+			}
+			toAnalyzeWriteFilePathMap[toAnalyzeFilePath] = fmt.Sprintf("%v.%v", toAnalyzeFilePath, global.SyntaxMarkdown)
+		}
+	default:
+		break
 	}
 
-	if toWriteFile == nil {
-		return fmt.Errorf("analyze to write file is nil")
-	}
-
-	toAnalyzeFile, inputError := os.Open(toAnalyzeFilePath)
-	defer toAnalyzeFile.Close()
-	if inputError != nil || toAnalyzeFile == nil {
-		return fmt.Errorf(ui.CommonError5, toAnalyzeFilePath, inputError.Error())
-	}
-
-	var analyzeError error
+	var analyzeFunction func(*os.File, *os.File) error
 	switch fileType {
 	case global.SyntaxGo:
-		analyzeError = analyzeGoFile(toAnalyzeFile, toWriteFile)
+		analyzeFunction = analyzeGoFile
 	case global.SyntaxCpp:
-		analyzeError = analyzeCppFile(toAnalyzeFile, toWriteFile)
-	}
-	if analyzeError != nil {
-		ui.OutputWarnInfo(ui.CMDAnalyzeOccursError, analyzeError)
+		analyzeFunction = analyzeCppFile
 	}
 
+	for toAnalyzeFilePath, toWriteFilePath := range toAnalyzeWriteFilePathMap {
+		var toWriteFile *os.File
+		defer func() {
+			if toWriteFile != nil {
+				toWriteFile.Close()
+			}
+		}()
+		if utility.IsExist(toWriteFilePath) {
+			var openFileError error
+			toWriteFile, openFileError = os.OpenFile(toWriteFilePath, os.O_RDWR|os.O_APPEND, 0644)
+			if openFileError != nil {
+				return openFileError
+			}
+		} else {
+			var createFileError error
+			toWriteFile, createFileError = utility.CreateFile(toWriteFilePath)
+			if createFileError != nil {
+				return createFileError
+			}
+		}
+		if toWriteFile == nil {
+			return fmt.Errorf("analyze to write file is nil")
+		}
+
+		toAnalyzeFile, inputError := os.Open(toAnalyzeFilePath)
+		defer toAnalyzeFile.Close()
+		if inputError != nil || toAnalyzeFile == nil {
+			return fmt.Errorf(ui.CommonError5, toAnalyzeFilePath, inputError.Error())
+		}
+
+		analyzeError := analyzeFunction(toAnalyzeFile, toWriteFile)
+		if analyzeError != nil {
+			ui.OutputWarnInfo(ui.CMDAnalyzeOccursError, analyzeError)
+		}
+	}
 	return nil
 }
 
@@ -323,9 +350,9 @@ func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte
 			for _, returnString := range strings.Split(returnContent, ",") {
 				returnStringList := strings.Split(strings.TrimSpace(returnString), " ")
 				if len(returnStringList) == 1 {
-					functionAnalysis.ReturnMap[fmt.Sprintf("%v", len(functionAnalysis.ReturnMap))] = returnStringList[0]
+					functionAnalysis.ReturnMap[fmt.Sprintf("%v", len(functionAnalysis.ReturnMap))] = utility.TraitStructName(returnStringList[0])
 				} else if len(returnStringList) == 2 {
-					functionAnalysis.ReturnMap[returnStringList[0]] = returnStringList[1]
+					functionAnalysis.ReturnMap[returnStringList[0]] = utility.TraitStructName(returnStringList[1])
 				}
 			}
 		}

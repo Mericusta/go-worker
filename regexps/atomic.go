@@ -34,7 +34,7 @@ var AEConvertOptionValue AtomicExpression = `csv(\s+[_\w-]+){1}`
 var AEConvertACOptionValue AtomicExpression = `(create|append)(\s+[_\.\w-]+){1}`
 
 // AEAnalyzeOptionValue 解析 analyze 指令参数的表达式
-var AEAnalyzeOptionValue AtomicExpression = `(file|directory|package)(\s+[_\.\w-]+)+`
+var AEAnalyzeOptionValue AtomicExpression = `(file|directory)(\s+[_\.\w-]+)+`
 
 // AEGoKeywordPackageValue go package 关键词的表达式
 var AEGoKeywordPackageValue AtomicExpression = `^package\s+[_\w-]+`
@@ -47,3 +47,6 @@ var AESpaceLine AtomicExpression = `(?ms)\n\s*\n`
 
 // AEIdentifier 标识符的表达式，以字母开头，字母，数字或下划线组合
 var AEIdentifier AtomicExpression = `[[:alpha:]][_\.\w]*`
+
+// AEFileNameType 文件名与类型的表达式
+var AEFileNameType AtomicExpression = `(?P<NAME>.*)\.(?P<TYPE>\w+)$`

@@ -78,6 +78,7 @@ func registAtomicExpression() {
 		global.AETemplateStyle:         AETemplateStyle,
 		global.AESpaceLine:             AESpaceLine,
 		global.AEIdentifier:            AEIdentifier,
+		global.AEFileNameType:          AEFileNameType,
 	}
 }
 
