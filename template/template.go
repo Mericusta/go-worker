@@ -20,6 +20,7 @@ func init() {
 		global.CmdCreate:  TECommandCreate,
 		global.CmdConvert: TECommandConvert,
 		global.CmdAnalyze: TECommandAnalyze,
+		global.CmdRemove:  TECommandRemove,
 	}
 	TemplateExpressionMap = map[global.TemplateEnum]TemplateExpression{
 		global.OptionParentValueTemplate:    TEOptionParentValue,
@@ -28,8 +29,5 @@ func init() {
 		global.GoKeywordImportAliasTemplate: TEGoKeywordImportAlias,
 		global.GoFunctionDefinitionTemplate: TEGoFunctionDefinition,
 		global.GoFunctionCallTemplate:       TEGoFunctionCall,
-		global.CommandBindTemplate:          TECommandBind,
-		global.CommandCreateTemplate:        TECommandCreate,
-		global.CommandConverTemplate:        TECommandConvert,
 	}
 }

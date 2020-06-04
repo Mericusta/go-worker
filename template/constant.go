@@ -32,4 +32,6 @@ var (
 	TK_ConvertACOptionExpression TemplateKeyword = "TK_ConvertACOptionExpression"
 	// TK_AnalyzeOVExpression analyze 指令的 file|directory|package 选项关键词
 	TK_AnalyzeOVExpression TemplateKeyword = "TK_AnalyzeOVExpression"
+	// TK_AERemoveOVExpression remove 指令的 file|type 选项关键词
+	TK_AERemoveOVExpression TemplateKeyword = "TK_RemoveOVExpression"
 )

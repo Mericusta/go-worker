@@ -35,6 +35,9 @@ var CommonError8 string = "%v is not a directory"
 // CommonError9 通用错误提示文本：读取文件夹的内容时发生错误
 var CommonError9 string = "Read directory %v occurs error: %v"
 
+// CommonError10 通用错误提示文本：删除文件时发生错误
+var CommonError10 string = "Remove file %v occurs error: %v"
+
 // CommonNote1 通用提示文本1：未知选项
 var CommonNote1 string = "Unknown command option"
 

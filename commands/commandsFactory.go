@@ -15,30 +15,29 @@ func (commandFactory *CommandFactory) CreateCommand(commandEnum global.CommandEn
 	}
 	switch commandEnum {
 	case global.CmdBind:
-		cmdBind := &Bind{
+		commandInterface = &Bind{
 			CommandStruct: command,
 		}
-		commandInterface = cmdBind
 	case global.CmdExit:
-		cmdExit := &Exit{
+		commandInterface = &Exit{
 			CommandStruct: command,
 		}
-		commandInterface = cmdExit
 	case global.CmdCreate:
-		cmdCreate := &Create{
+		commandInterface = &Create{
 			CommandStruct: command,
 		}
-		commandInterface = cmdCreate
 	case global.CmdConvert:
-		cmdConvert := &Convert{
+		commandInterface = &Convert{
 			CommandStruct: command,
 		}
-		commandInterface = cmdConvert
 	case global.CmdAnalyze:
-		cmdAnalyze := &Analyze{
+		commandInterface = &Analyze{
 			CommandStruct: command,
 		}
-		commandInterface = cmdAnalyze
+	case global.CmdRemove:
+		commandInterface = &Remove{
+			CommandStruct: command,
+		}
 	}
 
 	commandFactory.commandNo++

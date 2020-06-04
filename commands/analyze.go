@@ -22,7 +22,6 @@ type Analyze struct {
 }
 
 func (command *Analyze) Execute() error {
-	utility2.TestOutput("analyze execute")
 	// 解析指令的选项和参数
 	parseCommandParamsError := command.parseCommandParams()
 	if parseCommandParamsError != nil {
@@ -44,12 +43,10 @@ func (command *Analyze) Execute() error {
 		return fmt.Errorf(ui.CommonError1)
 	}
 
-	toAnalyzePath := fmt.Sprintf("%v/%v", projectPath, command.Params.sourceValue)
-	if !utility.IsExist(toAnalyzePath) {
-		return fmt.Errorf(ui.CMDAnalyzeFileOrDirectoryNotExist, toAnalyzePath)
+	toAnalyzePath := projectPath
+	if command.Params.sourceValue != "." {
+		toAnalyzePath = fmt.Sprintf("%v/%v", toAnalyzePath, command.Params.sourceValue)
 	}
-
-	utility2.TestOutput("toAnalyzePath = %v", toAnalyzePath)
 
 	toAnalyzeWriteFilePathMap := make(map[string]string, 0)
 	switch command.Params.sourceType {
@@ -350,9 +347,9 @@ func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte
 			for _, returnString := range strings.Split(returnContent, ",") {
 				returnStringList := strings.Split(strings.TrimSpace(returnString), " ")
 				if len(returnStringList) == 1 {
-					functionAnalysis.ReturnMap[fmt.Sprintf("%v", len(functionAnalysis.ReturnMap))] = utility.TraitStructName(returnStringList[0])
+					functionAnalysis.ReturnMap[fmt.Sprintf("%v", len(functionAnalysis.ReturnMap))] = returnStringList[0]
 				} else if len(returnStringList) == 2 {
-					functionAnalysis.ReturnMap[returnStringList[0]] = utility.TraitStructName(returnStringList[1])
+					functionAnalysis.ReturnMap[returnStringList[0]] = returnStringList[1]
 				}
 			}
 		}
@@ -397,7 +394,6 @@ func analyzeGoFunctionBody(goFileAnalysis *GoFileAnalysis, fileContentByte []byt
 					}
 					goFunctionAnalysis.PackageCallMap[callFromPackage][callFunction]++
 				} else {
-					utility2.TestOutput("function %v call %v not from package: %v", goFunctionAnalysis.Name, callFunction, callFromPackage)
 					callFromPackage = goFileAnalysis.PackageName
 					if _, hasMember := goFunctionAnalysis.MemberCallMap[goFunctionAnalysis.Name]; !hasMember {
 						goFunctionAnalysis.MemberCallMap[goFunctionAnalysis.Name] = make(map[string]int)
@@ -506,8 +502,6 @@ func outputAnalyzeGoFileResult(goFileAnalysis *GoFileAnalysis) string {
 
 	// clear space line
 	resultContent = utility3.TrimSpaceLine(resultContent)
-
-	// ui.OutputNoteInfo(resultContent)
 
 	return resultContent
 }

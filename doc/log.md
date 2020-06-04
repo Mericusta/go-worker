@@ -208,4 +208,6 @@ RP_FUNCTION_DEFINITION_LIST
 - Note: analyze 指令，去掉 package 选项
 - Note: analyze 目录级分析，递归分析指定目录及其所有子目录下的所有绑定类型的文件
 - TODO: analyze 项目级分析
-- TODO: go 函数分析，参数表，返回值类型萃取
+- Note: go 函数分析，参数表，返回值类型萃取
+- Note: go 函数分析，参数表，返回值，不萃取类型，完全保留包和指针
+- Note: 紧急开发指令 remove，删除指令路径下的指令类型或名称的文件，用于解决 analyze 根目录生成过多文件分析文件的问题

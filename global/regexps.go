@@ -38,4 +38,6 @@ const (
 	AEConvertACOptionValue AtomicExpressionEnum = 104
 	// AEAnalyzeOptionValue analyze 指令参数的表达式
 	AEAnalyzeOptionValue AtomicExpressionEnum = 105
+	// AERemoveOptionValue remove 指令参数得表达式
+	AERemoveOptionValue AtomicExpressionEnum = 106
 )

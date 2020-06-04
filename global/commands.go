@@ -16,4 +16,6 @@ const (
 	CmdConvert CommandEnum = 4
 	// CmdAnalyze 分析指令
 	CmdAnalyze CommandEnum = 5
+	// CmdRemove 删除指令
+	CmdRemove CommandEnum = 6
 )

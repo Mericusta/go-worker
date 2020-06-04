@@ -27,4 +27,6 @@ const (
 	CommandCreateTemplate TemplateEnum = 102
 	// CommandConverTemplate convert 指令模板
 	CommandConverTemplate TemplateEnum = 103
+	// CommandRemoveTemplate remove 指令模板
+	CommandRemoveTemplate TemplateEnum = 104
 )

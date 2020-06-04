@@ -50,3 +50,6 @@ var AEIdentifier AtomicExpression = `[[:alpha:]][_\.\w]*`
 
 // AEFileNameType 文件名与类型的表达式
 var AEFileNameType AtomicExpression = `(?P<NAME>.*)\.(?P<TYPE>\w+)$`
+
+// AERemoveOptionValue 解析 remove 指令参数的表达式
+var AERemoveOptionValue AtomicExpression = `(file|type)(\s+[_\.\w-]+)+`
