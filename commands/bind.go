@@ -43,10 +43,10 @@ func (command Bind) Execute() error {
 		return fmt.Errorf(ui.CommonError2)
 	}
 	if command.BindParams.option == "project" && !utility.IsExist(command.BindParams.optionValue) {
-		ui.OutputNoteInfo(ui.CMDBindProjectNotExist)
+		ui.OutputNoteInfoWithOutFormat(ui.CMDBindProjectNotExist)
 		return nil
 	}
-	ui.OutputNoteInfoWithFormat(optionUI, command.BindParams.optionValue)
+	ui.OutputNoteInfoWithOutFormat(optionUI, command.BindParams.optionValue)
 
 	return nil
 }

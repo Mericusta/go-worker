@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/go-worker/config"
@@ -31,26 +32,26 @@ func (command *Create) Execute() error {
 	}
 
 	if command.Params.parentValue != "" {
-		projectPath = fmt.Sprintf("%v/%v", projectPath, command.Params.parentValue)
+		projectPath = filepath.Join(projectPath, command.Params.parentValue)
 	}
 
 	createFilePath, filePackage := command.Params.optionValue, command.Params.optionValue
 	switch command.Params.option {
 	case "package":
-		packagePath := fmt.Sprintf("%v/%v", projectPath, command.Params.optionValue)
+		packagePath := filepath.Join(projectPath, command.Params.optionValue)
 		createError := utility.CreateDir(packagePath)
 		if createError != nil {
 			return fmt.Errorf(ui.CommonError3, createError)
 		}
-		createFilePath = fmt.Sprintf("%v/%v.%v", packagePath, command.Params.optionValue, fileType)
+		createFilePath = filepath.Join(packagePath, fmt.Sprintf("%v.%v", command.Params.optionValue, fileType))
 	case "file":
-		createFilePath = fmt.Sprintf("%v/%v.%v", projectPath, command.Params.optionValue, fileType)
+		createFilePath = filepath.Join(projectPath, fmt.Sprintf("%v.%v", command.Params.optionValue, fileType))
 		filePackage = command.Params.parentValue
 		if filePackage == "" {
 			filePackage = "main"
 		}
 	default:
-		ui.OutputNoteInfo(ui.CommonNote1)
+		ui.OutputNoteInfo(ui.CommonNote1, command.Params.option)
 		return nil
 	}
 

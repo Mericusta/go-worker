@@ -39,7 +39,7 @@ var CommonError9 string = "Read directory %v occurs error: %v"
 var CommonError10 string = "Remove file %v occurs error: %v"
 
 // CommonNote1 通用提示文本1：未知选项
-var CommonNote1 string = "Unknown command option"
+var CommonNote1 string = "Unknown command option: %v"
 
 // CommonWarn1 通用警告提示文本：待创建文件未指定后缀名
 var CommonWarn1 string = "File to create does not have suffix"
@@ -49,3 +49,6 @@ var CommonWarn2 string = "Command %v option %v does not regist regexp"
 
 // CommonWarn3 通用警告提示文本：原子表达式的解析式不存在
 var CommonWarn3 string = "Atomic %v does not regist regexp"
+
+// CommonWarn4 通用警告提示文本：文件不存在
+var CommonWarn4 string = "File %v does not exist"

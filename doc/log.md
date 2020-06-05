@@ -217,3 +217,6 @@ RP_FUNCTION_DEFINITION_LIST
 - Note: remove 添加 ignore 选项，添加排除文件夹
 - Note: 修复 go 函数分析，返回值类型中含有 . 字符时匹配错误
 - TODO: go 包级有向图
+- Note: remove 的 ignore 选项排除的文件夹，不排除其子文件夹
+- Note: 递归遍历改用标准库 filepath 实现，不再依赖 regexps
+- Note: 所有拼装路径的地方全都改用标准库 filepath 实现

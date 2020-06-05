@@ -18,6 +18,12 @@ var CMDAnalyzeGoFunctionContentSyntaxError string = "Analyze Go file, function c
 // CMDAnalyzeGoFunctionError 分析 go 文件，函数体语法错误
 var CMDAnalyzeGoFunctionError string = "Analyze Go file, function definition does not match body on index %v"
 
+// CMDAnalyzeGoFileAnalysisNotExist 分析 go 项目，文件的分析结果不存在
+var CMDAnalyzeGoFileAnalysisNotExist string = "Analyze Go project, file No %v does not have analysis"
+
+// CMDAnalyzeGoPackageAnalysisNotExist 分析 go 项目，包的分析结果不存在
+var CMDAnalyzeGoPackageAnalysisNotExist string = "Analyze Go project, package %v does not have analysis"
+
 // AnalyzeGoFileResultTemplate 分析 go 文件，输出结果的文本模板
 var AnalyzeGoFileResultTemplate = `
 ## File: RP_FILE_PATH

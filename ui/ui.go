@@ -10,13 +10,13 @@ import (
 	"github.com/go-worker/utility2"
 )
 
-// OutputNoteInfo 输出常规信息
-func OutputNoteInfo(content ...interface{}) {
+// OutputNoteInfoWithOutFormat 输出常规信息
+func OutputNoteInfoWithOutFormat(content ...interface{}) {
 	utility2.FormatOutput(global.LogMarkNote, "%v", content...)
 }
 
-// OutputNoteInfoWithFormat 输出带有格式的常规信息
-func OutputNoteInfoWithFormat(format string, content ...interface{}) {
+// OutputNoteInfo 输出带有格式的常规信息
+func OutputNoteInfo(format string, content ...interface{}) {
 	utility2.FormatOutput(global.LogMarkNote, format, content...)
 }
 

@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/go-worker/config"
@@ -10,7 +11,6 @@ import (
 	"github.com/go-worker/regexps"
 	"github.com/go-worker/ui"
 	"github.com/go-worker/utility"
-	"github.com/go-worker/utility3"
 )
 
 type Remove struct {
@@ -37,24 +37,29 @@ func (command *Remove) Execute() error {
 	}
 
 	if command.Params.parentValue != "" && command.Params.parentValue != "." {
-		projectPath = fmt.Sprintf("%v/%v", projectPath, command.Params.parentValue)
+		projectPath = filepath.Join(projectPath, command.Params.parentValue)
 	}
 
 	ignorePath := ""
 	if command.Params.ignoreValue != "" {
-		ignorePath = fmt.Sprintf("%v/%v", projectPath, command.Params.ignoreValue)
+		ignorePath = filepath.Join(projectPath, command.Params.ignoreValue)
 	}
 
 	toRemoveFileList := make([]string, 0)
 	switch command.Params.option {
 	case "file":
-		toRemoveFileList = append(toRemoveFileList, fmt.Sprintf("%v/%v", projectPath, command.Params.optionValue))
+		toRemoveFilePath := filepath.Join(projectPath, command.Params.optionValue)
+		if utility.IsExist(toRemoveFilePath) {
+			toRemoveFileList = append(toRemoveFileList, toRemoveFilePath)
+		} else {
+			ui.OutputWarnInfo(ui.CommonWarn4, toRemoveFilePath)
+		}
 	case "type":
-		toRemoveFileList = utility3.TraverseDirectorySpecificFile(projectPath, command.Params.optionValue)
+		toRemoveFileList = utility.TraverseDirectorySpecificFile(projectPath, command.Params.optionValue)
 	}
 
 	for _, toRemoveFile := range toRemoveFileList {
-		if ignorePath == "" || strings.Index(toRemoveFile, ignorePath) == -1 {
+		if ignorePath == "" || filepath.Dir(toRemoveFile) != ignorePath {
 			if utility.IsExist(toRemoveFile) {
 				removeError := os.Remove(toRemoveFile)
 				if removeError != nil {

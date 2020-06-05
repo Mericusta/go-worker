@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/go-worker/config"
@@ -33,9 +34,9 @@ func (command *Convert) Execute() error {
 		ui.OutputWarnInfo(ui.CommonWarn1)
 	}
 
-	filePath := fmt.Sprintf("%v/%v.%v", projectPath, command.Params.sourceValue, fileType)
+	filePath := filepath.Join(projectPath, fmt.Sprintf("%v.%v", command.Params.sourceValue, fileType))
 	if command.Params.sourceParentValue != "" {
-		filePath = fmt.Sprintf("%v/%v/%v.%v", projectPath, command.Params.sourceParentValue, command.Params.sourceValue, fileType)
+		filePath = filepath.Join(projectPath, command.Params.sourceParentValue, fmt.Sprintf("%v.%v", command.Params.sourceValue, fileType))
 	}
 
 	file, inputError := os.Open(filePath)
@@ -50,7 +51,7 @@ func (command *Convert) Execute() error {
 	case "csv":
 		fileContent, convertError = convertCsvToStruct(command.Params.sourceValue, file)
 	default:
-		ui.OutputNoteInfo(ui.CommonNote1)
+		ui.OutputNoteInfo(ui.CommonNote1, command.Params.sourceType)
 		return nil
 	}
 
@@ -67,7 +68,7 @@ func (command *Convert) Execute() error {
 		}
 	case "append":
 	default:
-		ui.OutputNoteInfo(ui.CommonNote1)
+		ui.OutputNoteInfo(ui.CommonNote1, command.Params.targetOption)
 		return nil
 	}
 
@@ -145,7 +146,7 @@ func (command *Convert) parseCommandParams() error {
 	if targetOptionValue != "" {
 		targetOptionValueList := strings.Split(targetOptionValue, " ")
 		command.Params.targetOption = targetOptionValueList[0]
-		command.Params.targetOption = targetOptionValueList[1]
+		command.Params.targetValue = targetOptionValueList[1]
 	}
 	return nil
 }

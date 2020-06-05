@@ -3,6 +3,8 @@ package utility
 import (
 	"fmt"
 	"os"
+	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -70,4 +72,20 @@ func TraitStructName(structString string) string {
 		return structNameList[1]
 	}
 	return structName
+}
+
+// TraverseDirectorySpecificFile 遍历文件夹获取所有绑定类型的文件
+func TraverseDirectorySpecificFile(directory, syntax string) []string {
+	traverseFileList := make([]string, 0)
+	syntaxExt := fmt.Sprintf(".%v", syntax)
+	filepath.Walk(directory, func(filePath string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		if path.Ext(filePath) == syntaxExt {
+			traverseFileList = append(traverseFileList, filePath)
+		}
+		return nil
+	})
+	return traverseFileList
 }
