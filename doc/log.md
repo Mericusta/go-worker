@@ -215,3 +215,5 @@ RP_FUNCTION_DEFINITION_LIST
 ## 2020.6.5
 
 - Note: remove 添加 ignore 选项，添加排除文件夹
+- Note: 修复 go 函数分析，返回值类型中含有 . 字符时匹配错误
+- TODO: go 包级有向图

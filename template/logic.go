@@ -13,7 +13,7 @@ var TEGoKeywordImportValue TemplateExpression = `(?ms)import\s+(?P<VALUE>\(.*?\)
 var TEGoKeywordImportAlias TemplateExpression = `(?P<ALIAS>\w+\s+)??TK_DoubleQuotesContent`
 
 // TEGoFunctionDefinition go function 定义的模板表达式
-var TEGoFunctionDefinition TemplateExpression = `(?ms)^func\s*(?P<MEMBER>\(.*?\))?\s*(?P<NAME>\w+)\s*(?P<PARAM>\(.*?\)){1}\s*(?P<RETURN>\(.*?\)|[\*\w]+)?\s*\{`
+var TEGoFunctionDefinition TemplateExpression = `(?ms)^func\s*(?P<MEMBER>\(.*?\))?\s*(?P<NAME>\w+)\s*(?P<PARAM>\(.*?\)){1}\s*(?P<RETURN>\(.*?\)|[\.\*\w]+)?\s*\{`
 
 // TEGoFunctionCall go function 调用的模板表达式
 var TEGoFunctionCall TemplateExpression = `(?ms)(?P<NAME>TK_IDENTIFIER)\(.*?\)`

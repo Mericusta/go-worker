@@ -50,7 +50,7 @@ func (command *Analyze) Execute() error {
 
 	toWriteFilePath := ""
 	if command.Params.outputValue != "" {
-		toWriteFilePath = fmt.Sprintf("%v/%v", toAnalyzePath, toWriteFilePath)
+		toWriteFilePath = fmt.Sprintf("%v/%v", toAnalyzePath, command.Params.outputValue)
 	}
 
 	toAnalyzeWriteFilePathMap := make(map[string]string, 0)

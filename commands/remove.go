@@ -54,7 +54,7 @@ func (command *Remove) Execute() error {
 	}
 
 	for _, toRemoveFile := range toRemoveFileList {
-		if strings.Index(toRemoveFile, ignorePath) == -1 {
+		if ignorePath == "" || strings.Index(toRemoveFile, ignorePath) == -1 {
 			if utility.IsExist(toRemoveFile) {
 				removeError := os.Remove(toRemoveFile)
 				if removeError != nil {
