@@ -36,8 +36,13 @@ func (command *Remove) Execute() error {
 		return fmt.Errorf(ui.CommonError1)
 	}
 
-	if command.Params.parentValue != "" {
+	if command.Params.parentValue != "" && command.Params.parentValue != "." {
 		projectPath = fmt.Sprintf("%v/%v", projectPath, command.Params.parentValue)
+	}
+
+	ignorePath := ""
+	if command.Params.ignoreValue != "" {
+		ignorePath = fmt.Sprintf("%v/%v", projectPath, command.Params.ignoreValue)
 	}
 
 	toRemoveFileList := make([]string, 0)
@@ -49,10 +54,12 @@ func (command *Remove) Execute() error {
 	}
 
 	for _, toRemoveFile := range toRemoveFileList {
-		if utility.IsExist(toRemoveFile) {
-			removeError := os.Remove(toRemoveFile)
-			if removeError != nil {
-				ui.OutputWarnInfo(ui.CommonError10, toRemoveFile)
+		if strings.Index(toRemoveFile, ignorePath) == -1 {
+			if utility.IsExist(toRemoveFile) {
+				removeError := os.Remove(toRemoveFile)
+				if removeError != nil {
+					ui.OutputWarnInfo(ui.CommonError10, toRemoveFile)
+				}
 			}
 		}
 	}
@@ -64,6 +71,7 @@ type removeParam struct {
 	option      string
 	optionValue string
 	parentValue string
+	ignoreValue string
 }
 
 func (command *Remove) parseCommandParams() error {
@@ -90,6 +98,16 @@ func (command *Remove) parseCommandParams() error {
 	if parentValue != "" {
 		parentValueList := strings.Split(parentValue, " ")
 		command.Params.parentValue = parentValueList[1]
+	}
+	ignoreValue := ""
+	if ignoreValueRegexp := regexps.GetRegexpByTemplateEnum(global.OptionIgnoreValueTemplate); ignoreValueRegexp != nil {
+		ignoreValue = ignoreValueRegexp.FindString(command.CommandStruct.InputString)
+	} else {
+		ui.OutputWarnInfo(ui.CommonWarn2, "remove", "ignore")
+	}
+	if ignoreValue != "" {
+		ignoreValueList := strings.Split(ignoreValue, " ")
+		command.Params.ignoreValue = ignoreValueList[1]
 	}
 	return nil
 }

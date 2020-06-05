@@ -48,6 +48,11 @@ func (command *Analyze) Execute() error {
 		toAnalyzePath = fmt.Sprintf("%v/%v", toAnalyzePath, command.Params.sourceValue)
 	}
 
+	toWriteFilePath := ""
+	if command.Params.outputValue != "" {
+		toWriteFilePath = fmt.Sprintf("%v/%v", toAnalyzePath, toWriteFilePath)
+	}
+
 	toAnalyzeWriteFilePathMap := make(map[string]string, 0)
 	switch command.Params.sourceType {
 	case "file":
@@ -55,7 +60,11 @@ func (command *Analyze) Execute() error {
 		if !utility.IsExist(toAnalyzeFilePath) {
 			return fmt.Errorf(ui.CMDAnalyzeFileOrDirectoryNotExist, toAnalyzeFilePath)
 		}
-		toAnalyzeWriteFilePathMap[toAnalyzeFilePath] = fmt.Sprintf("%v.%v", toAnalyzeFilePath, global.SyntaxMarkdown)
+		if toWriteFilePath != "" {
+			toAnalyzeWriteFilePathMap[toAnalyzeFilePath] = toWriteFilePath
+		} else {
+			toAnalyzeWriteFilePathMap[toAnalyzeFilePath] = fmt.Sprintf("%v.%v", toAnalyzeFilePath, global.SyntaxMarkdown)
+		}
 	case "directory":
 		directoryStat, getStatError := os.Stat(toAnalyzePath)
 		if getStatError != nil {
@@ -70,7 +79,11 @@ func (command *Analyze) Execute() error {
 				ui.OutputWarnInfo(ui.CMDAnalyzeFileOrDirectoryNotExist, toAnalyzeFilePath)
 				continue
 			}
-			toAnalyzeWriteFilePathMap[toAnalyzeFilePath] = fmt.Sprintf("%v.%v", toAnalyzeFilePath, global.SyntaxMarkdown)
+			if toWriteFilePath != "" {
+				toAnalyzeWriteFilePathMap[toAnalyzeFilePath] = toWriteFilePath
+			} else {
+				toAnalyzeWriteFilePathMap[toAnalyzeFilePath] = fmt.Sprintf("%v.%v", toAnalyzeFilePath, global.SyntaxMarkdown)
+			}
 		}
 	default:
 		break

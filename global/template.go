@@ -18,6 +18,8 @@ const (
 	GoFunctionDefinitionTemplate TemplateEnum = 5
 	// GoFunctionCallTemplate go function 调用的模板
 	GoFunctionCallTemplate TemplateEnum = 6
+	// OptionIgnoreValueTemplate ignore 选项模板
+	OptionIgnoreValueTemplate TemplateEnum = 7
 
 	// 外部模板
 

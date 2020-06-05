@@ -13,4 +13,4 @@ var TECommandConvert TemplateExpression = `^convert\s+TK_ConvertOVExpression(\s+
 var TECommandAnalyze TemplateExpression = `^analyze\s+TK_AnalyzeOVExpression(\s+TK_OPVExpression)?(\s+TK_OOVExpression)?$`
 
 // TECommandRemove 指令 remove 的模板表达式
-var TECommandRemove TemplateExpression = `^remove\s+TK_RemoveOVExpression(\s+TK_OPVExpression)?$`
+var TECommandRemove TemplateExpression = `^remove\s+TK_RemoveOVExpression(\s+TK_OPVExpression)?(\s+TK_OIVExpression)?$`

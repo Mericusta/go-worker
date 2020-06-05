@@ -17,3 +17,6 @@ var TEGoFunctionDefinition TemplateExpression = `(?ms)^func\s*(?P<MEMBER>\(.*?\)
 
 // TEGoFunctionCall go function 调用的模板表达式
 var TEGoFunctionCall TemplateExpression = `(?ms)(?P<NAME>TK_IDENTIFIER)\(.*?\)`
+
+// TEOptionIgnoreValue 指令选项 ignore 的模板表达式
+var TEOptionIgnoreValue TemplateExpression = `ignore(\s+TK_PATH){1}`

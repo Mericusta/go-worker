@@ -107,6 +107,7 @@ func registTemplateKeywordReplaceString() {
 		template.TK_AnalyzeOVExpression:       string(AEAnalyzeOptionValue),
 		template.TK_Identifier:                string(AEIdentifier),
 		template.TK_AERemoveOVExpression:      string(AERemoveOptionValue),
+		template.TK_OIVExpression:             string(template.TEOptionIgnoreValue),
 	}
 }
 

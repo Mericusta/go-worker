@@ -210,4 +210,8 @@ RP_FUNCTION_DEFINITION_LIST
 - TODO: analyze 项目级分析
 - Note: go 函数分析，参数表，返回值类型萃取
 - Note: go 函数分析，参数表，返回值，不萃取类型，完全保留包和指针
-- Note: 紧急开发指令 remove，删除指令路径下的指令类型或名称的文件，用于解决 analyze 根目录生成过多文件分析文件的问题
+- Note: 紧急开发指令 remove，删除指定路径下的指令类型或名称的文件，用于解决 analyze 根目录生成过多文件分析文件的问题
+
+## 2020.6.5
+
+- Note: remove 添加 ignore 选项，添加排除文件夹

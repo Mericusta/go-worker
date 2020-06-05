@@ -20,6 +20,8 @@ var (
 	TK_OPVExpression TemplateKeyword = "TK_OPVExpression"
 	// TK_OOVExpression 选项 output 的关键词
 	TK_OOVExpression TemplateKeyword = "TK_OOVExpression"
+	// TK_OIVExoression 选项 ignore 的关键词
+	TK_OIVExpression TemplateKeyword = "TK_OIVExpression"
 
 	// 指令特有关键词
 	// TK_BOVExpression bind 指令的 project|syntax 选项关键词

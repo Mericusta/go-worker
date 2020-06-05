@@ -25,6 +25,7 @@ func init() {
 	TemplateExpressionMap = map[global.TemplateEnum]TemplateExpression{
 		global.OptionParentValueTemplate:    TEOptionParentValue,
 		global.OptionOutputValueTemplate:    TEOptionOutputValue,
+		global.OptionIgnoreValueTemplate:    TEOptionIgnoreValue,
 		global.GoKeywordImportValueTemplate: TEGoKeywordImportValue,
 		global.GoKeywordImportAliasTemplate: TEGoKeywordImportAlias,
 		global.GoFunctionDefinitionTemplate: TEGoFunctionDefinition,
