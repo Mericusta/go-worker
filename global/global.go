@@ -3,6 +3,7 @@ package global
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/go-worker/fsm"
 )
@@ -17,5 +18,5 @@ func init() {
 	SyntaxFileSuffixMap = make(map[string]string)
 	SyntaxFileSuffixMap[SyntaxGo] = "go"
 	SyntaxFileSuffixMap[SyntaxCSV] = "csv"
-	GoPathSrc = fmt.Sprintf("%v\\%v", os.Getenv("GOPATH"), "src\\")
+	GoPathSrc = strings.Replace(fmt.Sprintf("%v\\%v", os.Getenv("GOPATH"), "src\\"), "\\", "/", -1)
 }

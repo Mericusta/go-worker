@@ -172,7 +172,7 @@ func analyzeGoProject(toAnalyzeWriteFilePathMap map[string]string) error {
 	packageNo := mainPackageNo
 	fileNo := 0
 	projectAnalysis := &GoProjectAnalysis{
-		FileNoAnalysisMap:    make(map[int]*GoFileAnalysis, len(toAnalyzeWriteFilePathMap)),
+		FileNoAnalysisMap:    make(map[int]*GoFileAnalysis),
 		PackageNoAnalysisMap: make(map[int]*GoPackageAnalysis),
 		MainPackageAnalysis: &GoPackageAnalysis{
 			No:                        packageNo,
@@ -181,30 +181,29 @@ func analyzeGoProject(toAnalyzeWriteFilePathMap map[string]string) error {
 		},
 	}
 	packagePathAnalysisMap := make(map[string]*GoPackageAnalysis)
-	utility2.TestOutput("len(toAnalyzeWriteFilePathMap) = %v", len(toAnalyzeWriteFilePathMap))
-	for toAnalyzeFilePath, toWriteFilePath := range toAnalyzeWriteFilePathMap {
+	for toAnalyzeFilePath, _ := range toAnalyzeWriteFilePathMap {
 		var toWriteFile *os.File
 		defer func() {
 			if toWriteFile != nil {
 				toWriteFile.Close()
 			}
 		}()
-		if utility.IsExist(toWriteFilePath) {
-			var openFileError error
-			toWriteFile, openFileError = os.OpenFile(toWriteFilePath, os.O_RDWR|os.O_APPEND, 0644)
-			if openFileError != nil {
-				return openFileError
-			}
-		} else {
-			var createFileError error
-			toWriteFile, createFileError = utility.CreateFile(toWriteFilePath)
-			if createFileError != nil {
-				return createFileError
-			}
-		}
-		if toWriteFile == nil {
-			return fmt.Errorf("analyze to write file is nil")
-		}
+		// if utility.IsExist(toWriteFilePath) {
+		// 	var openFileError error
+		// 	toWriteFile, openFileError = os.OpenFile(toWriteFilePath, os.O_RDWR|os.O_APPEND, 0644)
+		// 	if openFileError != nil {
+		// 		return openFileError
+		// 	}
+		// } else {
+		// 	var createFileError error
+		// 	toWriteFile, createFileError = utility.CreateFile(toWriteFilePath)
+		// 	if createFileError != nil {
+		// 		return createFileError
+		// 	}
+		// }
+		// if toWriteFile == nil {
+		// 	return fmt.Errorf("analyze to write file is nil")
+		// }
 
 		toAnalyzeFile, inputError := os.Open(toAnalyzeFilePath)
 		defer toAnalyzeFile.Close()
@@ -216,13 +215,8 @@ func analyzeGoProject(toAnalyzeWriteFilePathMap map[string]string) error {
 		if analyzeError != nil {
 			ui.OutputWarnInfo(ui.CMDAnalyzeOccursError, analyzeError)
 		}
-
-		continue
-
-		utility2.TestOutput("fileAnalysis = %v, %v, %v", fileAnalysis.FilePath, fileAnalysis.PackageName, fileAnalysis.PackagePath)
-
 		if _, hasPackageAnalysis := packagePathAnalysisMap[fileAnalysis.PackagePath]; !hasPackageAnalysis {
-			utility2.TestOutput("fileAnalysis.PackagePath = %v", fileAnalysis.PackagePath)
+			utility2.TestOutput("add package %v, %v", fileAnalysis.PackageName, fileAnalysis.PackagePath)
 			packagePathAnalysisMap[fileAnalysis.PackagePath] = &GoPackageAnalysis{
 				No: func() int {
 					if fileAnalysis.PackageName == "main" {
@@ -234,26 +228,23 @@ func analyzeGoProject(toAnalyzeWriteFilePathMap map[string]string) error {
 				FileNoList:                make([]int, 0),
 				ImportPackageAnalysisList: make([]int, 0),
 			}
-			utility2.TestOutput("packageNo = %v, package = %v", packagePathAnalysisMap[fileAnalysis.PackagePath].No, fileAnalysis.PackagePath)
 		}
 		packagePathAnalysisMap[fileAnalysis.PackagePath].FileNoList = append(packagePathAnalysisMap[fileAnalysis.PackagePath].FileNoList, fileNo)
-		utility2.TestOutput("fileNo = %v, file = %v", fileNo, fileAnalysis.FilePath)
 		projectAnalysis.FileNoAnalysisMap[fileNo] = fileAnalysis
 		fileNo++
 	}
 	for _, packageAnalysis := range packagePathAnalysisMap {
-		utility2.TestOutput("packageAnalysis = %v", packageAnalysis)
 		for _, fileNo := range packageAnalysis.FileNoList {
 			if fileAnalysis, hasFileAnalysis := projectAnalysis.FileNoAnalysisMap[fileNo]; hasFileAnalysis {
 				for _, importPackagePath := range fileAnalysis.ImportAliasMap {
 					if _, hasImportPackageAnalysis := packagePathAnalysisMap[importPackagePath]; hasImportPackageAnalysis {
 						packageAnalysis.ImportPackageAnalysisList = append(packageAnalysis.ImportPackageAnalysisList, packageAnalysis.No)
 					} else {
-						// ui.OutputWarnInfo(ui.CMDAnalyzeGoPackageAnalysisNotExist, importPackagePath)
+						ui.OutputWarnInfo(ui.CMDAnalyzeGoPackageAnalysisNotExist, importPackagePath)
 					}
 				}
 			} else {
-				// ui.OutputWarnInfo(ui.CMDAnalyzeGoFileAnalysisNotExist, fileNo)
+				ui.OutputWarnInfo(ui.CMDAnalyzeGoFileAnalysisNotExist, fileNo)
 			}
 		}
 	}
@@ -298,7 +289,7 @@ func analyzeGoFile(toAnalyzeFile, toWriteFile *os.File) (*GoFileAnalysis, error)
 	if getFileAbsPathError != nil {
 		return nil, getFileAbsPathError
 	}
-	goFileAnalysis.FilePath = filePath
+	goFileAnalysis.FilePath = strings.Replace(filePath, "\\", "/", -1)
 
 	// 解析包名
 	analyzeGoKeywordPackage(goFileAnalysis, toAnalyzeContent)
@@ -312,14 +303,14 @@ func analyzeGoFile(toAnalyzeFile, toWriteFile *os.File) (*GoFileAnalysis, error)
 	// 解析函数体
 	analyzeGoFunctionBody(goFileAnalysis, toAnalyzeContent)
 
-	// 输出解析结果
-	functionListContent := outputAnalyzeGoFileResult(goFileAnalysis)
+	// // 输出解析结果
+	// functionListContent := outputAnalyzeGoFileResult(goFileAnalysis)
 
-	// 输出到文件
-	_, writeError := toWriteFile.WriteString(functionListContent)
-	if writeError != nil {
-		return nil, writeError
-	}
+	// // 输出到文件
+	// _, writeError := toWriteFile.WriteString(functionListContent)
+	// if writeError != nil {
+	// 	return nil, writeError
+	// }
 
 	return goFileAnalysis, nil
 }
@@ -328,7 +319,7 @@ func analyzeGoKeywordPackage(goFileAnalysis *GoFileAnalysis, fileContentByte []b
 	if keywordPackageRegexp, hasKeywordPackageRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEGoKeywordPackageValue]; hasKeywordPackageRegexp {
 		if packageValueContentByte := keywordPackageRegexp.Find(fileContentByte); len(packageValueContentByte) != 0 {
 			goFileAnalysis.PackageName = strings.Split(string(packageValueContentByte), " ")[1]
-			goFileAnalysis.PackagePath = strings.Replace(filepath.Dir(goFileAnalysis.FilePath), global.GoPathSrc, "", -1)
+			goFileAnalysis.PackagePath = strings.Replace(strings.Replace(filepath.Dir(goFileAnalysis.FilePath), "\\", "/", -1), global.GoPathSrc, "", -1)
 		}
 	} else {
 		ui.OutputWarnInfo(ui.CMDAnalyzeGoKeywordRegexpNotExist, "package")
@@ -508,10 +499,10 @@ func outputAnalyzeGoFileResult(goFileAnalysis *GoFileAnalysis) string {
 	}
 
 	// file path
-	resultContent := strings.Replace(ui.AnalyzeGoFileResultTemplate, global.AnalyzeRPFilePath, strings.Replace(goFileAnalysis.FilePath, "\\", "/", -1), -1)
+	resultContent := strings.Replace(ui.AnalyzeGoFileResultTemplate, global.AnalyzeRPFilePath, goFileAnalysis.FilePath, -1)
 
 	// package path
-	resultContent = strings.Replace(resultContent, global.AnalyzeRPPackagePath, strings.Replace(goFileAnalysis.PackagePath, "\\", "/", -1), -1)
+	resultContent = strings.Replace(resultContent, global.AnalyzeRPPackagePath, goFileAnalysis.PackagePath, -1)
 
 	// package name
 	resultContent = strings.Replace(resultContent, global.AnalyzeRPPackageName, goFileAnalysis.PackageName, -1)

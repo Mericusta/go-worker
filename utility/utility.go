@@ -83,7 +83,7 @@ func TraverseDirectorySpecificFile(directory, syntax string) []string {
 			return nil
 		}
 		if path.Ext(filePath) == syntaxExt {
-			traverseFileList = append(traverseFileList, filePath)
+			traverseFileList = append(traverseFileList, strings.Replace(filePath, "\\", "/", -1))
 		}
 		return nil
 	})
