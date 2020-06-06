@@ -27,9 +27,16 @@ var CMDAnalyzeGoPackageAnalysisNotExist string = "Analyze Go project, package %v
 // AnalyzeGoFileResultTemplate 分析 go 文件，输出结果的文本模板
 var AnalyzeGoFileResultTemplate = `
 ## File: RP_FILE_PATH
-- Package: RP_PACKAGE_PATH/RP_PACKAGE_NAME
+RP_PACKAGE_CONTENT
 RP_IMPORT_PACKAGE_LIST
 RP_FUNCTION_DEFINITION_LIST
+`
+
+// AnalyzeGoFilePackageContentTemplate 分析 go 文件，文件定义的包的文本模板
+var AnalyzeGoFilePackageContentTemplate = `
+- Package:
+(9,1)- Name: RP_PACKAGE_NAME
+(9,1)- Path: RP_PACKAGE_PATH
 `
 
 // AnalyzeGoFileImportPackageListTemplate 分析 go 文件，依赖包列表的文本模板

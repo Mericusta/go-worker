@@ -181,13 +181,14 @@ func analyzeGoProject(toAnalyzeWriteFilePathMap map[string]string) error {
 		},
 	}
 	packagePathAnalysisMap := make(map[string]*GoPackageAnalysis)
-	for toAnalyzeFilePath, _ := range toAnalyzeWriteFilePathMap {
+	for toAnalyzeFilePath := range toAnalyzeWriteFilePathMap {
 		var toWriteFile *os.File
 		defer func() {
 			if toWriteFile != nil {
 				toWriteFile.Close()
 			}
 		}()
+		// toWriteFilePath := toAnalyzeWriteFilePathMap[toAnalyzeFilePath]
 		// if utility.IsExist(toWriteFilePath) {
 		// 	var openFileError error
 		// 	toWriteFile, openFileError = os.OpenFile(toWriteFilePath, os.O_RDWR|os.O_APPEND, 0644)
@@ -216,7 +217,6 @@ func analyzeGoProject(toAnalyzeWriteFilePathMap map[string]string) error {
 			ui.OutputWarnInfo(ui.CMDAnalyzeOccursError, analyzeError)
 		}
 		if _, hasPackageAnalysis := packagePathAnalysisMap[fileAnalysis.PackagePath]; !hasPackageAnalysis {
-			utility2.TestOutput("add package %v, %v", fileAnalysis.PackageName, fileAnalysis.PackagePath)
 			packagePathAnalysisMap[fileAnalysis.PackagePath] = &GoPackageAnalysis{
 				No: func() int {
 					if fileAnalysis.PackageName == "main" {
@@ -233,20 +233,35 @@ func analyzeGoProject(toAnalyzeWriteFilePathMap map[string]string) error {
 		projectAnalysis.FileNoAnalysisMap[fileNo] = fileAnalysis
 		fileNo++
 	}
+
 	for _, packageAnalysis := range packagePathAnalysisMap {
 		for _, fileNo := range packageAnalysis.FileNoList {
 			if fileAnalysis, hasFileAnalysis := projectAnalysis.FileNoAnalysisMap[fileNo]; hasFileAnalysis {
 				for _, importPackagePath := range fileAnalysis.ImportAliasMap {
-					if _, hasImportPackageAnalysis := packagePathAnalysisMap[importPackagePath]; hasImportPackageAnalysis {
-						packageAnalysis.ImportPackageAnalysisList = append(packageAnalysis.ImportPackageAnalysisList, packageAnalysis.No)
+					if importPackageAnalysis, hasImportPackageAnalysis := packagePathAnalysisMap[importPackagePath]; hasImportPackageAnalysis {
+						found := false
+						for _, importPackageNo := range packageAnalysis.ImportPackageAnalysisList {
+							if importPackageNo == importPackageAnalysis.No {
+								found = true
+								break
+							}
+						}
+						if found {
+							continue
+						}
+						packageAnalysis.ImportPackageAnalysisList = append(packageAnalysis.ImportPackageAnalysisList, importPackageAnalysis.No)
 					} else {
-						ui.OutputWarnInfo(ui.CMDAnalyzeGoPackageAnalysisNotExist, importPackagePath)
+						// ui.OutputWarnInfo(ui.CMDAnalyzeGoPackageAnalysisNotExist, importPackagePath)
 					}
 				}
 			} else {
-				ui.OutputWarnInfo(ui.CMDAnalyzeGoFileAnalysisNotExist, fileNo)
+				// ui.OutputWarnInfo(ui.CMDAnalyzeGoFileAnalysisNotExist, fileNo)
 			}
 		}
+	}
+
+	for packagePath, packageAnalysis := range packagePathAnalysisMap {
+		utility2.TestOutput("No: %v, Package Path: %v, Import: %v", packageAnalysis.No, packagePath, packageAnalysis.ImportPackageAnalysisList)
 	}
 
 	return nil
@@ -319,7 +334,11 @@ func analyzeGoKeywordPackage(goFileAnalysis *GoFileAnalysis, fileContentByte []b
 	if keywordPackageRegexp, hasKeywordPackageRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEGoKeywordPackageValue]; hasKeywordPackageRegexp {
 		if packageValueContentByte := keywordPackageRegexp.Find(fileContentByte); len(packageValueContentByte) != 0 {
 			goFileAnalysis.PackageName = strings.Split(string(packageValueContentByte), " ")[1]
-			goFileAnalysis.PackagePath = strings.Replace(strings.Replace(filepath.Dir(goFileAnalysis.FilePath), "\\", "/", -1), global.GoPathSrc, "", -1)
+			if goFileAnalysis.PackageName == "main" {
+				goFileAnalysis.PackagePath = strings.Replace(strings.Replace(filepath.Join(filepath.Dir(goFileAnalysis.FilePath), "main"), "\\", "/", -1), global.GoPathSrc, "", -1)
+			} else {
+				goFileAnalysis.PackagePath = strings.Replace(strings.Replace(filepath.Dir(goFileAnalysis.FilePath), "\\", "/", -1), global.GoPathSrc, "", -1)
+			}
 		}
 	} else {
 		ui.OutputWarnInfo(ui.CMDAnalyzeGoKeywordRegexpNotExist, "package")
@@ -501,11 +520,11 @@ func outputAnalyzeGoFileResult(goFileAnalysis *GoFileAnalysis) string {
 	// file path
 	resultContent := strings.Replace(ui.AnalyzeGoFileResultTemplate, global.AnalyzeRPFilePath, goFileAnalysis.FilePath, -1)
 
-	// package path
-	resultContent = strings.Replace(resultContent, global.AnalyzeRPPackagePath, goFileAnalysis.PackagePath, -1)
-
-	// package name
-	resultContent = strings.Replace(resultContent, global.AnalyzeRPPackageName, goFileAnalysis.PackageName, -1)
+	// package content
+	packageContent := ui.ParseStyleTemplate(templateStyleRegexp, ui.AnalyzeGoFilePackageContentTemplate)
+	packageContent = strings.Replace(packageContent, global.AnalyzeRPPackageName, goFileAnalysis.PackageName, -1)
+	packageContent = strings.Replace(packageContent, global.AnalyzeRPPackagePath, goFileAnalysis.PackagePath, -1)
+	resultContent = strings.Replace(resultContent, global.AnalyzeRPPackageContent, packageContent, -1)
 
 	// import 内容
 	importPackageListContent := ""

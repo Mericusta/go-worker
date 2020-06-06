@@ -220,3 +220,9 @@ RP_FUNCTION_DEFINITION_LIST
 - Note: remove 的 ignore 选项排除的文件夹，不排除其子文件夹
 - Note: 递归遍历改用标准库 filepath 实现，不再依赖 regexps
 - Note: 所有拼装路径的地方全都改用标准库 filepath 实现
+
+## 2020.6.6
+
+- Note：go 包级有向图，层级归并算法
+- Note: 修改包的输出样式
+- Note: 修复包分析结果的错误，分析结果中出现循环引用导致层级归并算法出现错误：由于解析了注释 import 的代码引起的错误

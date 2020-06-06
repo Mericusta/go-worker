@@ -7,7 +7,7 @@ var TEOptionParentValue TemplateExpression = `parent(\s+TK_PATH){1}`
 var TEOptionOutputValue TemplateExpression = `output(\s+TK_PATH){1}`
 
 // TEGoKeywordImportValue go import 关键词的模板表达式
-var TEGoKeywordImportValue TemplateExpression = `(?ms)import\s+(?P<VALUE>\(.*?\)|TK_GoKeywordImportAlias)`
+var TEGoKeywordImportValue TemplateExpression = `(?ms)^import\s+(?P<VALUE>\(.*?\)|TK_GoKeywordImportAlias)`
 
 // TEGoKeywordImportAlias go import 关键词的重命名形式的模板表达式
 var TEGoKeywordImportAlias TemplateExpression = `(?P<ALIAS>\w+\s+)??TK_DoubleQuotesContent`

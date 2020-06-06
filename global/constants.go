@@ -18,6 +18,7 @@ var (
 
 	AnalyzeRPFilePath                   = "RP_FILE_PATH"
 	AnalyzeRPPackageName                = "RP_PACKAGE_NAME"
+	AnalyzeRPPackageContent             = "RP_PACKAGE_CONTENT"
 	AnalyzeRPImportPackageList          = "RP_IMPORT_PACKAGE_LIST"
 	AnalyzeRPFunctionDefinitionList     = "RP_FUNCTION_DEFINITION_LIST"
 	AnalyzeRPImportPackage              = "RP_IMPORT_PACKAGE"
