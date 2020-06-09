@@ -89,3 +89,55 @@ func TraverseDirectorySpecificFile(directory, syntax string) []string {
 	})
 	return traverseFileList
 }
+
+// NTreeNode N 叉树节点
+type NTreeNode struct {
+	No       int
+	Children []int
+}
+
+// NTreeHierarchicalMergeAlgorithm N 叉树分层归并算法
+func NTreeHierarchicalMergeAlgorithm(nTreeNodeChildrenMap map[int][]int) map[int]map[int]int {
+	noNodeMap := make(map[int]*NTreeNode)
+	for no := range nTreeNodeChildrenMap {
+		noNodeMap[no] = &NTreeNode{
+			No:       no,
+			Children: make([]int, 0),
+		}
+	}
+	rootNode := noNodeMap[0]
+
+	levelNoMap := make(map[int]map[int]int)
+
+	level := 0
+	currentLevelNodeMap := make(map[int]int, 0)
+	currentLevelNodeMap[rootNode.No] = rootNode.No
+	for len(currentLevelNodeMap) != 0 {
+		levelNoMap[level] = currentLevelNodeMap
+		nextLevelNodeList := make(map[int]int, 0)
+		for _, currentLevelNode := range currentLevelNodeMap {
+			for _, subNode := range nTreeNodeChildrenMap[currentLevelNode] {
+				nextLevelNodeList[subNode] = subNode
+			}
+		}
+		currentLevelNodeMap = nextLevelNodeList
+		level++
+	}
+
+	for level := 0; level != len(levelNoMap); level++ {
+		for no := range levelNoMap[level] {
+			found := false
+			for checkLevel := level + 1; checkLevel < len(levelNoMap); checkLevel++ {
+				if _, hasNo := levelNoMap[checkLevel][no]; hasNo {
+					found = true
+					break
+				}
+			}
+			if found {
+				delete(levelNoMap[level], no)
+			}
+		}
+	}
+
+	return levelNoMap
+}

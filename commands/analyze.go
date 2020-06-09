@@ -262,6 +262,15 @@ func analyzeGoProject(toAnalyzeWriteFilePathMap map[string]string) error {
 
 	for packagePath, packageAnalysis := range packagePathAnalysisMap {
 		utility2.TestOutput("No: %v, Package Path: %v, Import: %v", packageAnalysis.No, packagePath, packageAnalysis.ImportPackageAnalysisList)
+		projectAnalysis.PackageNoAnalysisMap[packageAnalysis.No] = packageAnalysis
+	}
+
+	nTreeNodeChildrenMap := makeUpNTreeNodeChildrenMapByGoPackage(projectAnalysis.PackageNoAnalysisMap)
+	if len(nTreeNodeChildrenMap) != 0 {
+		mergedNTree := utility.NTreeHierarchicalMergeAlgorithm(nTreeNodeChildrenMap)
+		for level, node := range mergedNTree {
+			utility2.TestOutput("level = %v, node = %v", level, node)
+		}
 	}
 
 	return nil
@@ -655,6 +664,17 @@ func parseGoFunctionCallMapContent(templateStyleRegexp *regexp.Regexp, nameTypeM
 		}
 	}
 	return strings.Replace(ui.ParseStyleTemplate(templateStyleRegexp, ui.AnalyzeGoFileFunctionCallMapTemplate), global.AnalyzeRPFunctionCallPackageMap, callMapContent, -1)
+}
+
+func makeUpNTreeNodeChildrenMapByGoPackage(goPackageAnalysisMap map[int]*GoPackageAnalysis) map[int][]int {
+	nTreeNodeChildrenMap := make(map[int][]int)
+	for packageNo, packageAnalysis := range goPackageAnalysisMap {
+		if _, hasNo := nTreeNodeChildrenMap[packageNo]; !hasNo {
+			nTreeNodeChildrenMap[packageNo] = make([]int, 0)
+		}
+		nTreeNodeChildrenMap[packageNo] = append(nTreeNodeChildrenMap[packageNo], packageAnalysis.ImportPackageAnalysisList...)
+	}
+	return nTreeNodeChildrenMap
 }
 
 // 分析 CPP 文件

@@ -226,3 +226,345 @@ RP_FUNCTION_DEFINITION_LIST
 - Note：go 包级有向图，层级归并算法
 - Note: 修改包的输出样式
 - Note: 修复包分析结果的错误，分析结果中出现循环引用导致层级归并算法出现错误：由于解析了注释 import 的代码引起的错误
+
+## 2020.6.9
+
+- Note: go 包级有向图，层级归并算法
+    - 问题描述：已知某 N 叉树，以及该树中若干父子节点关系，所有父子节点之间可能存在直系父子或跨越若干深度之间的孙子关系，现要求用已知数据生成**合理层级关系的最简 N 叉树**，要求包含所有节点，示例
+        ```txt
+        - 0: {2, 9, 11, 3}
+        - 1: {9, 6, 7, 3, 10, 4, 8, 2}
+        - 2: {}
+        - 3: {4, 9}
+        - 4: {9}
+        - 5: {9}
+        - 6: {9, 10}
+        - 7: {5, 3, 9}
+        - 8: {9, 7, 3}
+        - 9: {2}
+        - 10: {}
+        - 11: {1, 7, 3}
+        ```
+    - 实现思路1：用现有数据生成一个完整 N 叉树结构，再通过比较剪枝的方式去除多余的节点
+        - 问题：由于该思路，需要针对非根节点的每一个节点与其他非根节点做对比，对于深度为 L 的完全 N 叉树，其时间复杂度为 (N!+(N-1)!+(N-2)!+...+2!)^2，考虑到实际中，L 的数量级为 10^2，N 的数量级为 10^3，有较大时间代价
+        - 结果示例
+            ```txt
+            level 0: 0
+            level 1: 11
+            level 2: 1
+            level 3: 6 8
+            level 4: 10 7
+            level 5: 3 5
+            level 6: 4
+            level 7: 9
+            level 8: 2
+            ```
+            [](20200609180201.png)
+        - 实现代码
+            ```go
+            type Node struct {
+                No      int
+                SubNode []*Node
+            }
+
+            type NodeNo struct {
+                No            int
+                SubNodeNoList []int
+            }
+            func main() {
+                noListMap := map[int][]int{
+                    0:  []int{2, 9, 11, 3},
+                    2:  []int{},
+                    9:  []int{2},
+                    11: []int{1, 7, 3},
+                    3:  []int{4, 9},
+                    4:  []int{9},
+                    5:  []int{9},
+                    7:  []int{5, 3, 9},
+                    8:  []int{9, 7, 3},
+                    10: []int{},
+                    12: []int{6, 10, 4, 8, 9, 7, 3},
+                    1:  []int{9, 6, 7, 3, 10, 4, 8, 2},
+                    6:  []int{9, 10},
+                }
+
+                noNodeMap := make(map[int]*NodeNo)
+                for no := range noListMap {
+                    noNodeMap[no] = &NodeNo{
+                        No:            no,
+                        SubNodeNoList: make([]int, 0),
+                    }
+                }
+                rootNode := noNodeMap[0]
+
+                levelNoMap := make(map[int]map[int]int)
+
+                level := 0
+                currentLevelNodeMap := make(map[int]int, 0)
+                currentLevelNodeMap[rootNode.No] = rootNode.No
+                for len(currentLevelNodeMap) != 0 {
+                    levelNoMap[level] = currentLevelNodeMap
+                    nextLevelNodeList := make(map[int]int, 0)
+                    for _, currentLevelNode := range currentLevelNodeMap {
+                        for _, subNode := range noListMap[currentLevelNode] {
+                            nextLevelNodeList[subNode] = subNode
+                        }
+                    }
+                    currentLevelNodeMap = nextLevelNodeList
+                    level++
+                }
+
+                for level := 0; level != len(levelNoMap); level++ {
+                    for no := range levelNoMap[level] {
+                        found := false
+                        for checkLevel := level + 1; checkLevel < len(levelNoMap); checkLevel++ {
+                            if _, hasNo := levelNoMap[checkLevel][no]; hasNo {
+                                found = true
+                                break
+                            }
+                        }
+                        if found {
+                            delete(levelNoMap[level], no)
+                        }
+                    }
+                }
+
+                for level := 0; level != len(levelNoMap); level++ {
+                    fmt.Println(strings.Repeat("\t", level), "- level", level, "node list:", levelNoMap[level])
+                }
+            }
+            ```
+    - 实现思路2：边生成 N 叉树边去除
+        - 问题：该思路实现并不能保证结果正确，并且目前的实现在最终叶子节点的结果处理上存在问题，但由于所有节点只迭代一遍并且在迭代过程中改变了节点的父子关系减少了判定依据，所以其复杂度为给出条件中的节点总和，如该条件：父子节点总共 40 个
+        - 结果示例
+            ```txt
+            level 0: 0
+            level 1: 11
+            level 2: 1
+            level 3: 6 8
+            level 4: 10 7
+            level 5: 3 5
+            level 6: 9 4 9
+            level 7: 2
+            ```
+            [](20200609180243.png)
+        - 实现代码
+            ```go
+            type Node struct {
+                No      int
+                SubNode []*Node
+            }
+
+            type NodeNo struct {
+                No            int
+                SubNodeNoList []int
+            }
+            // 由于变换过程中改变了原节点的父子关系，所以叶子节点存在无法消去的同层次相同节点
+            // - level 0 node 0 sub node [11]
+            // - level 1 node 11 sub node [1]
+            // - level 2 node 1 sub node [6 8]
+            // - level 3 node 6 sub node [10]
+            // - level 3 node 8 sub node [7]
+            // - level 4 node 10 sub node []
+            // - level 4 node 7 sub node [5 3]
+            // - level 5 node 5 sub node [9]
+            // - level 5 node 3 sub node [4 9]
+            // - level 6 node 9 sub node [2] -> 9: [2] 相同节点
+            // - level 6 node 4 sub node [] -> 4: [] 原本 4 是 4: [9]，可以消除同层次的 9: [2]，但是变换过程中改变了了该节点的父子关系
+            // - level 6 node 9 sub node [2] -> 9: [2] 相同节点
+            // - level 7 node 2 sub node [] -> 2: [] 相同节点
+            // - level 7 node 2 sub node [] -> 2: [] 相同节点
+            // 改变前：
+            // - 0: {2, 9, 11, 3}
+            // - 1: {9, 6, 7, 3, 10, 4, 8, 2}
+            // - 2: {}
+            // - 3: {4, 9}
+            // - 4: {9}
+            // - 5: {9}
+            // - 6: {9, 10}
+            // - 7: {5, 3, 9}
+            // - 8: {9, 7, 3}
+            // - 9: {2}
+            // - 10: {}
+            // - 11: {1, 7, 3}
+            // - 12: {6, 10, 4, 8, 9, 7, 3}
+            // 改变后：
+            // - 0: {11}
+            // - 1: {6, 8}
+            // - 2: {}
+            // - 3: {4, 9}
+            // - 4: {}
+            // - 5: {9}
+            // - 6: {10}
+            // - 7: {5, 3}
+            // - 8: {7}
+            // - 9: {2}
+            // - 10: {}
+            // - 11: {1}
+            // - 12: {6, 10, 4, 8, 9, 7, 3}
+            func endVersion() {
+                noListMap := map[int][]int{
+                    0:  []int{2, 9, 11, 3},
+                    2:  []int{},
+                    9:  []int{2},
+                    11: []int{1, 7, 3},
+                    3:  []int{4, 9},
+                    4:  []int{9},
+                    5:  []int{9},
+                    7:  []int{5, 3, 9},
+                    8:  []int{9, 7, 3},
+                    10: []int{},
+                    12: []int{6, 10, 4, 8, 9, 7, 3},
+                    1:  []int{9, 6, 7, 3, 10, 4, 8, 2},
+                    6:  []int{9, 10},
+                }
+
+                noNodeMap := make(map[int]*NodeNo)
+                for no := range noListMap {
+                    noNodeMap[no] = &NodeNo{
+                        No:            no,
+                        SubNodeNoList: make([]int, 0),
+                    }
+                }
+                rootNode := noNodeMap[0]
+
+                forLevel := 0
+                currentLevel := 0
+                nextLevel := currentLevel + 1
+                lastLevel := currentLevel - 1
+                levelNodeListMap := make(map[int][]int, 0)
+                levelNodeListMap[currentLevel] = []int{
+                    rootNode.No,
+                }
+                for forLevel != 9 {
+                    currentLevel = forLevel
+                    nextLevel = currentLevel + 1
+                    lastLevel = currentLevel - 1
+                    // 当前层级
+                    if _, hasCurrentLevel := levelNodeListMap[currentLevel]; !hasCurrentLevel {
+                        levelNodeListMap[currentLevel] = make([]int, 0)
+                    }
+                    lastLevelNodeList := levelNodeListMap[lastLevel]
+                    fmt.Println("last level:", lastLevel, "node list:", lastLevelNodeList)
+                    currentLevelNodeList := levelNodeListMap[currentLevel]
+                    fmt.Println("current level:", currentLevel, currentLevelNodeList)
+
+                    // 迭代终止
+                    if len(currentLevelNodeList) == 0 {
+                        break
+                    }
+
+                    // 开始计算
+                    fmt.Println("---------------- start calculate ----------------")
+                    removedCurrentLevelNodeList := make([]int, 0)
+                    for _, currentLevelNode := range currentLevelNodeList {
+                        fmt.Println("current level", currentLevel, "node", currentLevelNode, "sub node", noListMap[currentLevelNode])
+                        currentNodeRemoved := false
+                        for _, removedCurrentLevelNode := range removedCurrentLevelNodeList {
+                            if removedCurrentLevelNode == currentLevelNode {
+                                currentNodeRemoved = true
+                                removedCurrentLevelNodeSubNode := noListMap[removedCurrentLevelNode]
+                                fmt.Println("removedCurrentLevelNodeSubNode", removedCurrentLevelNodeSubNode)
+                                break
+                            }
+                        }
+                        if !currentNodeRemoved {
+                            for _, subNode := range noListMap[currentLevelNode] {
+                                fmt.Println("-- check if subNode", subNode, "need remove from parent node")
+                                // fromCurrentNode := false
+                                for checkLevel := 0; checkLevel != currentLevel; checkLevel++ {
+                                    fmt.Println("---- check level", checkLevel, "node list", levelNodeListMap[checkLevel])
+                                    afterRemoveNextLevelNode := make([]int, 0)
+                                    for _, checkNode := range levelNodeListMap[checkLevel] {
+                                        fmt.Println("------ check level", checkLevel, "node", checkNode, "sub node", noListMap[checkNode])
+                                        afterRemoveCheckNodeSubNode := make([]int, 0)
+                                        for _, checkNodeSubNode := range noListMap[checkNode] {
+                                            if checkNodeSubNode == subNode {
+                                                fmt.Println("-------- node", subNode, "need remove from leve", checkLevel, "node", checkNode, "sub node", noListMap[checkNode])
+                                                fmt.Println("-------- node", subNode, "need remove from check next leve", checkLevel+1, "node list", levelNodeListMap[checkLevel+1])
+                                                if checkLevel+1 == currentLevel {
+                                                    // 记录当前层级由于被高层级节点的子节点移除的节点，减少计算过程
+                                                    fmt.Println("-------- node", subNode, "in current level", currentLevel, "removed")
+                                                    // fromCurrentNode = true
+                                                    removedCurrentLevelNodeList = append(removedCurrentLevelNodeList, subNode)
+                                                }
+                                            } else {
+                                                afterRemoveCheckNodeSubNode = append(afterRemoveCheckNodeSubNode, checkNodeSubNode)
+                                                afterRemoveNextLevelNode = append(afterRemoveNextLevelNode, checkNodeSubNode)
+                                            }
+                                        }
+                                        noListMap[checkNode] = afterRemoveCheckNodeSubNode
+                                        fmt.Println("------ after remove subNode", subNode, "check level", checkLevel, "check node", checkNode, "sub node is", noListMap[checkNode])
+                                    }
+                                    levelNodeListMap[checkLevel+1] = afterRemoveNextLevelNode
+                                    fmt.Println("---- after remove subNode", subNode, "next check level", checkLevel+1, "node list", levelNodeListMap[checkLevel+1])
+                                }
+                                // TODO: 添加到层级节点列表中，添加毫无意义，下一层及总是要重新计算的
+                                // fmt.Println("-- add subNode", subNode, "to next level", nextLevel, "node list", levelNodeListMap[nextLevel])
+                                // levelNodeListMap[nextLevel] = append(levelNodeListMap[nextLevel], subNode)
+
+                                // 处理由于移除当前层级的节点而影响的子节点
+                                // if fromCurrentNode {
+                                // fmt.Println("-- subNode", subNode, "children", noListMap[subNode], "need remove from next level", nextLevel, "node list", levelNodeListMap[nextLevel])
+                                // for _, subNodeSubNode := range noListMap[subNode] {
+                                // 	removeIndex := -1
+                                // 	for index, no := range levelNodeListMap[nextLevel] {
+                                // 		if no == subNodeSubNode {
+                                // 			removeIndex = index
+                                // 			break
+                                // 		}
+                                // 	}
+                                // 	if removeIndex != -1 {
+                                // 		if removeIndex < len(levelNodeListMap[nextLevel]) {
+                                // 			levelNodeListMap[nextLevel] = append(levelNodeListMap[nextLevel][0:removeIndex], levelNodeListMap[nextLevel][removeIndex+1:]...)
+                                // 		}
+                                // 	}
+                                // }
+                                // fmt.Println("-- after remove subNode", subNode, "children", noListMap[subNode], "removed from next level", nextLevel, "node list", levelNodeListMap[nextLevel])
+                                // }
+                            }
+                        } else {
+                            fmt.Println("current level", currentLevel, "node", currentLevelNode, "has been removed, continue calculate")
+                        }
+                        fmt.Println("after calculate next level", nextLevel, "node list", levelNodeListMap[nextLevel])
+                        fmt.Println("---------------- node", currentLevelNode, "calculate done ----------------")
+                        wideFirstTraverseNodeNo(rootNode, noListMap)
+                    }
+                    nextLevelNodeListFromCurrentLevelNodeList := make([]int, 0)
+                    for _, currentLevelNode := range levelNodeListMap[currentLevel] {
+                        for _, currentLevelNodeSubNode := range noListMap[currentLevelNode] {
+                            nextLevelNodeListFromCurrentLevelNodeList = append(nextLevelNodeListFromCurrentLevelNodeList, currentLevelNodeSubNode)
+                        }
+                    }
+                    fmt.Println("after calculate current level", currentLevel, "next level", nextLevel, "node list", levelNodeListMap[nextLevel], "should regenerate by current level", currentLevel, "node list", levelNodeListMap[currentLevel], "sub node list", nextLevelNodeListFromCurrentLevelNodeList)
+                    levelNodeListMap[nextLevel] = nextLevelNodeListFromCurrentLevelNodeList
+                    fmt.Println("---------------- stop calculate ----------------")
+
+                    // 层级递增
+                    forLevel++
+
+                    fmt.Println("--------------------------------", forLevel, "--------------------------------")
+                }
+
+                fmt.Println("no list map")
+                for no, list := range noListMap {
+                    fmt.Println("no", no, "sub node", list)
+                }
+            }
+
+            func wideFirstTraverseNodeNo(rootNode *NodeNo, noListMap map[int][]int) {
+                level := 0
+                currentLevelNodeList := make([]int, 0)
+                currentLevelNodeList = append(currentLevelNodeList, rootNode.No)
+                for len(currentLevelNodeList) != 0 {
+                    nextLevelNodeList := make([]int, 0)
+                    for _, currentLevelNode := range currentLevelNodeList {
+                        fmt.Println(strings.Repeat("\t", level), "- level", level, "node", currentLevelNode, "sub node", noListMap[currentLevelNode])
+                        nextLevelNodeList = append(nextLevelNodeList, noListMap[currentLevelNode]...)
+                    }
+                    currentLevelNodeList = nextLevelNodeList
+                    level++
+                }
+            }
+            ```
+- Note: 
