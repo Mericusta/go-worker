@@ -14,6 +14,10 @@ func (commandFactory *CommandFactory) CreateCommand(commandEnum global.CommandEn
 		InputString: inputString,
 	}
 	switch commandEnum {
+	case global.CmdCustom:
+		commandInterface = &Custom{
+			CommandStruct: command,
+		}
 	case global.CmdBind:
 		commandInterface = &Bind{
 			CommandStruct: command,
@@ -36,6 +40,10 @@ func (commandFactory *CommandFactory) CreateCommand(commandEnum global.CommandEn
 		}
 	case global.CmdRemove:
 		commandInterface = &Remove{
+			CommandStruct: command,
+		}
+	case global.CmdSpider:
+		commandInterface = &Spider{
 			CommandStruct: command,
 		}
 	}

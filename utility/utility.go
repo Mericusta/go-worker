@@ -90,10 +90,67 @@ func TraverseDirectorySpecificFile(directory, syntax string) []string {
 	return traverseFileList
 }
 
+// TraverseDirectorySpecificFileWithFunction 遍历文件夹获取所有绑定类型的文件
+func TraverseDirectorySpecificFileWithFunction(directory, syntax string, operate func(string, os.FileInfo)) {
+	syntaxExt := fmt.Sprintf(".%v", syntax)
+	filepath.Walk(directory, func(filePath string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		if path.Ext(filePath) == syntaxExt {
+			operate(filePath, info)
+			// traverseFileList = append(traverseFileList, strings.Replace(filePath, "\\", "/", -1))
+		}
+		return nil
+	})
+}
+
 // NTreeNode N 叉树节点
 type NTreeNode struct {
 	No       int
 	Children []int
+}
+
+// NTreeHierarchicalMergeAlgorithmImproved N 叉树分层归并算法改进版
+func NTreeHierarchicalMergeAlgorithmImproved(nTreeNodeChildrenMap map[int][]int) map[int]map[int]int {
+	noNodeMap := make(map[int]*NTreeNode)
+	for no := range nTreeNodeChildrenMap {
+		noNodeMap[no] = &NTreeNode{
+			No:       no,
+			Children: make([]int, 0),
+		}
+	}
+	rootNode := noNodeMap[0]
+
+	noMostLevelMap := make(map[int]int)
+	levelNoMap := make(map[int]map[int]int)
+
+	level := 0
+	currentLevelNodeMap := make(map[int]int, 0)
+	currentLevelNodeMap[rootNode.No] = rootNode.No
+	for len(currentLevelNodeMap) != 0 {
+		levelNoMap[level] = currentLevelNodeMap
+		nextLevelNodeList := make(map[int]int, 0)
+		for _, currentLevelNode := range currentLevelNodeMap {
+			noMostLevelMap[currentLevelNode] = level
+			for _, subNode := range nTreeNodeChildrenMap[currentLevelNode] {
+				nextLevelNodeList[subNode] = subNode
+			}
+		}
+		currentLevelNodeMap = nextLevelNodeList
+		level++
+	}
+
+	for level := 0; level != len(levelNoMap); level++ {
+		for no := range levelNoMap[level] {
+			noMostLevel := noMostLevelMap[no]
+			if noMostLevel > level {
+				delete(levelNoMap[level], no)
+			}
+		}
+	}
+
+	return levelNoMap
 }
 
 // NTreeHierarchicalMergeAlgorithm N 叉树分层归并算法
