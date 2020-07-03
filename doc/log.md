@@ -207,7 +207,7 @@ RP_FUNCTION_DEFINITION_LIST
 - Note: go 文件的 package 需要知晓其全路径，以便于项目整体的分析
 - Note: analyze 指令，去掉 package 选项
 - Note: analyze 目录级分析，递归分析指定目录及其所有子目录下的所有绑定类型的文件
-- TODO: analyze 项目级分析
+- Deperated: analyze 项目级分析
 - Note: go 函数分析，参数表，返回值类型萃取
 - Note: go 函数分析，参数表，返回值，不萃取类型，完全保留包和指针
 - Note: 紧急开发指令 remove，删除指定路径下的指令类型或名称的文件，用于解决 analyze 根目录生成过多文件分析文件的问题
@@ -216,7 +216,7 @@ RP_FUNCTION_DEFINITION_LIST
 
 - Note: remove 添加 ignore 选项，添加排除文件夹
 - Note: 修复 go 函数分析，返回值类型中含有 . 字符时匹配错误
-- TODO: go 包级有向图
+- Note: go 包级有向图
 - Note: remove 的 ignore 选项排除的文件夹，不排除其子文件夹
 - Note: 递归遍历改用标准库 filepath 实现，不再依赖 regexps
 - Note: 所有拼装路径的地方全都改用标准库 filepath 实现
@@ -567,4 +567,48 @@ RP_FUNCTION_DEFINITION_LIST
                 }
             }
             ```
-- Note: 
+
+## 2020.7.3
+
+- Note: 包级有向图期望输出
+```txt
+|
+|---- Level 0
+|---- main
+|_________
+     |
+     |---- Level 1
+     |---- regexpscommands
+     |_________
+          |
+          |---- Level 2
+          |---- commands
+          |_________
+               |
+               |---- Level 3
+               |---- config
+               |---- utility3
+               |_________
+                    |
+                    |---- Level 4
+                    |---- utility
+                    |---- regexps
+                    |_________
+                         |
+                         |---- Level 5
+                         |---- template
+                         |---- ui
+                         |_________
+                              |
+                              |---- Level 6
+                              |---- utility2
+                              |_________
+                                   |
+                                   |---- Level 7
+                                   |---- global
+                                   |_________
+                                        |
+                                        |---- Level 8
+                                        |---- fsm
+                                        |_________
+```

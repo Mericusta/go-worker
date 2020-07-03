@@ -39,6 +39,8 @@ var (
 	AnalyzeRPPackage                    = "RP_PACKAGE"
 	AnalyzeRPIdentifier                 = "RP_IDENTIFIER"
 	AnalyzeRPEmptyString                = ""
+	AnalyzeRPPackageLevel               = "RP_PACKAGE_LEVEL"
+	AnalyzeRPPackageList                = "RP_PACKAGE_LIST"
 
 	PunctuationMarkLeftQuote        = '"'
 	PunctuationMarkRightQuote       = '"'

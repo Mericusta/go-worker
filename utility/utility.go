@@ -114,30 +114,37 @@ type NTreeNode struct {
 // NTreeHierarchicalMergeAlgorithmImproved N 叉树分层归并算法改进版
 func NTreeHierarchicalMergeAlgorithmImproved(nTreeNodeChildrenMap map[int][]int) map[int]map[int]int {
 	noNodeMap := make(map[int]*NTreeNode)
+	levelNoMap := make(map[int]map[int]int)
+	noMostLevelMap := make(map[int]int)
 	for no := range nTreeNodeChildrenMap {
 		noNodeMap[no] = &NTreeNode{
 			No:       no,
 			Children: make([]int, 0),
 		}
 	}
-	rootNode := noNodeMap[0]
 
-	noMostLevelMap := make(map[int]int)
-	levelNoMap := make(map[int]map[int]int)
+	rootNode := noNodeMap[0]
+	if rootNode == nil {
+		rootNode = noNodeMap[1]
+	}
+
+	if rootNode == nil {
+		return levelNoMap
+	}
 
 	level := 0
 	currentLevelNodeMap := make(map[int]int, 0)
 	currentLevelNodeMap[rootNode.No] = rootNode.No
 	for len(currentLevelNodeMap) != 0 {
 		levelNoMap[level] = currentLevelNodeMap
-		nextLevelNodeList := make(map[int]int, 0)
+		nextLevelNodeMap := make(map[int]int, 0)
 		for _, currentLevelNode := range currentLevelNodeMap {
 			noMostLevelMap[currentLevelNode] = level
 			for _, subNode := range nTreeNodeChildrenMap[currentLevelNode] {
-				nextLevelNodeList[subNode] = subNode
+				nextLevelNodeMap[subNode] = subNode
 			}
 		}
-		currentLevelNodeMap = nextLevelNodeList
+		currentLevelNodeMap = nextLevelNodeMap
 		level++
 	}
 
@@ -156,6 +163,7 @@ func NTreeHierarchicalMergeAlgorithmImproved(nTreeNodeChildrenMap map[int][]int)
 // NTreeHierarchicalMergeAlgorithm N 叉树分层归并算法
 func NTreeHierarchicalMergeAlgorithm(nTreeNodeChildrenMap map[int][]int) map[int]map[int]int {
 	noNodeMap := make(map[int]*NTreeNode)
+	levelNoMap := make(map[int]map[int]int)
 	for no := range nTreeNodeChildrenMap {
 		noNodeMap[no] = &NTreeNode{
 			No:       no,
@@ -163,21 +171,26 @@ func NTreeHierarchicalMergeAlgorithm(nTreeNodeChildrenMap map[int][]int) map[int
 		}
 	}
 	rootNode := noNodeMap[0]
+	if rootNode == nil {
+		rootNode = noNodeMap[1]
+	}
 
-	levelNoMap := make(map[int]map[int]int)
+	if rootNode == nil {
+		return levelNoMap
+	}
 
 	level := 0
 	currentLevelNodeMap := make(map[int]int, 0)
 	currentLevelNodeMap[rootNode.No] = rootNode.No
 	for len(currentLevelNodeMap) != 0 {
 		levelNoMap[level] = currentLevelNodeMap
-		nextLevelNodeList := make(map[int]int, 0)
+		nextLevelNodeMap := make(map[int]int, 0)
 		for _, currentLevelNode := range currentLevelNodeMap {
 			for _, subNode := range nTreeNodeChildrenMap[currentLevelNode] {
-				nextLevelNodeList[subNode] = subNode
+				nextLevelNodeMap[subNode] = subNode
 			}
 		}
-		currentLevelNodeMap = nextLevelNodeList
+		currentLevelNodeMap = nextLevelNodeMap
 		level++
 	}
 

@@ -94,3 +94,18 @@ RP_FUNCTION_CALL_PACKAGE_MAP
 var AnalyzeGoFileFunctionCallPackageMap = `
 (9,3)- RP_PACKAGE: RP_IDENTIFIER
 `
+
+// AnalyzeGoFilePackageLevelDirectedGraphTemplate 分析 go 文件，包级有向图的文本模板
+var AnalyzeGoFilePackageLevelDirectedGraphTemplate = `
+|
+RP_PACKAGE_LEVEL
+|
+RP_PACKAGE_LIST
+|(95,8)
+`
+
+// AnalyzeGoFilePackageLevelTemplate 分析 go 文件，包级有向图的层级文本模板
+var AnalyzeGoFilePackageLevelTemplate = `|(45,4) Level RP_LEVEL`
+
+// AnalyzeGoFilePackageListTemplate 分析 go 文件，包级有向图的包列表模板
+var AnalyzeGoFilePackageListTemplate = `|(45,4) RP_PACKAGE`

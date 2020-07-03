@@ -90,15 +90,15 @@ func (command *Analyze) Execute() error {
 		break
 	}
 
-	var analyzeFunction func(toAnalyzeWriteFilePathMap map[string]string) error
+	var analyzeFunction func(string, map[string]string) error
 	switch fileType {
 	case global.SyntaxGo:
-		analyzeFunction = analyzeGoProject
+		analyzeFunction = analyzeGo
 	case global.SyntaxCpp:
 		analyzeFunction = nil
 	}
 
-	analyzeError := analyzeFunction(toAnalyzeWriteFilePathMap)
+	analyzeError := analyzeFunction(toAnalyzePath, toAnalyzeWriteFilePathMap)
 	if analyzeError != nil {
 		return analyzeError
 	}
@@ -153,8 +153,8 @@ func (command *Analyze) parseCommandParams() error {
 
 // 分析 GO 项目
 
-// GoProjectAnalysis go 项目分析结果
-type GoProjectAnalysis struct {
+// GoAnalysis go 项目分析结果
+type GoAnalysis struct {
 	FileNoAnalysisMap    map[int]*GoFileAnalysis
 	PackageNoAnalysisMap map[int]*GoPackageAnalysis
 	MainPackageAnalysis  *GoPackageAnalysis
@@ -162,23 +162,18 @@ type GoProjectAnalysis struct {
 
 // GoPackageAnalysis go 包分析结果
 type GoPackageAnalysis struct {
-	No                        int
-	FileNoList                []int
-	ImportPackageAnalysisList []int
+	No                          int
+	FileNoList                  []int
+	ImportPackageAnalysisNoList []int
 }
 
-func analyzeGoProject(toAnalyzeWriteFilePathMap map[string]string) error {
+func analyzeGo(toAnalyzePath string, toAnalyzeWriteFilePathMap map[string]string) error {
 	const mainPackageNo = 0
 	packageNo := mainPackageNo
 	fileNo := 0
-	projectAnalysis := &GoProjectAnalysis{
+	goAnalysis := &GoAnalysis{
 		FileNoAnalysisMap:    make(map[int]*GoFileAnalysis),
 		PackageNoAnalysisMap: make(map[int]*GoPackageAnalysis),
-		MainPackageAnalysis: &GoPackageAnalysis{
-			No:                        packageNo,
-			FileNoList:                make([]int, 0),
-			ImportPackageAnalysisList: make([]int, 0),
-		},
 	}
 	packagePathAnalysisMap := make(map[string]*GoPackageAnalysis)
 	for toAnalyzeFilePath := range toAnalyzeWriteFilePathMap {
@@ -188,23 +183,23 @@ func analyzeGoProject(toAnalyzeWriteFilePathMap map[string]string) error {
 				toWriteFile.Close()
 			}
 		}()
-		// toWriteFilePath := toAnalyzeWriteFilePathMap[toAnalyzeFilePath]
-		// if utility.IsExist(toWriteFilePath) {
-		// 	var openFileError error
-		// 	toWriteFile, openFileError = os.OpenFile(toWriteFilePath, os.O_RDWR|os.O_APPEND, 0644)
-		// 	if openFileError != nil {
-		// 		return openFileError
-		// 	}
-		// } else {
-		// 	var createFileError error
-		// 	toWriteFile, createFileError = utility.CreateFile(toWriteFilePath)
-		// 	if createFileError != nil {
-		// 		return createFileError
-		// 	}
-		// }
-		// if toWriteFile == nil {
-		// 	return fmt.Errorf("analyze to write file is nil")
-		// }
+		toWriteFilePath := toAnalyzeWriteFilePathMap[toAnalyzeFilePath]
+		if utility.IsExist(toWriteFilePath) {
+			var openFileError error
+			toWriteFile, openFileError = os.OpenFile(toWriteFilePath, os.O_RDWR|os.O_TRUNC, 0644)
+			if openFileError != nil {
+				return openFileError
+			}
+		} else {
+			var createFileError error
+			toWriteFile, createFileError = utility.CreateFile(toWriteFilePath)
+			if createFileError != nil {
+				return createFileError
+			}
+		}
+		if toWriteFile == nil {
+			return fmt.Errorf("analyze to write file is nil")
+		}
 
 		toAnalyzeFile, inputError := os.Open(toAnalyzeFilePath)
 		defer toAnalyzeFile.Close()
@@ -216,8 +211,10 @@ func analyzeGoProject(toAnalyzeWriteFilePathMap map[string]string) error {
 		if analyzeError != nil {
 			ui.OutputWarnInfo(ui.CMDAnalyzeOccursError, analyzeError)
 		}
+		fileAnalysis.No = fileNo
+
 		if _, hasPackageAnalysis := packagePathAnalysisMap[fileAnalysis.PackagePath]; !hasPackageAnalysis {
-			packagePathAnalysisMap[fileAnalysis.PackagePath] = &GoPackageAnalysis{
+			goPackageAnalysis := &GoPackageAnalysis{
 				No: func() int {
 					if fileAnalysis.PackageName == "main" {
 						return mainPackageNo
@@ -225,22 +222,28 @@ func analyzeGoProject(toAnalyzeWriteFilePathMap map[string]string) error {
 					packageNo++
 					return packageNo
 				}(),
-				FileNoList:                make([]int, 0),
-				ImportPackageAnalysisList: make([]int, 0),
+				FileNoList:                  make([]int, 0),
+				ImportPackageAnalysisNoList: make([]int, 0),
 			}
+			packagePathAnalysisMap[fileAnalysis.PackagePath] = goPackageAnalysis
+			goAnalysis.PackageNoAnalysisMap[goPackageAnalysis.No] = goPackageAnalysis
 		}
-		packagePathAnalysisMap[fileAnalysis.PackagePath].FileNoList = append(packagePathAnalysisMap[fileAnalysis.PackagePath].FileNoList, fileNo)
-		projectAnalysis.FileNoAnalysisMap[fileNo] = fileAnalysis
+		packagePathAnalysisMap[fileAnalysis.PackagePath].FileNoList = append(packagePathAnalysisMap[fileAnalysis.PackagePath].FileNoList, fileAnalysis.No)
+		goAnalysis.FileNoAnalysisMap[fileAnalysis.No] = fileAnalysis
 		fileNo++
+	}
+
+	if mainPackageAnalysis, hasMainPackage := goAnalysis.PackageNoAnalysisMap[mainPackageNo]; hasMainPackage {
+		goAnalysis.MainPackageAnalysis = mainPackageAnalysis
 	}
 
 	for _, packageAnalysis := range packagePathAnalysisMap {
 		for _, fileNo := range packageAnalysis.FileNoList {
-			if fileAnalysis, hasFileAnalysis := projectAnalysis.FileNoAnalysisMap[fileNo]; hasFileAnalysis {
+			if fileAnalysis, hasFileAnalysis := goAnalysis.FileNoAnalysisMap[fileNo]; hasFileAnalysis {
 				for _, importPackagePath := range fileAnalysis.ImportAliasMap {
 					if importPackageAnalysis, hasImportPackageAnalysis := packagePathAnalysisMap[importPackagePath]; hasImportPackageAnalysis {
 						found := false
-						for _, importPackageNo := range packageAnalysis.ImportPackageAnalysisList {
+						for _, importPackageNo := range packageAnalysis.ImportPackageAnalysisNoList {
 							if importPackageNo == importPackageAnalysis.No {
 								found = true
 								break
@@ -249,27 +252,57 @@ func analyzeGoProject(toAnalyzeWriteFilePathMap map[string]string) error {
 						if found {
 							continue
 						}
-						packageAnalysis.ImportPackageAnalysisList = append(packageAnalysis.ImportPackageAnalysisList, importPackageAnalysis.No)
+						packageAnalysis.ImportPackageAnalysisNoList = append(packageAnalysis.ImportPackageAnalysisNoList, importPackageAnalysis.No)
 					} else {
-						// ui.OutputWarnInfo(ui.CMDAnalyzeGoPackageAnalysisNotExist, importPackagePath)
+						ui.OutputWarnInfo(ui.CMDAnalyzeGoPackageAnalysisNotExist, importPackagePath)
 					}
 				}
 			} else {
-				// ui.OutputWarnInfo(ui.CMDAnalyzeGoFileAnalysisNotExist, fileNo)
+				ui.OutputWarnInfo(ui.CMDAnalyzeGoFileAnalysisNotExist, fileNo)
 			}
 		}
 	}
 
 	for packagePath, packageAnalysis := range packagePathAnalysisMap {
-		utility2.TestOutput("No: %v, Package Path: %v, Import: %v", packageAnalysis.No, packagePath, packageAnalysis.ImportPackageAnalysisList)
-		projectAnalysis.PackageNoAnalysisMap[packageAnalysis.No] = packageAnalysis
+		utility2.TestOutput("No: %v, Package Path: %v, Import: %v", packageAnalysis.No, packagePath, packageAnalysis.ImportPackageAnalysisNoList)
+		// goAnalysis.PackageNoAnalysisMap[packageAnalysis.No] = packageAnalysis
 	}
 
-	nTreeNodeChildrenMap := makeUpNTreeNodeChildrenMapByGoPackage(projectAnalysis.PackageNoAnalysisMap)
+	nTreeNodeChildrenMap := makeUpNTreeNodeChildrenMapByGoPackage(goAnalysis.PackageNoAnalysisMap)
+	utility2.TestOutput("nTreeNodeChildrenMap = %+v", nTreeNodeChildrenMap)
+
 	if len(nTreeNodeChildrenMap) != 0 {
-		mergedNTree := utility.NTreeHierarchicalMergeAlgorithm(nTreeNodeChildrenMap)
+		mergedNTree := utility.NTreeHierarchicalMergeAlgorithmImproved(nTreeNodeChildrenMap)
 		for level, node := range mergedNTree {
 			utility2.TestOutput("level = %v, node = %v", level, node)
+		}
+
+		// 输出包级有向图
+		abs, getAbsError := filepath.Abs(toAnalyzePath)
+		if getAbsError != nil {
+			return getAbsError
+		}
+		utility2.TestOutput("%v", filepath.Base(abs))
+		var toWriteGoAnalysisFile *os.File
+		toWriteGoAnalysisFilePath := fmt.Sprintf("%v.%v", filepath.Base(abs), global.SyntaxMarkdown)
+		if utility.IsExist(toWriteGoAnalysisFilePath) {
+			var openFileError error
+			toWriteGoAnalysisFile, openFileError = os.OpenFile(toWriteGoAnalysisFilePath, os.O_RDWR|os.O_TRUNC, 0644)
+			if openFileError != nil {
+				return openFileError
+			}
+		} else {
+			var createFileError error
+			toWriteGoAnalysisFile, createFileError = utility.CreateFile(toWriteGoAnalysisFilePath)
+			if createFileError != nil {
+				return createFileError
+			}
+		}
+
+		goPackageLevelDirectedGraph := outputGoPackageLevelDirectedGraph(mergedNTree)
+		_, writeError := toWriteGoAnalysisFile.WriteString(goPackageLevelDirectedGraph)
+		if writeError != nil {
+			return writeError
 		}
 	}
 
@@ -278,6 +311,7 @@ func analyzeGoProject(toAnalyzeWriteFilePathMap map[string]string) error {
 
 // GoFileAnalysis go 文件分析结果
 type GoFileAnalysis struct {
+	No             int
 	FilePath       string
 	PackageName    string
 	PackagePath    string
@@ -327,14 +361,14 @@ func analyzeGoFile(toAnalyzeFile, toWriteFile *os.File) (*GoFileAnalysis, error)
 	// 解析函数体
 	analyzeGoFunctionBody(goFileAnalysis, toAnalyzeContent)
 
-	// // 输出解析结果
-	// functionListContent := outputAnalyzeGoFileResult(goFileAnalysis)
+	// 输出解析结果
+	functionListContent := outputAnalyzeGoFileResult(goFileAnalysis)
 
-	// // 输出到文件
-	// _, writeError := toWriteFile.WriteString(functionListContent)
-	// if writeError != nil {
-	// 	return nil, writeError
-	// }
+	// 输出到文件
+	_, writeError := toWriteFile.WriteString(functionListContent)
+	if writeError != nil {
+		return nil, writeError
+	}
 
 	return goFileAnalysis, nil
 }
@@ -620,6 +654,10 @@ func outputAnalyzeGoFileResult(goFileAnalysis *GoFileAnalysis) string {
 	return resultContent
 }
 
+func outputGoPackageLevelDirectedGraph(mergedNTree map[int]map[int]int) string {
+	return ""
+}
+
 const (
 	functionParamList  = 0
 	functionReturnList = 1
@@ -672,7 +710,7 @@ func makeUpNTreeNodeChildrenMapByGoPackage(goPackageAnalysisMap map[int]*GoPacka
 		if _, hasNo := nTreeNodeChildrenMap[packageNo]; !hasNo {
 			nTreeNodeChildrenMap[packageNo] = make([]int, 0)
 		}
-		nTreeNodeChildrenMap[packageNo] = append(nTreeNodeChildrenMap[packageNo], packageAnalysis.ImportPackageAnalysisList...)
+		nTreeNodeChildrenMap[packageNo] = append(nTreeNodeChildrenMap[packageNo], packageAnalysis.ImportPackageAnalysisNoList...)
 	}
 	return nTreeNodeChildrenMap
 }
