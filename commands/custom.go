@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-worker/ui"
 	"github.com/go-worker/utility"
-	"github.com/go-worker/utility2"
 )
 
 type Custom struct {
@@ -39,7 +39,10 @@ func (command *Custom) Execute() error {
 	if !hasExecutor || executor == nil {
 		return fmt.Errorf(ui.CMDCustomExecutorNotExist, command.Params.optionValue)
 	}
+	executeBeginTime := time.Now()
 	executor(command.Params.paramList)
+	executeEndTime := time.Now()
+	ui.OutputNoteInfo("execute custom command %v done, using: %v ns", command.Params.optionValue, executeEndTime.Sub(executeBeginTime).Nanoseconds())
 
 	return nil
 }
@@ -75,7 +78,6 @@ func RecursivelyCountFileSizeInDirectory(paramList []string) {
 	directory := paramList[0]
 	fileType := paramList[1]
 	fileSizeListMap := make(map[int64][]string)
-	utility2.TestOutput("directory = %v", directory)
 	directoryStat, getStatError := os.Stat(directory)
 	if getStatError != nil {
 		ui.OutputErrorInfo(ui.CommonError7, directory, getStatError)
@@ -91,16 +93,18 @@ func RecursivelyCountFileSizeInDirectory(paramList []string) {
 		}
 		fileSizeListMap[info.Size()] = append(fileSizeListMap[info.Size()], filePath)
 	})
-	for fileSize, fileList := range fileSizeListMap {
-		utility2.TestOutput("fileSize = %v", fileSize)
-		utility2.TestOutput("fileList = %v", fileList)
+	for fileSize, filePathList := range fileSizeListMap {
+		ui.OutputNoteInfo("fileSize = %v", fileSize)
+		for _, filePath := range filePathList {
+			ui.OutputNoteInfo("filePath = %v", filePath)
+		}
 	}
 	return
 }
 
 // ----------------------------------------------------------------
 
-// ConcurrentScanDirectory 并发扫描目录
+// ConcurrentScanDirectory 并发扫描目录下指定文件类型的大小
 func ConcurrentScanDirectory(paramList []string) {
 	if len(paramList) < 2 {
 		ui.OutputErrorInfo(ui.CMDCustomExecutorHasNotEnoughParam, 2)
