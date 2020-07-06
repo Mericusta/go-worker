@@ -26,7 +26,7 @@ var CommonError5 string = "Open file %v error, file is nil or %v"
 // CommonError6 通用错误提示文本：解析数值错误
 var CommonError6 string = "Parse alpha to integer error: %v"
 
-// CommonError7 通用错误提示文本：文件状态获取失败
+// CommonError7 通用错误提示文本：文件或目录状态获取失败
 var CommonError7 string = "Get file or directory %v stat error: %v"
 
 // CommonError8 通用错误提示文本：%v 不是一个文件夹
@@ -37,6 +37,12 @@ var CommonError9 string = "Read directory %v occurs error: %v"
 
 // CommonError10 通用错误提示文本：删除文件时发生错误
 var CommonError10 string = "Remove file %v occurs error: %v"
+
+// CommonError11 通用错误提示文本：文件或目录的绝对路径获取失败
+var CommonError11 string = "Get file or directory %v absolute path error: %v"
+
+// CommonError12 通用错误提示文本：读取目录下的文件失败
+var CommonError12 string = "Read directory %v files error: %v"
 
 // CommonNote1 通用提示文本1：未知选项
 var CommonNote1 string = "Unknown command option: %v"

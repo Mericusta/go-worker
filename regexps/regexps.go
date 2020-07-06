@@ -139,7 +139,8 @@ func parseTemplateExpressionCommand() {
 
 func regisCommandAtomicExpression() {
 	commandAtomicExpressionMap = map[global.CommandEnum]AtomicExpression{
-		global.CmdExit: AECommandExit,
+		global.CmdExit:   AECommandExit,
+		global.CmdCustom: AECommandCustom,
 	}
 }
 
