@@ -44,8 +44,14 @@ var CommonError11 string = "Get file or directory %v absolute path error: %v"
 // CommonError12 通用错误提示文本：读取目录下的文件失败
 var CommonError12 string = "Read directory %v files error: %v"
 
+// CommonError13 通用错误提示文本：读取文件内容错误
+var CommonError13 string = "Read file %v content error: %v"
+
 // CommonNote1 通用提示文本1：未知选项
 var CommonNote1 string = "Unknown command option: %v"
+
+// CommonNote2 通用显示文本1：分隔线
+var CommonNote2 string = "----------------------------------------------------------------"
 
 // CommonWarn1 通用警告提示文本：待创建文件未指定后缀名
 var CommonWarn1 string = "File to create does not have suffix"

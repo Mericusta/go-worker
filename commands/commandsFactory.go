@@ -46,6 +46,10 @@ func (commandFactory *CommandFactory) CreateCommand(commandEnum global.CommandEn
 		commandInterface = &Spider{
 			CommandStruct: command,
 		}
+	case global.CmdCSVChecker:
+		commandInterface = &CSVChecker{
+			CommandStruct: command,
+		}
 	}
 
 	commandFactory.commandNo++

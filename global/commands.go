@@ -22,4 +22,6 @@ const (
 	CmdRemove CommandEnum = 6
 	// CmdSpider 爬虫指令
 	CmdSpider CommandEnum = 7
+	// CmdCSVChecker 配置表检查指令
+	CmdCSVChecker CommandEnum = 8
 )

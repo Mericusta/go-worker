@@ -59,10 +59,11 @@ const (
 
 // 配置常量
 var (
-	SyntaxGo       = "go"
-	SyntaxCSV      = "csv"
-	SyntaxCpp      = "cpp"
-	SyntaxMarkdown = "md"
+	SyntaxGo          = "go"
+	SyntaxCSV         = "csv"
+	SyntaxCpp         = "cpp"
+	SyntaxMarkdown    = "md"
+	ResourceDirectory = "resources"
 )
 
 // 外部常量

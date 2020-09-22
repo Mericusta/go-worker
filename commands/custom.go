@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/go-worker/ui"
 	"github.com/go-worker/utility"
+	"github.com/go-worker/utility2"
 )
 
 type Custom struct {
@@ -24,6 +26,7 @@ func init() {
 	CustomExecutor = map[int]func([]string){
 		1: RecursivelyCountFileSizeInDirectory,
 		2: ConcurrentScanDirectory,
+		3: MorrisTraverseBinaryTree,
 	}
 }
 
@@ -69,6 +72,8 @@ func (command *Custom) parseCommandParams() error {
 
 // ----------------------------------------------------------------
 
+// Command Example: custom execute 1 . md
+
 // RecursivelyCountFileSizeInDirectory 递归统计目录下指定文件类型的大小
 func RecursivelyCountFileSizeInDirectory(paramList []string) {
 	if len(paramList) < 2 {
@@ -103,6 +108,8 @@ func RecursivelyCountFileSizeInDirectory(paramList []string) {
 }
 
 // ----------------------------------------------------------------
+
+// Command Example: custom execute 2 . md .git
 
 // ConcurrentScanDirectory 并发扫描目录下指定文件类型的大小
 func ConcurrentScanDirectory(paramList []string) {
@@ -178,3 +185,95 @@ func ConcurrentScanDirectory(paramList []string) {
 		}
 	}
 }
+
+// ----------------------------------------------------------------
+
+// Command Example: custom execute 3
+
+// BTNode 二叉树结点
+type BTNode struct {
+	Value int
+	Left  *BTNode
+	Right *BTNode
+}
+
+// MorrisTraverseBinaryTree Morris 遍历二叉树
+func MorrisTraverseBinaryTree(paramList []string) {
+	rootNode := randomGenerateBinaryTree()
+	currentNode := rootNode
+	var mostRightNode *BTNode
+	outputTemplate := "Morris Traverse Binary Tree:"
+	for currentNode != nil {
+		ui.OutputNoteInfo("%v current Node is %v", outputTemplate, currentNode.Value)
+		if currentNode.Left == nil {
+			ui.OutputNoteInfo("%v current node left child is nil, move current node to right child", outputTemplate)
+			currentNode = currentNode.Right
+		} else {
+			ui.OutputNoteInfo("%v current node left child is not nil", outputTemplate)
+			mostRightNode = currentNode.Left.Right
+			for mostRightNode != nil && mostRightNode.Right != nil {
+				utility2.TestOutput("change most right node from %+v to %+v", mostRightNode, mostRightNode.Right)
+				mostRightNode = mostRightNode.Right
+			}
+
+			ui.OutputNoteInfo("%v most right node is %v", outputTemplate, mostRightNode.Value)
+			if mostRightNode.Right == nil {
+				ui.OutputNoteInfo("%v most right node right child is nil, point to current node, move current node to left child", outputTemplate)
+				mostRightNode.Right = currentNode
+				currentNode = currentNode.Left
+			} else if mostRightNode.Right == currentNode {
+				ui.OutputNoteInfo("%v most right node right child is not nil, move current node to right child", outputTemplate)
+				mostRightNode.Right = nil
+				currentNode = currentNode.Right
+			}
+		}
+	}
+}
+
+// randomGenerateBinaryTree 随机生成二叉树
+func randomGenerateBinaryTree() *BTNode {
+	rand.Seed(time.Now().UnixNano())
+	// nodeCount := rand.Intn(31) + 1
+	nodeCount := 7
+	nodeList := make([]*BTNode, 0)
+	for index := 0; index != nodeCount; index++ {
+		nodeList = append(nodeList, &BTNode{
+			Value: index + 1,
+		})
+	}
+	rootNode := nodeList[0]
+	nodeList = nodeList[1:]
+	toAppendChildrenNodeList := []*BTNode{rootNode}
+	for len(toAppendChildrenNodeList) != 0 {
+		toAppendChildrenNode := toAppendChildrenNodeList[0]
+		toAppendChildrenNodeList = toAppendChildrenNodeList[1:]
+		if len(nodeList) > 0 {
+			toAppendChildrenNode.Left = nodeList[0]
+			toAppendChildrenNodeList = append(toAppendChildrenNodeList, nodeList[0])
+			nodeList = nodeList[1:]
+		} else {
+			break
+		}
+		if len(nodeList) > 0 {
+			toAppendChildrenNode.Right = nodeList[0]
+			toAppendChildrenNodeList = append(toAppendChildrenNodeList, nodeList[0])
+			nodeList = nodeList[1:]
+		} else {
+			break
+		}
+	}
+	return rootNode
+}
+
+// ----------------------------------------------------------------
+
+// Command Example: custom execute 4
+
+// test objects:
+// charge_config.shop_data
+// shop_config.shop_id
+// shoplist.shop_id
+
+// example rules:
+// table.field -> table.field [table.field]
+// table.field ->
