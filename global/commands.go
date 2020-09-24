@@ -24,4 +24,6 @@ const (
 	CmdSpider CommandEnum = 7
 	// CmdCSVChecker 配置表检查指令
 	CmdCSVChecker CommandEnum = 8
+	// Cmd3DTable 3D 表格指令
+	Cmd3DTable CommandEnum = 9
 )

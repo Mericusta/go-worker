@@ -142,6 +142,7 @@ func regisCommandAtomicExpression() {
 		global.CmdExit:       AECommandExit,
 		global.CmdCustom:     AECommandCustom,
 		global.CmdCSVChecker: AECommandCSVChecker,
+		global.Cmd3DTable:    AECommand3DTable,
 	}
 }
 

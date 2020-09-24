@@ -50,6 +50,10 @@ func (commandFactory *CommandFactory) CreateCommand(commandEnum global.CommandEn
 		commandInterface = &CSVChecker{
 			CommandStruct: command,
 		}
+	case global.Cmd3DTable:
+		commandInterface = &Table3D{
+			CommandStruct: command,
+		}
 	}
 
 	commandFactory.commandNo++

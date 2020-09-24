@@ -27,6 +27,7 @@ func init() {
 		1: RecursivelyCountFileSizeInDirectory,
 		2: ConcurrentScanDirectory,
 		3: MorrisTraverseBinaryTree,
+		4: RandomGenerateOnmyojiEquipments,
 	}
 }
 
@@ -267,13 +268,109 @@ func randomGenerateBinaryTree() *BTNode {
 
 // ----------------------------------------------------------------
 
-// Command Example: custom execute 4
+// Command Example: custom execute 4 100 1
 
-// test objects:
-// charge_config.shop_data
-// shop_config.shop_id
-// shoplist.shop_id
+type ce4AttributeType int
 
-// example rules:
-// table.field -> table.field [table.field]
-// table.field ->
+const (
+	// ATKR ATK Rencentage
+	ATKR ce4AttributeType = iota + 1
+	// ATKV ATK Value
+	ATKV
+	// DEFR DEF Rencentage
+	DEFR
+	// DEFV DEF Value
+	DEFV
+	// LIFER LIFE Rencentage
+	LIFER
+	// LIFEV LIFE Value
+	LIFEV
+	// CR Critical Rate
+	CR
+	// CD Critical Demage
+	CD
+	// SV Speed Value
+	SV
+	// ER Effect Resistance
+	ER
+	// EH Effect Hit
+	EH
+)
+
+type ce4Attribute struct {
+	Type  ce4AttributeType
+	Value int
+}
+
+type ce4Equipment struct {
+	MainAttribute *ce4Attribute
+	Attribute1    *ce4Attribute
+	Attribute2    *ce4Attribute
+	Attribute3    *ce4Attribute
+	Attribute4    *ce4Attribute
+}
+
+// position type isMain min max
+// 1 ATKV 1 486 486
+// 2 ATKR
+
+// main
+// - ATKV 486 486
+// - DEFV 104 104
+// - LIFEV 2052 2052
+// - xxxR 55 55
+
+// sub
+// - xxxR = initR + eachR * level
+// - xxxV = initV + eachV * level
+
+// - xxxInitR const
+// - xxxEachR const
+// - level random
+
+// equipment level const
+// - attribute0 level + ... + attributeN level = equipment level
+
+// R
+// type  init each
+// ATKR  3,3  3
+// ATKV
+// DEFR  3,3  3
+// DEFV
+// LIFER
+// LIFEV
+// CR
+// CD
+// SV
+// ER
+// EH
+
+func RandomGenerateOnmyojiEquipments(paramList []string) {
+	if len(paramList) < 1 {
+		ui.OutputErrorInfo(ui.CMDCustomExecutorHasNotEnoughParam, 4)
+		return
+	}
+	var generateNumber int
+	var atoiGenerateNumberError error
+	var generatePosition int
+	var atoiGeneratePositionError error
+	generateNumber, atoiGenerateNumberError = strconv.Atoi(paramList[0])
+	if len(paramList) > 1 {
+		generatePosition, atoiGeneratePositionError = strconv.Atoi(paramList[1])
+	}
+	if atoiGenerateNumberError != nil || atoiGeneratePositionError != nil {
+		ui.OutputErrorInfo(ui.CMDCustomExecutorParseParamError, 4)
+		return
+	}
+
+	rand.Seed(time.Now().Unix())
+
+	for index := 0; index != generateNumber; index++ {
+		position := generatePosition
+		if generatePosition == 0 {
+			position = rand.Intn(6) + 1
+		}
+		initAttributeNum := rand.Intn(3) + 2
+
+	}
+}
