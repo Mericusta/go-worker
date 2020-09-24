@@ -273,29 +273,53 @@ func randomGenerateBinaryTree() *BTNode {
 type ce4AttributeType int
 
 const (
+	// MaxLevel max times of update attribute
+	MaxLevel int = 5
+	// MaxSubAttributeNum max num of sub attribute
+	MaxSubAttributeNum int = 4
+	// AttributeR Attronite Rate
+	AttributeR ce4AttributeType = 10
 	// ATKR ATK Rencentage
-	ATKR ce4AttributeType = iota + 1
-	// ATKV ATK Value
-	ATKV
+	ATKR ce4AttributeType = 1
 	// DEFR DEF Rencentage
-	DEFR
-	// DEFV DEF Value
-	DEFV
+	DEFR ce4AttributeType = 2
 	// LIFER LIFE Rencentage
-	LIFER
-	// LIFEV LIFE Value
-	LIFEV
-	// CR Critical Rate
-	CR
-	// CD Critical Demage
-	CD
+	LIFER ce4AttributeType = 3
 	// SV Speed Value
-	SV
-	// ER Effect Resistance
-	ER
+	SV ce4AttributeType = 4
+	// ATKV ATK Value
+	ATKV ce4AttributeType = 11
+	// DEFV DEF Value
+	DEFV ce4AttributeType = 12
+	// LIFEV LIFE Value
+	LIFEV ce4AttributeType = 13
+	// CR Critical Rate
+	CR ce4AttributeType = 21
+	// CD Critical Demage
+	CD ce4AttributeType = 22
+	// AttributeEffect Attribute Effect
+	AttributeEffect ce4AttributeType = 50
 	// EH Effect Hit
-	EH
+	EH ce4AttributeType = 41
+	// ER Effect Resistance
+	ER ce4AttributeType = 42
 )
+
+var attributeTypeMap map[int]ce4AttributeType
+
+func initAttributeType() {
+	attributeTypeList := []ce4AttributeType{
+		ATKR, DEFR, LIFER, SV,
+		ATKV, DEFV, LIFEV,
+		CR, CD,
+		EH, ER,
+	}
+
+	attributeTypeMap = map[int]ce4AttributeType{}
+	for index, attributeType := range attributeTypeList {
+		attributeTypeMap[index] = attributeType
+	}
+}
 
 type ce4Attribute struct {
 	Type  ce4AttributeType
@@ -331,20 +355,101 @@ type ce4Equipment struct {
 // equipment level const
 // - attribute0 level + ... + attributeN level = equipment level
 
-// R
-// type  init each
-// ATKR  3,3  3
-// ATKV
-// DEFR  3,3  3
-// DEFV
-// LIFER
-// LIFEV
-// CR
-// CD
-// SV
-// ER
-// EH
+// type            init   each
+// AttributeR
+// ATKR            2,3    2,3
+// DEFR            2,3    2,3
+// LIFER           2,3    2,3
+// SV              2,3    2,3
+// --------------------------------
+// ATKV            22,27  22,24
+// DEFV            4,5    4,5
+// LIFEV           91,114 95,105
+// CR              2,3    3
+// CD              3,4    4
+// --------------------------------
+// AttributeEffect
+// EH              3,4    3,4
+// ER              3,4    3,4
 
+var attributeConfigMap map[ce4AttributeType]map[string]map[string]int
+
+func initAttributeConfigMap() {
+	attributeConfigMap = map[ce4AttributeType]map[string]map[string]int{
+		AttributeR: map[string]map[string]int{
+			"init": map[string]int{
+				"min": 2,
+				"max": 3,
+			},
+			"each": map[string]int{
+				"min": 2,
+				"max": 3,
+			},
+		},
+		AttributeEffect: map[string]map[string]int{
+			"init": map[string]int{
+				"min": 3,
+				"max": 4,
+			},
+			"each": map[string]int{
+				"min": 3,
+				"max": 4,
+			},
+		},
+		ATKV: map[string]map[string]int{
+			"init": map[string]int{
+				"min": 22,
+				"max": 27,
+			},
+			"each": map[string]int{
+				"min": 22,
+				"max": 24,
+			},
+		},
+		DEFV: map[string]map[string]int{
+			"init": map[string]int{
+				"min": 4,
+				"max": 5,
+			},
+			"each": map[string]int{
+				"min": 4,
+				"max": 5,
+			},
+		},
+		LIFEV: map[string]map[string]int{
+			"init": map[string]int{
+				"min": 91,
+				"max": 114,
+			},
+			"each": map[string]int{
+				"min": 95,
+				"max": 105,
+			},
+		},
+		CR: map[string]map[string]int{
+			"init": map[string]int{
+				"min": 2,
+				"max": 3,
+			},
+			"each": map[string]int{
+				"min": 3,
+				"max": 3,
+			},
+		},
+		CD: map[string]map[string]int{
+			"init": map[string]int{
+				"min": 3,
+				"max": 4,
+			},
+			"each": map[string]int{
+				"min": 4,
+				"max": 4,
+			},
+		},
+	}
+}
+
+// RandomGenerateOnmyojiEquipments 模拟 Onmyoji 御魂生成机制随机生成御魂
 func RandomGenerateOnmyojiEquipments(paramList []string) {
 	if len(paramList) < 1 {
 		ui.OutputErrorInfo(ui.CMDCustomExecutorHasNotEnoughParam, 4)
@@ -365,12 +470,43 @@ func RandomGenerateOnmyojiEquipments(paramList []string) {
 
 	rand.Seed(time.Now().Unix())
 
+	var logConstant1 string = "No.%v equipment"
+
 	for index := 0; index != generateNumber; index++ {
+		ui.OutputNoteInfo(fmt.Sprintf("generate %v", logConstant1), index)
 		position := generatePosition
 		if generatePosition == 0 {
 			position = rand.Intn(6) + 1
 		}
-		initAttributeNum := rand.Intn(3) + 2
+		ui.OutputNoteInfo(fmt.Sprintf("%v position: %v", logConstant1, position), index)
 
+		initAttributeNum := rand.Intn(3) + 2
+		ui.OutputNoteInfo(fmt.Sprintf("%v init attribute num: %v", logConstant1, initAttributeNum), index)
+
+		leftUpdateTimes := MaxLevel - (4 - initAttributeNum)
+		ui.OutputNoteInfo(fmt.Sprintf("%v left update times: %v", logConstant1, leftUpdateTimes), index)
+
+		ui.OutputNoteInfo(ui.CommonNote2)
 	}
+}
+
+func randomGenerateSubAttributes() map[ce4AttributeType]*ce4Attribute {
+	ce4AttributeMap := make(map[ce4AttributeType]*ce4Attribute)
+
+	for index := 0; index != MaxSubAttributeNum; index++ {
+		for {
+			randomValue := rand.Intn(len(attributeTypeMap))
+			if attributeType, hasAttributeType := attributeTypeMap[randomValue]; hasAttributeType {
+				if _, hasAttribute := ce4AttributeMap[attributeType]; hasAttribute {
+					continue
+				}
+
+			} else {
+				ui.OutputWarnInfo(ui.CMDCustomExecutorOutOfRangeError, 4)
+				continue
+			}
+		}
+	}
+
+	return ce4AttributeMap
 }
