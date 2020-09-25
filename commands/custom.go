@@ -272,42 +272,51 @@ func randomGenerateBinaryTree() *BTNode {
 
 type ce4AttributeType int
 
+// 0  0  0  0  0     0    0    0  0     0    0
+// ER EH CD CR LIFEV DEFV ATKV SV LIFER DEFR ATKR
+// AttributeR      = 00000001111
+// AttributeEffect = 11000000000
+// Attribute & AttributeR      != 0 -> Attribute has Attribute R
+// Attribute & AttributeEffect != 0 -> Attribute has Attribute Effect
+
 const (
+	// ATKR ATK Rencentage
+	ATKR ce4AttributeType = 1 << iota
+	// DEFR DEF Rencentage
+	DEFR
+	// LIFER LIFE Rencentage
+	LIFER
+	// SV Speed Value
+	SV
+	// ATKV ATK Value
+	ATKV
+	// DEFV DEF Value
+	DEFV
+	// LIFEV LIFE Value
+	LIFEV
+	// CR Critical Rate
+	CR
+	// CD Critical Demage
+	CD
+	// EH Effect Hit
+	EH
+	// ER Effect Resistance
+	ER
+
+	// AttributeR Attronite Rate
+	AttributeR ce4AttributeType = ATKR | DEFR | LIFER | SV
+	// AttributeEffect Attribute Effect
+	AttributeEffect ce4AttributeType = EH | ER
+
 	// MaxLevel max times of update attribute
 	MaxLevel int = 5
 	// MaxSubAttributeNum max num of sub attribute
 	MaxSubAttributeNum int = 4
-	// AttributeR Attronite Rate
-	AttributeR ce4AttributeType = 10
-	// ATKR ATK Rencentage
-	ATKR ce4AttributeType = 1
-	// DEFR DEF Rencentage
-	DEFR ce4AttributeType = 2
-	// LIFER LIFE Rencentage
-	LIFER ce4AttributeType = 3
-	// SV Speed Value
-	SV ce4AttributeType = 4
-	// ATKV ATK Value
-	ATKV ce4AttributeType = 11
-	// DEFV DEF Value
-	DEFV ce4AttributeType = 12
-	// LIFEV LIFE Value
-	LIFEV ce4AttributeType = 13
-	// CR Critical Rate
-	CR ce4AttributeType = 21
-	// CD Critical Demage
-	CD ce4AttributeType = 22
-	// AttributeEffect Attribute Effect
-	AttributeEffect ce4AttributeType = 50
-	// EH Effect Hit
-	EH ce4AttributeType = 41
-	// ER Effect Resistance
-	ER ce4AttributeType = 42
 )
 
 var attributeTypeMap map[int]ce4AttributeType
 
-func initAttributeType() {
+func initAttributeTypeMap() {
 	attributeTypeList := []ce4AttributeType{
 		ATKR, DEFR, LIFER, SV,
 		ATKV, DEFV, LIFEV,
@@ -376,77 +385,116 @@ var attributeConfigMap map[ce4AttributeType]map[string]map[string]int
 
 func initAttributeConfigMap() {
 	attributeConfigMap = map[ce4AttributeType]map[string]map[string]int{
-		AttributeR: map[string]map[string]int{
-			"init": map[string]int{
+		AttributeR: {
+			"init": {
 				"min": 2,
 				"max": 3,
 			},
-			"each": map[string]int{
+			"each": {
 				"min": 2,
 				"max": 3,
 			},
 		},
-		AttributeEffect: map[string]map[string]int{
-			"init": map[string]int{
+		AttributeEffect: {
+			"init": {
 				"min": 3,
 				"max": 4,
 			},
-			"each": map[string]int{
+			"each": {
 				"min": 3,
 				"max": 4,
 			},
 		},
-		ATKV: map[string]map[string]int{
-			"init": map[string]int{
+		ATKV: {
+			"init": {
 				"min": 22,
 				"max": 27,
 			},
-			"each": map[string]int{
+			"each": {
 				"min": 22,
 				"max": 24,
 			},
 		},
-		DEFV: map[string]map[string]int{
-			"init": map[string]int{
+		DEFV: {
+			"init": {
 				"min": 4,
 				"max": 5,
 			},
-			"each": map[string]int{
+			"each": {
 				"min": 4,
 				"max": 5,
 			},
 		},
-		LIFEV: map[string]map[string]int{
-			"init": map[string]int{
+		LIFEV: {
+			"init": {
 				"min": 91,
 				"max": 114,
 			},
-			"each": map[string]int{
+			"each": {
 				"min": 95,
 				"max": 105,
 			},
 		},
-		CR: map[string]map[string]int{
-			"init": map[string]int{
+		CR: {
+			"init": {
 				"min": 2,
 				"max": 3,
 			},
-			"each": map[string]int{
+			"each": {
 				"min": 3,
 				"max": 3,
 			},
 		},
-		CD: map[string]map[string]int{
-			"init": map[string]int{
+		CD: {
+			"init": {
 				"min": 3,
 				"max": 4,
 			},
-			"each": map[string]int{
+			"each": {
 				"min": 4,
 				"max": 4,
 			},
 		},
 	}
+}
+
+func checkAttributeConfig() (bool, int, int) {
+	for _, attributeConfig := range attributeConfigMap {
+		if attributeConfig["init"]["max"] < attributeConfig["init"]["min"] {
+			return false, attributeConfig["init"]["max"], attributeConfig["init"]["min"]
+		} else if attributeConfig["each"]["max"] < attributeConfig["each"]["min"] {
+			return false, attributeConfig["each"]["max"], attributeConfig["each"]["min"]
+		}
+	}
+	return true, 0, 0
+}
+
+func getAttributeConfig(attributeType ce4AttributeType) map[string]map[string]int {
+	if attributeType&AttributeR != 0 {
+		return attributeConfigMap[AttributeR]
+	} else if attributeType&AttributeEffect != 0 {
+		return attributeConfigMap[AttributeEffect]
+	} else {
+		return attributeConfigMap[attributeType]
+	}
+}
+
+var logConstant1 string = "No.%v equipment"
+
+func logWarp(index int, preFormat, postFormat string, value ...interface{}) {
+	format := logConstant1
+	if len(preFormat) != 0 {
+		format = fmt.Sprintf("%v %v", preFormat, format)
+	}
+	if len(postFormat) != 0 {
+		format = fmt.Sprintf("%v %v", format, postFormat)
+	}
+
+	outputNoteInfoValue := make([]interface{}, 0)
+	outputNoteInfoValue = append(outputNoteInfoValue, index)
+	outputNoteInfoValue = append(outputNoteInfoValue, value...)
+
+	ui.OutputNoteInfo(format, outputNoteInfoValue...)
 }
 
 // RandomGenerateOnmyojiEquipments 模拟 Onmyoji 御魂生成机制随机生成御魂
@@ -468,45 +516,97 @@ func RandomGenerateOnmyojiEquipments(paramList []string) {
 		return
 	}
 
+	initAttributeTypeMap()
+	initAttributeConfigMap()
+	if noError, errorMaxValue, errorMinValue := checkAttributeConfig(); !noError {
+		ui.OutputErrorInfo(ui.CMDCustomExecutorConfigDataError, 4, fmt.Sprintf("config max value %v should greater than or equal to min value %v", errorMaxValue, errorMinValue))
+		return
+	}
+
 	rand.Seed(time.Now().Unix())
 
-	var logConstant1 string = "No.%v equipment"
-
 	for index := 0; index != generateNumber; index++ {
-		ui.OutputNoteInfo(fmt.Sprintf("generate %v", logConstant1), index)
+		logWarp(index, "generate", "")
 		position := generatePosition
 		if generatePosition == 0 {
 			position = rand.Intn(6) + 1
 		}
-		ui.OutputNoteInfo(fmt.Sprintf("%v position: %v", logConstant1, position), index)
+		logWarp(index, "", "position: %v", position)
 
 		initAttributeNum := rand.Intn(3) + 2
-		ui.OutputNoteInfo(fmt.Sprintf("%v init attribute num: %v", logConstant1, initAttributeNum), index)
+		logWarp(index, "", "init attribute num: %v", initAttributeNum)
 
 		leftUpdateTimes := MaxLevel - (4 - initAttributeNum)
-		ui.OutputNoteInfo(fmt.Sprintf("%v left update times: %v", logConstant1, leftUpdateTimes), index)
+		logWarp(index, "", "left update times: %v", leftUpdateTimes)
+
+		attributeMap, attributeTypeList := randomGenerateSubAttributes()
+		logWarp(index, "", "attribute list: %v", attributeTypeList)
+		for _, attribute := range attributeMap {
+			logWarp(index, "", "init attribute %v, value %v", attribute.Type, attribute.Value)
+		}
+
+		randomUpdateSubAttributes(leftUpdateTimes, attributeMap, attributeTypeList)
+		logWarp(index, "", "after update:")
+		for _, attribute := range attributeMap {
+			logWarp(index, "", "attribute %v, value %v", attribute.Type, attribute.Value)
+		}
 
 		ui.OutputNoteInfo(ui.CommonNote2)
 	}
 }
 
-func randomGenerateSubAttributes() map[ce4AttributeType]*ce4Attribute {
-	ce4AttributeMap := make(map[ce4AttributeType]*ce4Attribute)
+func randomGenerateSubAttributes() (map[ce4AttributeType]*ce4Attribute, []ce4AttributeType) {
+	ce4AttributeMap := make(map[ce4AttributeType]*ce4Attribute, 4)
+	ce4AttributeList := make([]ce4AttributeType, 0, MaxSubAttributeNum)
 
 	for index := 0; index != MaxSubAttributeNum; index++ {
+		attribute := &ce4Attribute{}
 		for {
 			randomValue := rand.Intn(len(attributeTypeMap))
 			if attributeType, hasAttributeType := attributeTypeMap[randomValue]; hasAttributeType {
 				if _, hasAttribute := ce4AttributeMap[attributeType]; hasAttribute {
 					continue
 				}
-
+				attribute.Type = attributeType
+				break
 			} else {
-				ui.OutputWarnInfo(ui.CMDCustomExecutorOutOfRangeError, 4)
+				ui.OutputWarnInfo(ui.CMDCustomExecutorOutOfRangeError, 4, fmt.Sprintf("attributeTypeMap does not have randomValue %v", randomValue))
 				continue
 			}
 		}
+		attributeConfig := getAttributeConfig(attribute.Type)
+		if attributeConfig == nil {
+			ui.OutputWarnInfo(ui.CMDCustomExecutorOutOfRangeError, 4, fmt.Sprintf("attributeConfigMap does not have attribute type %v", attribute.Type))
+			continue
+		}
+		attribute.Value = attributeConfig["init"]["min"] + rand.Intn(attributeConfig["init"]["max"]-attributeConfig["init"]["min"])
+		ce4AttributeMap[attribute.Type] = attribute
+		ce4AttributeList = append(ce4AttributeList, attribute.Type)
 	}
 
-	return ce4AttributeMap
+	return ce4AttributeMap, ce4AttributeList
 }
+
+func randomUpdateSubAttributes(leftUpdateTimes int, ce4AttributeMap map[ce4AttributeType]*ce4Attribute, attributeTypeList []ce4AttributeType) {
+	for index := 0; index != leftUpdateTimes; index++ {
+		attributeTypeToUpdate := attributeTypeList[rand.Intn(len(attributeTypeList))]
+		attributeConfig := getAttributeConfig(attributeTypeToUpdate)
+		if attributeConfig == nil {
+			ui.OutputWarnInfo(ui.CMDCustomExecutorOutOfRangeError, 4, fmt.Sprintf("attributeConfigMap does not have attribute type %v", attributeTypeToUpdate))
+			continue
+		}
+		attribute, hasAttribute := ce4AttributeMap[attributeTypeToUpdate]
+		if !hasAttribute {
+			ui.OutputErrorInfo(ui.CMDCustomExecutorOutOfRangeError, 4, fmt.Sprintf("ce4AttributeMap does not have attribute type %v", attributeTypeToUpdate))
+			continue
+		}
+		attribute.Value = attribute.Value + attributeConfig["each"]["min"] + rand.Intn(attributeConfig["each"]["max"]-attributeConfig["each"]["min"])
+
+	}
+}
+
+// x1 + x2 + x3 + x4 + x5 + x6 = t1
+// y1 + y2 + y3 + y4 + y5 + y6 = t2
+// z1 + z2 + z3 + z4 + z5 + z6 = t3
+//
+// xn % en = yn % en = zn %en

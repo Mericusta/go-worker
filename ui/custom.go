@@ -10,4 +10,7 @@ var CMDCustomExecutorHasNotEnoughParam string = "Custom executor %v does not hav
 var CMDCustomExecutorParseParamError string = "Custom executor %v parse param occurs error: %v"
 
 // CMDCustomExecutorOutOfRangeError 待执行的自定义项目出现越界错误
-var CMDCustomExecutorOutOfRangeError string = "Custom executor %v occurs out of range error"
+var CMDCustomExecutorOutOfRangeError string = "Custom executor %v occurs out of range error: %v"
+
+// CMDCustomExecutorConfigDataError 待执行的自定义项目出现配置数值错误
+var CMDCustomExecutorConfigDataError string = "Custom executor %v occurs config data error: %v"
