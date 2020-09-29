@@ -74,6 +74,12 @@ func (command *Custom) parseCommandParams() error {
 // ----------------------------------------------------------------
 
 // Command Example: custom execute 1 . md
+// Command Expression:
+// - custom : command const content
+// - execute: command const content
+// - 1      : specify executor
+// - .      : specify directory to count
+// - md     : specify file type to count
 
 // RecursivelyCountFileSizeInDirectory 递归统计目录下指定文件类型的大小
 func RecursivelyCountFileSizeInDirectory(paramList []string) {
@@ -111,6 +117,13 @@ func RecursivelyCountFileSizeInDirectory(paramList []string) {
 // ----------------------------------------------------------------
 
 // Command Example: custom execute 2 . md .git
+// Command Expression:
+// - custom : command const content
+// - execute: command const content
+// - 2      : specify executor
+// - .      : specify directory to scan
+// - md     : specify file type to scan
+// - .git   : specify directory to ignore
 
 // ConcurrentScanDirectory 并发扫描目录下指定文件类型的大小
 func ConcurrentScanDirectory(paramList []string) {
@@ -190,6 +203,10 @@ func ConcurrentScanDirectory(paramList []string) {
 // ----------------------------------------------------------------
 
 // Command Example: custom execute 3
+// Command Expression:
+// - custom : command const content
+// - execute: command const content
+// - 3      : specify executor
 
 // BTNode 二叉树结点
 type BTNode struct {
@@ -269,15 +286,73 @@ func randomGenerateBinaryTree() *BTNode {
 // ----------------------------------------------------------------
 
 // Command Example: custom execute 4 100 1
+// Command Expression:
+// - custom : command const content
+// - execute: command const content
+// - 4      : specify executor
+// - 100    : specify the number of items to generate
+// - 1      : specify item's position
 
 type ce4AttributeType int
 
+func (attributeType ce4AttributeType) String() string {
+	switch attributeType {
+	case ATKR:
+		return "ATKR"
+	case DEFR:
+		return "DEFR"
+	case LIFER:
+		return "LIFER"
+	case SV:
+		return "SV"
+	case ATKV:
+		return "ATKV"
+	case DEFV:
+		return "DEFV"
+	case LIFEV:
+		return "LIFEV"
+	case CR:
+		return "CR"
+	case CD:
+		return "CD"
+	case EH:
+		return "EH"
+	case ER:
+		return "ER"
+	case AttributeRGroup:
+		return "AttributeRGroup"
+	case AttributeEGroup:
+		return "AttributeEGroup"
+	}
+	return "unknown"
+}
+
 // 0  0  0  0  0     0    0    0  0     0    0
 // ER EH CD CR LIFEV DEFV ATKV SV LIFER DEFR ATKR
-// AttributeR      = 00000001111
-// AttributeEffect = 11000000000
-// Attribute & AttributeR      != 0 -> Attribute has Attribute R
-// Attribute & AttributeEffect != 0 -> Attribute has Attribute Effect
+// AttributeRGroup = 00000001111
+// AttributeEGroup = 11000000000
+// Attribute & AttributeRGroup != 0 -> Attribute has Attribute R
+// Attribute & AttributeEGroup != 0 -> Attribute has Attribute Effect
+
+type ce4EquipmentSuitType int
+
+func (equipmentSuitType ce4EquipmentSuitType) String() string {
+	switch equipmentSuitType {
+	case ATK4Group:
+		return "ATK4Group"
+	case DEF4Group:
+		return "DEF4Group"
+	case LIFE4Group:
+		return "LIFE4Group"
+	case CR4Group:
+		return "CR4Group"
+	case EH4Group:
+		return "EH4Group"
+	case ER4Group:
+		return "ER4Group"
+	}
+	return "unknown"
+}
 
 const (
 	// ATKR ATK Rencentage
@@ -303,15 +378,28 @@ const (
 	// ER Effect Resistance
 	ER
 
-	// AttributeR Attronite Rate
-	AttributeR ce4AttributeType = ATKR | DEFR | LIFER | SV
-	// AttributeEffect Attribute Effect
-	AttributeEffect ce4AttributeType = EH | ER
+	// AttributeRGroup Attronite Rate Group
+	AttributeRGroup ce4AttributeType = ATKR | DEFR | LIFER | SV
+	// AttributeEGroup Attribute Effect Group
+	AttributeEGroup ce4AttributeType = EH | ER
 
 	// MaxLevel max times of update attribute
 	MaxLevel int = 5
 	// MaxSubAttributeNum max num of sub attribute
 	MaxSubAttributeNum int = 4
+
+	// ATK4Group ATK 4 item suit type Group
+	ATK4Group ce4EquipmentSuitType = 10
+	// DEF4Group DEF 4 item suit type Group
+	DEF4Group ce4EquipmentSuitType = 20
+	// LIFE4Group LIFE 4 item suit type Group
+	LIFE4Group ce4EquipmentSuitType = 30
+	// CR4Group CR 4 item suit type Group
+	CR4Group ce4EquipmentSuitType = 40
+	// EH4Group EH 4 item suit type Group
+	EH4Group ce4EquipmentSuitType = 50
+	// ER4Group ER 4 item suit type Group
+	ER4Group ce4EquipmentSuitType = 60
 )
 
 var attributeTypeMap map[int]ce4AttributeType
@@ -336,11 +424,9 @@ type ce4Attribute struct {
 }
 
 type ce4Equipment struct {
-	MainAttribute *ce4Attribute
-	Attribute1    *ce4Attribute
-	Attribute2    *ce4Attribute
-	Attribute3    *ce4Attribute
-	Attribute4    *ce4Attribute
+	SuitType        ce4EquipmentSuitType
+	MainAttribute   *ce4Attribute
+	SubAttributeMap map[ce4AttributeType]*ce4Attribute
 }
 
 // position type isMain min max
@@ -365,7 +451,7 @@ type ce4Equipment struct {
 // - attribute0 level + ... + attributeN level = equipment level
 
 // type            init   each
-// AttributeR
+// AttributeRGroup
 // ATKR            2,3    2,3
 // DEFR            2,3    2,3
 // LIFER           2,3    2,3
@@ -377,15 +463,16 @@ type ce4Equipment struct {
 // CR              2,3    3
 // CD              3,4    4
 // --------------------------------
-// AttributeEffect
+// AttributeEGroup
 // EH              3,4    3,4
 // ER              3,4    3,4
 
 var attributeConfigMap map[ce4AttributeType]map[string]map[string]int
+var attributeMainValueMap map[ce4AttributeType]int
 
 func initAttributeConfigMap() {
 	attributeConfigMap = map[ce4AttributeType]map[string]map[string]int{
-		AttributeR: {
+		AttributeRGroup: {
 			"init": {
 				"min": 2,
 				"max": 3,
@@ -395,7 +482,7 @@ func initAttributeConfigMap() {
 				"max": 3,
 			},
 		},
-		AttributeEffect: {
+		AttributeEGroup: {
 			"init": {
 				"min": 3,
 				"max": 4,
@@ -456,6 +543,13 @@ func initAttributeConfigMap() {
 			},
 		},
 	}
+	attributeMainValueMap = map[ce4AttributeType]int{
+		ATKV:            486,
+		DEFV:            104,
+		LIFEV:           2052,
+		AttributeRGroup: 55,
+		AttributeEGroup: 55,
+	}
 }
 
 func checkAttributeConfig() (bool, int, int) {
@@ -470,12 +564,20 @@ func checkAttributeConfig() (bool, int, int) {
 }
 
 func getAttributeConfig(attributeType ce4AttributeType) map[string]map[string]int {
-	if attributeType&AttributeR != 0 {
-		return attributeConfigMap[AttributeR]
-	} else if attributeType&AttributeEffect != 0 {
-		return attributeConfigMap[AttributeEffect]
+	return attributeConfigMap[getAttributeGroup(attributeType)]
+}
+
+func getAttributeMainValue(attributeType ce4AttributeType) int {
+	return attributeMainValueMap[getAttributeGroup(attributeType)]
+}
+
+func getAttributeGroup(attributeType ce4AttributeType) ce4AttributeType {
+	if attributeType&AttributeRGroup != 0 {
+		return AttributeRGroup
+	} else if attributeType&AttributeEGroup != 0 {
+		return AttributeEGroup
 	} else {
-		return attributeConfigMap[attributeType]
+		return attributeType
 	}
 }
 
@@ -542,17 +644,47 @@ func RandomGenerateOnmyojiEquipments(paramList []string) {
 		attributeMap, attributeTypeList := randomGenerateSubAttributes()
 		logWarp(index, "", "attribute list: %v", attributeTypeList)
 		for _, attribute := range attributeMap {
-			logWarp(index, "", "init attribute %v, value %v", attribute.Type, attribute.Value)
+			logWarp(index, "", "init attribute %s, value %v", attribute.Type, attribute.Value)
 		}
 
 		randomUpdateSubAttributes(leftUpdateTimes, attributeMap, attributeTypeList)
 		logWarp(index, "", "after update:")
 		for _, attribute := range attributeMap {
-			logWarp(index, "", "attribute %v, value %v", attribute.Type, attribute.Value)
+			logWarp(index, "", "attribute %s, value %v", attribute.Type, attribute.Value)
 		}
+
+		ce4Equipment := makeUpEquipment(position, attributeMap)
+		logWarp(index, "", "after generate: \nsuit type: %s\nmain attribute: %s:%v\nsub attributes:\n%v", ce4Equipment.SuitType, ce4Equipment.MainAttribute.Type, ce4Equipment.MainAttribute.Value, func() string {
+			content := "%v\n%v\n%v\n%v"
+			list := make([]interface{}, 0, 4)
+			for _, attribute := range ce4Equipment.SubAttributeMap {
+				list = append(list, fmt.Sprintf("- %s:%v", attribute.Type, attribute.Value))
+			}
+			content = fmt.Sprintf(content, list...)
+			return content
+		}())
 
 		ui.OutputNoteInfo(ui.CommonNote2)
 	}
+}
+
+func makeUpEquipment(position int, attributeMap map[ce4AttributeType]*ce4Attribute) *ce4Equipment {
+	mainAttribute := &ce4Attribute{}
+	randomValue := rand.Intn(len(attributeTypeMap))
+	attributeType, hasAttributeType := attributeTypeMap[randomValue]
+	if !hasAttributeType {
+		ui.OutputWarnInfo(ui.CMDCustomExecutorOutOfRangeError, 4, fmt.Sprintf("attributeTypeMap does not have randomValue %v", randomValue))
+		return nil
+	}
+	mainAttribute.Type = attributeType
+	mainAttribute.Value = getAttributeMainValue(attributeType)
+
+	equipment := &ce4Equipment{
+		SuitType:        ce4EquipmentSuitType((rand.Intn(6) + 1) * 10),
+		MainAttribute:   mainAttribute,
+		SubAttributeMap: attributeMap,
+	}
+	return equipment
 }
 
 func randomGenerateSubAttributes() (map[ce4AttributeType]*ce4Attribute, []ce4AttributeType) {
@@ -600,8 +732,11 @@ func randomUpdateSubAttributes(leftUpdateTimes int, ce4AttributeMap map[ce4Attri
 			ui.OutputErrorInfo(ui.CMDCustomExecutorOutOfRangeError, 4, fmt.Sprintf("ce4AttributeMap does not have attribute type %v", attributeTypeToUpdate))
 			continue
 		}
-		attribute.Value = attribute.Value + attributeConfig["each"]["min"] + rand.Intn(attributeConfig["each"]["max"]-attributeConfig["each"]["min"])
-
+		if attributeConfig["each"]["max"] != attributeConfig["each"]["min"] {
+			attribute.Value = attribute.Value + attributeConfig["each"]["min"] + rand.Intn(attributeConfig["each"]["max"]-attributeConfig["each"]["min"])
+		} else {
+			attribute.Value = attribute.Value + attributeConfig["each"]["min"]
+		}
 	}
 }
 
@@ -610,3 +745,18 @@ func randomUpdateSubAttributes(leftUpdateTimes int, ce4AttributeMap map[ce4Attri
 // z1 + z2 + z3 + z4 + z5 + z6 = t3
 //
 // xn % en = yn % en = zn %en
+
+// t = 90
+
+// cr()
+
+// ----------------------------------------------------------------
+
+// Command Example: custom execute 5 CR 60 1000
+// Command Expression:
+// - custom : command const content
+// - execute: command const content
+// - 5      : specify executor
+// - CR     : specify equipment attribute to make up
+// - 60     : specify equipment attribute value to make up
+// - 1000   : specify the number of candidate equipments
