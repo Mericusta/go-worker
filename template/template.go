@@ -16,11 +16,12 @@ var TemplateExpressionMap map[global.TemplateEnum]TemplateExpression
 
 func init() {
 	CommandTemplateExpressionMap = map[global.CommandEnum]TemplateExpression{
-		global.CmdBind:    TECommandBind,
-		global.CmdCreate:  TECommandCreate,
-		global.CmdConvert: TECommandConvert,
-		global.CmdAnalyze: TECommandAnalyze,
-		global.CmdRemove:  TECommandRemove,
+		global.CmdBind:      TECommandBind,
+		global.CmdCreate:    TECommandCreate,
+		global.CmdConvert:   TECommandConvert,
+		global.CmdAnalyze:   TECommandAnalyze,
+		global.CmdRemove:    TECommandRemove,
+		global.CmdTemplater: TECommandTemplater,
 	}
 	TemplateExpressionMap = map[global.TemplateEnum]TemplateExpression{
 		global.OptionParentValueTemplate:    TEOptionParentValue,

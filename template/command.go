@@ -14,3 +14,6 @@ var TECommandAnalyze TemplateExpression = `^analyze\s+TK_AnalyzeOVExpression(\s+
 
 // TECommandRemove 指令 remove 的模板表达式
 var TECommandRemove TemplateExpression = `^remove\s+TK_RemoveOVExpression(\s+TK_OPVExpression)?(\s+TK_OIVExpression)?$`
+
+// TECommandTemplater 指令 templater 的模板表达式
+var TECommandTemplater TemplateExpression = `^templater\s+TK_PATH(\s+TK_OPVExpression)?(\s+TK_OOVExpression)?$`

@@ -27,6 +27,8 @@ const (
 	AEIdentifier AtomicExpressionEnum = 9
 	// AEFileNameType 文件名与类型的表达式
 	AEFileNameType AtomicExpressionEnum = 10
+	// AEGoCommentLine Go 语言注释行的表达式
+	AEGoCommentLine AtomicExpressionEnum = 11
 
 	// AEBindOptionValue bind 指令参数的表达式
 	AEBindOptionValue AtomicExpressionEnum = 101

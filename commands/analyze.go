@@ -342,6 +342,8 @@ func analyzeGoFile(toAnalyzeFile, toWriteFile *os.File) (*GoFileAnalysis, error)
 		return nil, readToAnalyzeContentError
 	}
 
+	toAnalyzeContent = removeGoFileCommentLine(toAnalyzeContent)
+
 	// 文件路径
 	filePath, getFileAbsPathError := filepath.Abs(toAnalyzeFile.Name())
 	if getFileAbsPathError != nil {
@@ -371,6 +373,22 @@ func analyzeGoFile(toAnalyzeFile, toWriteFile *os.File) (*GoFileAnalysis, error)
 	}
 
 	return goFileAnalysis, nil
+}
+
+func removeGoFileCommentLine(fileContentByte []byte) []byte {
+	if goCommentLineRegexp, hasGoCommentLineRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEGoCommentLine]; hasGoCommentLineRegexp {
+		for _, l := range goCommentLineRegexp.FindAll(fileContentByte, -1) {
+			// utility2.TestOutput("i = %v", i)
+			fmt.Printf("l = %v\n", string(l))
+			utility2.TestOutput("|%v|", string(l))
+			// utility2.TestOutput("l = |%v|", string(l))
+			// utility2.TestOutput("comment line: |%v|", string(commentLine[0], ))
+		}
+
+		result := goCommentLineRegexp.ReplaceAll(fileContentByte, []byte(""))
+		return result
+	}
+	return fileContentByte
 }
 
 func analyzeGoKeywordPackage(goFileAnalysis *GoFileAnalysis, fileContentByte []byte) {
@@ -528,6 +546,9 @@ func analyzeGoFunctionBody(goFileAnalysis *GoFileAnalysis, fileContentByte []byt
 				continue
 			}
 			functionBodyContent := fileContentByte[functionDefinitionIndex[1] : functionDefinitionIndex[1]+1+definitionLength]
+
+			utility2.TestOutput("functionBodyContent = |%v|", string(functionBodyContent))
+
 			for _, subMatchList := range goFunctionCallRegexp.FindAllSubmatch(functionBodyContent, -1) {
 				packageFunctionList := strings.Split(string(subMatchList[1]), ".")
 				callFromPackage := goFileAnalysis.PackageName
@@ -536,6 +557,10 @@ func analyzeGoFunctionBody(goFileAnalysis *GoFileAnalysis, fileContentByte []byt
 					callFromPackage = packageFunctionList[0]
 					callFunction = packageFunctionList[1]
 				}
+
+				utility2.TestOutput("call from package: %v", callFromPackage)
+				utility2.TestOutput("call function: %v", callFunction)
+
 				if _, hasPackage := goFileAnalysis.ImportAliasMap[callFromPackage]; hasPackage {
 					if _, hasPackage := goFunctionAnalysis.PackageCallMap[callFromPackage]; !hasPackage {
 						goFunctionAnalysis.PackageCallMap[callFromPackage] = make(map[string]int)

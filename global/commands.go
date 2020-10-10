@@ -26,4 +26,6 @@ const (
 	CmdCSVChecker CommandEnum = 8
 	// Cmd3DTable 3D 表格指令
 	Cmd3DTable CommandEnum = 9
+	// CmdTemplater 模板工具指令
+	CmdTemplater CommandEnum = 10
 )

@@ -54,6 +54,10 @@ func (commandFactory *CommandFactory) CreateCommand(commandEnum global.CommandEn
 		commandInterface = &Table3D{
 			CommandStruct: command,
 		}
+	case global.CmdTemplater:
+		commandInterface = &Templater{
+			CommandStruct: command,
+		}
 	}
 
 	commandFactory.commandNo++

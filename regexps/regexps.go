@@ -79,6 +79,7 @@ func registAtomicExpression() {
 		global.AEIdentifier:            AEIdentifier,
 		global.AEFileNameType:          AEFileNameType,
 		global.AERemoveOptionValue:     AERemoveOptionValue,
+		global.AEGoCommentLine:         AEGoCommentLine,
 	}
 }
 

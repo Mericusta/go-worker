@@ -53,3 +53,6 @@ var AEFileNameType AtomicExpression = `(?P<NAME>.*)\.(?P<TYPE>\w+)$`
 
 // AERemoveOptionValue 解析 remove 指令参数的表达式
 var AERemoveOptionValue AtomicExpression = `(file|type)(\s+[_\.\w-]+)+`
+
+// AEGoCommentLine Go 语言注释行的表达式
+var AEGoCommentLine AtomicExpression = `//.*`

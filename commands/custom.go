@@ -28,6 +28,7 @@ func init() {
 		2: ConcurrentScanDirectory,
 		3: MorrisTraverseBinaryTree,
 		4: RandomGenerateOnmyojiEquipments,
+		5: GoCommandToolTemplater,
 	}
 }
 
@@ -744,7 +745,7 @@ func randomUpdateSubAttributes(leftUpdateTimes int, ce4AttributeMap map[ce4Attri
 // y1 + y2 + y3 + y4 + y5 + y6 = t2
 // z1 + z2 + z3 + z4 + z5 + z6 = t3
 //
-// xn % en = yn % en = zn %en
+// xn % en = yn % en = zn % en
 
 // t = 90
 
@@ -752,11 +753,48 @@ func randomUpdateSubAttributes(leftUpdateTimes int, ce4AttributeMap map[ce4Attri
 
 // ----------------------------------------------------------------
 
-// Command Example: custom execute 5 CR 60 1000
+// Command Example: custom execute 5 resources/templater_example.go
 // Command Expression:
-// - custom : command const content
-// - execute: command const content
-// - 5      : specify executor
-// - CR     : specify equipment attribute to make up
-// - 60     : specify equipment attribute value to make up
-// - 1000   : specify the number of candidate equipments
+// - custom                        : command const content
+// - execute                       : command const content
+// - 5                             : specify executor
+// - resources/templater_example.go: specify a file to analyze
+
+// GoCommandToolTemplater go 语言命令行工具：模板代码生成器
+func GoCommandToolTemplater(paramList []string) {
+	if len(paramList) < 1 {
+		ui.OutputErrorInfo(ui.CMDCustomExecutorHasNotEnoughParam, 5)
+		return
+	}
+	filename := paramList[0]
+
+	contentByte, readFileError := ioutil.ReadFile(filename)
+	if readFileError != nil {
+		ui.OutputErrorInfo(ui.CommonError5, filename, readFileError)
+		return
+	}
+
+	removeGoFileCommentLine(contentByte)
+	// contentByteWithoutComment := removeGoFileCommentLine(contentByte)
+	// utility2.TestOutput("after clear all comment line:\n|%v|", string(removeGoFileCommentLine(contentByte)))
+
+	// goFileAnalysis := &GoFileAnalysis{FunctionMap: make(map[string]*GoFunctionAnalysis), functionList: make([]string, 0)}
+	// analyzeGoFunctionDefinition(goFileAnalysis, contentByte)
+
+	// analyzeGoFunctionBody(goFileAnalysis, contentByte)
+
+	// for functionName, functionAnalysis := range goFileAnalysis.FunctionMap {
+	// 	utility2.TestOutput("function name: %v", functionName)
+	// 	utility2.TestOutput("function class: %v", functionAnalysis.Class)
+	// 	utility2.TestOutput("function params map: %v", functionAnalysis.ParamsMap)
+	// 	utility2.TestOutput("function return map: %v", functionAnalysis.ReturnMap)
+
+	// 	// for functionName, callMap := range functionAnalysis.MemberCallMap {
+	// 	// 	utility2.TestOutput("function name: %v", functionName)
+	// 	// 	for callFunctionName, callFunctionTimes := range callMap {
+	// 	// 		utility2.TestOutput("call function: %v, times: %v", callFunctionName, callFunctionTimes)
+	// 	// 	}
+	// 	// }
+	// }
+
+}

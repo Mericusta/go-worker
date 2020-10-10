@@ -9,7 +9,12 @@ import (
 
 // FormatOutput 格式化输出
 func FormatOutput(logMark, format string, content ...interface{}) {
+	// fmt.Println("format =", format)
+	// fmt.Println("len(content) =", len(content))
+	fmt.Printf("TEST: format = %v\n", format)
+	fmt.Printf("TEST: content = %v\n", content...)
 	formatContent := fmt.Sprintf(format, content...)
+	fmt.Printf("formatContent = %v\n", formatContent)
 	fmt.Printf("%v: %v\n", logMark, formatContent)
 }
 
