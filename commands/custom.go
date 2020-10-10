@@ -28,7 +28,8 @@ func init() {
 		2: ConcurrentScanDirectory,
 		3: MorrisTraverseBinaryTree,
 		4: RandomGenerateOnmyojiEquipments,
-		5: GoCommandToolTemplater,
+		5: ProofOfArrayOrdered,
+		6: GoCommandToolTemplater,
 	}
 }
 
@@ -753,6 +754,7 @@ func randomUpdateSubAttributes(leftUpdateTimes int, ce4AttributeMap map[ce4Attri
 
 // ----------------------------------------------------------------
 
+<<<<<<< HEAD
 // Command Example: custom execute 5 resources/templater_example.go
 // Command Expression:
 // - custom                        : command const content
@@ -797,4 +799,115 @@ func GoCommandToolTemplater(paramList []string) {
 	// 	// }
 	// }
 
+=======
+// Command Example: custom execute 5 UP 1,2,3,...
+// Command Expression:
+// - custom : command const content
+// - execute: command const content
+// - 5      : specify executor
+// - UP     : specify prove type: UP, DOWN, EQUAL
+// - 1,2,3  : input list to prove
+
+const (
+	// MonotonicityUP 单调递增
+	MonotonicityUP = iota << 0
+	// MonotonicityDOWN 单调递减
+	MonotonicityDOWN
+	// MonotonicityEQUAL 相等
+	MonotonicityEQUAL
+	// GREATER 大于等于
+	GREATER = MonotonicityUP | MonotonicityEQUAL
+	// LOWER 小于等于
+	LOWER = MonotonicityDOWN | MonotonicityEQUAL
+)
+
+// ProofOfArrayOrdered 数组单调性证明
+func ProofOfArrayOrdered(paramList []string) {
+	if len(paramList) < 2 {
+		ui.OutputErrorInfo(ui.CMDCustomExecutorHasNotEnoughParam, 1)
+		return
+	}
+	proveTypeString := paramList[0]
+	toProveStringSlice := strings.Split(paramList[1], ",")
+
+	proveType := MonotonicityEQUAL
+	if proveTypeString == "UP" {
+		proveType = MonotonicityUP
+	} else if proveTypeString == "DOWN" {
+		proveType = MonotonicityDOWN
+	} else if proveTypeString == "GREATER" {
+		proveType = GREATER
+	} else if proveTypeString == "LOWER" {
+		proveType = LOWER
+	}
+
+	toProveSlice := make([]int, 0, len(toProveStringSlice))
+	for _, alpha := range toProveStringSlice {
+		integer, atioError := strconv.Atoi(alpha)
+		if atioError != nil {
+			ui.OutputErrorInfo(ui.CMDCustomExecutorParseParamError, atioError)
+			return
+		}
+		toProveSlice = append(toProveSlice, integer)
+	}
+
+	outputNoteFormat := "array %v Monotonicity %v"
+
+	last := toProveSlice[0]
+	if proveType == MonotonicityUP {
+		for _, value := range toProveSlice[1:] {
+			if (value - last) > 0 {
+				last = value
+				continue
+			} else {
+				ui.OutputNoteInfo(outputNoteFormat, "is not", proveTypeString)
+				return
+			}
+		}
+	} else if proveType == MonotonicityDOWN {
+		for _, value := range toProveSlice[1:] {
+			if (value - last) < 0 {
+				last = value
+				continue
+			} else {
+				ui.OutputNoteInfo(outputNoteFormat, "is not", proveTypeString)
+				return
+			}
+		}
+	} else if proveType == GREATER {
+		for _, value := range toProveSlice[1:] {
+			if (value - last) >= 0 {
+				last = value
+				continue
+			} else {
+				ui.OutputNoteInfo(outputNoteFormat, "is not", proveTypeString)
+				return
+			}
+		}
+	} else if proveType == LOWER {
+		for _, value := range toProveSlice[1:] {
+			if (value - last) <= 0 {
+				last = value
+				continue
+			} else {
+				ui.OutputNoteInfo(outputNoteFormat, "is not", proveTypeString)
+				return
+			}
+		}
+	} else {
+		for _, value := range toProveSlice[1:] {
+			if (value - last) == 0 {
+				last = value
+				continue
+			} else {
+				ui.OutputNoteInfo(outputNoteFormat, "is not", proveTypeString)
+				return
+			}
+		}
+	}
+
+	ui.OutputNoteInfo(outputNoteFormat, "is", proveTypeString)
+
+	return
+>>>>>>> de950eeb2f060ac77c06f3230eb153efcdbd2184
 }
