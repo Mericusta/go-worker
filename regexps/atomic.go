@@ -46,7 +46,7 @@ var AETemplateStyle AtomicExpression = `\((?P<CHAR>\d+),(?P<NUM>\d+)\)`
 var AESpaceLine AtomicExpression = `(?ms)\n\s*\n`
 
 // AEIdentifier 标识符的表达式，以字母开头，字母，数字或下划线组合
-var AEIdentifier AtomicExpression = `[[:alpha:]][_\.\w]*`
+var AEIdentifier AtomicExpression = `[[:alpha:]][_\w]*`
 
 // AEFileNameType 文件名与类型的表达式
 var AEFileNameType AtomicExpression = `(?P<NAME>.*)\.(?P<TYPE>\w+)$`
@@ -56,3 +56,6 @@ var AERemoveOptionValue AtomicExpression = `(file|type)(\s+[_\.\w-]+)+`
 
 // AEGoCommentLine Go 语言注释行的表达式
 var AEGoCommentLine AtomicExpression = `//.*`
+
+// AEGoTemplate Go 语言模板表达式
+var AEGoTemplate AtomicExpression = `(?P<NAME>\w+)\s+template\.Typename`

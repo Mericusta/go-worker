@@ -9,12 +9,7 @@ import (
 
 // FormatOutput 格式化输出
 func FormatOutput(logMark, format string, content ...interface{}) {
-	// fmt.Println("format =", format)
-	// fmt.Println("len(content) =", len(content))
-	fmt.Printf("TEST: format = %v\n", format)
-	fmt.Printf("TEST: content = %v\n", content...)
 	formatContent := fmt.Sprintf(format, content...)
-	fmt.Printf("formatContent = %v\n", formatContent)
 	fmt.Printf("%v: %v\n", logMark, formatContent)
 }
 
@@ -42,9 +37,7 @@ func CalculatePunctuationMarksContentLength(afterLeftContent string, punctuation
 			leftCount++
 		} else if r == rightPunctionMark {
 			rightCount++
-		} else if leftCount == rightCount {
-			return true
 		}
-		return false
+		return leftCount == rightCount
 	})
 }

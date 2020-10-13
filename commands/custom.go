@@ -754,52 +754,6 @@ func randomUpdateSubAttributes(leftUpdateTimes int, ce4AttributeMap map[ce4Attri
 
 // ----------------------------------------------------------------
 
-<<<<<<< HEAD
-// Command Example: custom execute 5 resources/templater_example.go
-// Command Expression:
-// - custom                        : command const content
-// - execute                       : command const content
-// - 5                             : specify executor
-// - resources/templater_example.go: specify a file to analyze
-
-// GoCommandToolTemplater go 语言命令行工具：模板代码生成器
-func GoCommandToolTemplater(paramList []string) {
-	if len(paramList) < 1 {
-		ui.OutputErrorInfo(ui.CMDCustomExecutorHasNotEnoughParam, 5)
-		return
-	}
-	filename := paramList[0]
-
-	contentByte, readFileError := ioutil.ReadFile(filename)
-	if readFileError != nil {
-		ui.OutputErrorInfo(ui.CommonError5, filename, readFileError)
-		return
-	}
-
-	removeGoFileCommentLine(contentByte)
-	// contentByteWithoutComment := removeGoFileCommentLine(contentByte)
-	// utility2.TestOutput("after clear all comment line:\n|%v|", string(removeGoFileCommentLine(contentByte)))
-
-	// goFileAnalysis := &GoFileAnalysis{FunctionMap: make(map[string]*GoFunctionAnalysis), functionList: make([]string, 0)}
-	// analyzeGoFunctionDefinition(goFileAnalysis, contentByte)
-
-	// analyzeGoFunctionBody(goFileAnalysis, contentByte)
-
-	// for functionName, functionAnalysis := range goFileAnalysis.FunctionMap {
-	// 	utility2.TestOutput("function name: %v", functionName)
-	// 	utility2.TestOutput("function class: %v", functionAnalysis.Class)
-	// 	utility2.TestOutput("function params map: %v", functionAnalysis.ParamsMap)
-	// 	utility2.TestOutput("function return map: %v", functionAnalysis.ReturnMap)
-
-	// 	// for functionName, callMap := range functionAnalysis.MemberCallMap {
-	// 	// 	utility2.TestOutput("function name: %v", functionName)
-	// 	// 	for callFunctionName, callFunctionTimes := range callMap {
-	// 	// 		utility2.TestOutput("call function: %v, times: %v", callFunctionName, callFunctionTimes)
-	// 	// 	}
-	// 	// }
-	// }
-
-=======
 // Command Example: custom execute 5 UP 1,2,3,...
 // Command Expression:
 // - custom : command const content
@@ -909,5 +863,106 @@ func ProofOfArrayOrdered(paramList []string) {
 	ui.OutputNoteInfo(outputNoteFormat, "is", proveTypeString)
 
 	return
->>>>>>> de950eeb2f060ac77c06f3230eb153efcdbd2184
+}
+
+// ----------------------------------------------------------------
+
+// Command Example: custom execute 6 resources/templater_example.go
+// Command Expression:
+// - custom                        : command const content
+// - execute                       : command const content
+// - 6                             : specify executor
+// - resources/templater_example.go: specify a file to analyze
+
+var TemplateType string = "template.TypeName"
+
+type GoTemplateFunctionAnalysis struct {
+	Analysis                     *GoFunctionAnalysis
+	ToDeductionTemplateParamMap  map[string][]string
+	ToDeductionTemplateReturnMap map[string][]string
+}
+
+// GoCommandToolTemplater go 语言命令行工具：模板代码生成器
+func GoCommandToolTemplater(paramList []string) {
+	if len(paramList) < 1 {
+		ui.OutputErrorInfo(ui.CMDCustomExecutorHasNotEnoughParam, 5)
+		return
+	}
+	filename := paramList[0]
+
+	toAnalyzeFile, inputError := os.Open(filename)
+	defer toAnalyzeFile.Close()
+	if inputError != nil || toAnalyzeFile == nil {
+		ui.OutputErrorInfo(ui.CommonError5, filename, inputError.Error())
+		return
+	}
+
+	goFileAnalysis, analysisGoFileError := analyzeGoFile(toAnalyzeFile, nil)
+	if analysisGoFileError != nil {
+		ui.OutputWarnInfo(ui.CMDAnalyzeOccursError, analysisGoFileError)
+		return
+	}
+
+	templateFunctionAnalysisMap := make(map[string]*GoTemplateFunctionAnalysis)
+
+	// get template functions
+	utility2.TestOutput("get template functions from file analysis")
+	for functionName, functionAnalysis := range goFileAnalysis.FunctionMap {
+		utility2.TestOutput("function name: %v", functionName)
+
+		toDeductionTemplateParamMap := make(map[string][]string)
+		toDeductionTemplateReturnMap := make(map[string][]string)
+
+		for param, paramType := range functionAnalysis.ParamsMap {
+			if paramType == TemplateType {
+				utility2.TestOutput("in param list, template value %v", param)
+				toDeductionTemplateParamMap[param] = make([]string, 0)
+			}
+		}
+
+		for returnValue, returnType := range functionAnalysis.ReturnMap {
+			if returnType == TemplateType {
+				utility2.TestOutput("in return list, template value %v", returnValue)
+				toDeductionTemplateReturnMap[returnValue] = make([]string, 0)
+			}
+		}
+
+		utility2.TestOutput("to deduction template param map: %v", toDeductionTemplateParamMap)
+		utility2.TestOutput("to deduction template return map: %v", toDeductionTemplateReturnMap)
+
+		templateFunctionAnalysisMap[functionName] = &GoTemplateFunctionAnalysis{
+			Analysis:                     functionAnalysis,
+			ToDeductionTemplateParamMap:  toDeductionTemplateParamMap,
+			ToDeductionTemplateReturnMap: toDeductionTemplateReturnMap,
+		}
+	}
+
+	// get template functions caller
+	utility2.TestOutput("get template functions caller from file analysis")
+	for functionName, functionAnalysis := range goFileAnalysis.FunctionMap {
+		// inner package call function
+		for callFunction, times := range functionAnalysis.InnerPackageCallMap {
+			if _, isTemplateFunction := templateFunctionAnalysisMap[callFunction]; isTemplateFunction {
+				utility2.TestOutput("%v call inner package template function %v times %v", functionName, callFunction, times)
+			}
+		}
+
+		// outer package call function
+		for callFrom, callFunctionCountMap := range functionAnalysis.OuterPackageCallMap {
+			for callFunction, times := range callFunctionCountMap {
+				if _, isTemplateFunction := templateFunctionAnalysisMap[callFunction]; isTemplateFunction {
+					utility2.TestOutput("%v call package %v template function %v times %v", functionName, callFrom, callFunction, times)
+				}
+			}
+		}
+
+		// member call function
+		for callFrom, callFunctionCountMap := range functionAnalysis.MemberCallMap {
+			for callFunction, times := range callFunctionCountMap {
+				if _, isTemplateFunction := templateFunctionAnalysisMap[callFunction]; isTemplateFunction {
+					utility2.TestOutput("%v call member %v template function %v times %v", functionName, callFrom, callFunction, times)
+				}
+			}
+		}
+	}
 }

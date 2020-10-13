@@ -322,12 +322,14 @@ type GoFileAnalysis struct {
 
 // GoFunctionAnalysis go 函数分析结果
 type GoFunctionAnalysis struct {
-	Class          string
-	Name           string
-	ParamsMap      map[string]string
-	ReturnMap      map[string]string
-	PackageCallMap map[string]map[string]int
-	MemberCallMap  map[string]map[string]int
+	Class               string
+	Name                string
+	ParamsMap           map[string]string
+	ReturnMap           map[string]string
+	InnerPackageCallMap map[string][][]string            // call function from inner package
+	OuterPackageCallMap map[string]map[string][][]string // call function from outer package
+	MemberCallMap       map[string]map[string][][]string // call member function
+	BodyContent         []byte
 }
 
 func analyzeGoFile(toAnalyzeFile, toWriteFile *os.File) (*GoFileAnalysis, error) {
@@ -367,9 +369,11 @@ func analyzeGoFile(toAnalyzeFile, toWriteFile *os.File) (*GoFileAnalysis, error)
 	functionListContent := outputAnalyzeGoFileResult(goFileAnalysis)
 
 	// 输出到文件
-	_, writeError := toWriteFile.WriteString(functionListContent)
-	if writeError != nil {
-		return nil, writeError
+	if toWriteFile != nil {
+		_, writeError := toWriteFile.WriteString(functionListContent)
+		if writeError != nil {
+			return nil, writeError
+		}
 	}
 
 	return goFileAnalysis, nil
@@ -377,14 +381,6 @@ func analyzeGoFile(toAnalyzeFile, toWriteFile *os.File) (*GoFileAnalysis, error)
 
 func removeGoFileCommentLine(fileContentByte []byte) []byte {
 	if goCommentLineRegexp, hasGoCommentLineRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEGoCommentLine]; hasGoCommentLineRegexp {
-		for _, l := range goCommentLineRegexp.FindAll(fileContentByte, -1) {
-			// utility2.TestOutput("i = %v", i)
-			fmt.Printf("l = %v\n", string(l))
-			utility2.TestOutput("|%v|", string(l))
-			// utility2.TestOutput("l = |%v|", string(l))
-			// utility2.TestOutput("comment line: |%v|", string(commentLine[0], ))
-		}
-
 		result := goCommentLineRegexp.ReplaceAll(fileContentByte, []byte(""))
 		return result
 	}
@@ -468,10 +464,11 @@ func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte
 	functionDefinitionByteList := functionDefinitionRegexp.FindAll(fileContentByte, -1)
 	for _, functionDefinitionByte := range functionDefinitionByteList {
 		functionAnalysis := &GoFunctionAnalysis{
-			ParamsMap:      make(map[string]string),
-			ReturnMap:      make(map[string]string),
-			PackageCallMap: make(map[string]map[string]int),
-			MemberCallMap:  make(map[string]map[string]int),
+			ParamsMap:           make(map[string]string),
+			ReturnMap:           make(map[string]string),
+			InnerPackageCallMap: make(map[string][][]string),
+			OuterPackageCallMap: make(map[string]map[string][][]string),
+			MemberCallMap:       make(map[string]map[string][][]string),
 		}
 		// 解析所属类
 		memberStringWithPunctuationMark := functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$MEMBER")
@@ -540,38 +537,55 @@ func analyzeGoFunctionBody(goFileAnalysis *GoFileAnalysis, fileContentByte []byt
 			}
 			goFunctionAnalysis := goFileAnalysis.FunctionMap[goFileAnalysis.functionList[index]]
 
-			definitionLength := utility2.CalculatePunctuationMarksContentLength(string(fileContentByte[functionDefinitionIndex[1]+1:]), global.PunctuationMarkCurlyBraces)
+			// passing content: ...}
+			definitionLength := utility2.CalculatePunctuationMarksContentLength(string(fileContentByte[functionDefinitionIndex[1]:]), global.PunctuationMarkCurlyBraces)
 			if definitionLength == 0 {
 				ui.OutputWarnInfo(ui.CMDAnalyzeGoFunctionContentSyntaxError)
 				continue
 			}
-			functionBodyContent := fileContentByte[functionDefinitionIndex[1] : functionDefinitionIndex[1]+1+definitionLength]
 
-			utility2.TestOutput("functionBodyContent = |%v|", string(functionBodyContent))
+			goFunctionAnalysis.BodyContent = fileContentByte[functionDefinitionIndex[1]-1 : functionDefinitionIndex[1]+1+definitionLength]
 
-			for _, subMatchList := range goFunctionCallRegexp.FindAllSubmatch(functionBodyContent, -1) {
-				packageFunctionList := strings.Split(string(subMatchList[1]), ".")
-				callFromPackage := goFileAnalysis.PackageName
-				callFunction := packageFunctionList[0]
-				if len(packageFunctionList) == 2 {
-					callFromPackage = packageFunctionList[0]
-					callFunction = packageFunctionList[1]
-				}
+			// body content: {...}
+			// utility2.TestOutput("goFunctionAnalysis.BodyContent = |%v|", string(goFunctionAnalysis.BodyContent))
 
-				utility2.TestOutput("call from package: %v", callFromPackage)
+			for index, functionCallByteList := range goFunctionCallRegexp.FindAll(goFunctionAnalysis.BodyContent, -1) {
+				utility2.TestOutput("index = %v, string(functionCallByteList) = %v", index, string(functionCallByteList))
+				utility2.TestOutput("goFileAnalysis.PackageName = %v", goFileAnalysis.PackageName)
+
+				callFrom := goFunctionCallRegexp.ReplaceAllString(string(functionCallByteList), "$CALL")
+				callFunction := goFunctionCallRegexp.ReplaceAllString(string(functionCallByteList), "$NAME")
+				callParam := goFunctionCallRegexp.ReplaceAllString(string(functionCallByteList), "$PARAM")
+
+				utility2.TestOutput("call from: %v", callFrom)
 				utility2.TestOutput("call function: %v", callFunction)
+				utility2.TestOutput("call param: %v", callParam)
 
-				if _, hasPackage := goFileAnalysis.ImportAliasMap[callFromPackage]; hasPackage {
-					if _, hasPackage := goFunctionAnalysis.PackageCallMap[callFromPackage]; !hasPackage {
-						goFunctionAnalysis.PackageCallMap[callFromPackage] = make(map[string]int)
+				if len(callFrom) != 0 {
+					if _, hasPackage := goFileAnalysis.ImportAliasMap[callFrom]; hasPackage {
+						if _, hasPackage := goFunctionAnalysis.OuterPackageCallMap[callFrom]; !hasPackage {
+							goFunctionAnalysis.OuterPackageCallMap[callFrom] = make(map[string][][]string)
+						}
+						goFunctionAnalysis.OuterPackageCallMap[callFrom][callFunction] = make([][]string, 0)
+
+						if len(callParam) != 0 {
+							callParamStringList := strings.Split(callParam, ",")
+							callParamList := make([]string, 0, len(callParamStringList))
+							for _, callParam := range callParamStringList {
+								callParamList = append(callParamList, strings.TrimSpace(callParam))
+							}
+							goFunctionAnalysis.OuterPackageCallMap[callFrom][callFunction] = append(goFunctionAnalysis.OuterPackageCallMap[callFrom][callFunction], callParamList)
+						}
+					} else {
+						// utility2.TestOutput("This is call member function: %v.%v", callFrom, callFunction)
+						// if _, hasMember := goFunctionAnalysis.MemberCallMap[callFrom]; !hasMember {
+						// 	goFunctionAnalysis.MemberCallMap[callFrom] = make(map[string]int)
+						// }
+						// goFunctionAnalysis.MemberCallMap[callFrom][callFunction]++
 					}
-					goFunctionAnalysis.PackageCallMap[callFromPackage][callFunction]++
 				} else {
-					callFromPackage = goFileAnalysis.PackageName
-					if _, hasMember := goFunctionAnalysis.MemberCallMap[goFunctionAnalysis.Name]; !hasMember {
-						goFunctionAnalysis.MemberCallMap[goFunctionAnalysis.Name] = make(map[string]int)
-					}
-					goFunctionAnalysis.MemberCallMap[goFunctionAnalysis.Name][callFunction]++
+					// utility2.TestOutput("This is call inner package function: %v", callFunction)
+					// goFunctionAnalysis.InnerPackageCallMap[callFunction]++
 				}
 			}
 		}
@@ -657,8 +671,8 @@ func outputAnalyzeGoFileResult(goFileAnalysis *GoFileAnalysis) string {
 
 			// function body call map
 			functionCallMapContent := ""
-			if len(functionAnalysis.PackageCallMap) != 0 {
-				functionCallMapContent = parseGoFunctionCallMapContent(templateStyleRegexp, functionAnalysis.PackageCallMap)
+			if len(functionAnalysis.OuterPackageCallMap) != 0 {
+				functionCallMapContent = parseGoFunctionCallMapContent(templateStyleRegexp, functionAnalysis.OuterPackageCallMap)
 			}
 			functionDefinitionContent = strings.Replace(functionDefinitionContent, global.AnalyzeRPFunctionCallMap, functionCallMapContent, -1)
 
