@@ -14,6 +14,7 @@ var (
 
 	// 逻辑关键词
 	TK_GoKeywordImportAlias TemplateKeyword = "TK_GoKeywordImportAlias"
+	TK_TYPE                 TemplateKeyword = "TK_TYPE"
 
 	// 通用指令选项关键词
 	// TK_OPVExpression 选项 parent 的关键词

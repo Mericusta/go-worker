@@ -29,6 +29,12 @@ const (
 	AEFileNameType AtomicExpressionEnum = 10
 	// AEGoCommentLine Go 语言注释行的表达式
 	AEGoCommentLine AtomicExpressionEnum = 11
+	// AEInteger 整数数值的表达式
+	AEInteger AtomicExpressionEnum = 12
+	// AEFloat 浮点数数值的表达式
+	AEFloat AtomicExpressionEnum = 13
+	// AEComplex 复数数值的表达式
+	AEComplex AtomicExpressionEnum = 14
 
 	// AEBindOptionValue bind 指令参数的表达式
 	AEBindOptionValue AtomicExpressionEnum = 101

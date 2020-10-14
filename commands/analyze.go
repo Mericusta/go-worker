@@ -549,44 +549,52 @@ func analyzeGoFunctionBody(goFileAnalysis *GoFileAnalysis, fileContentByte []byt
 			// body content: {...}
 			// utility2.TestOutput("goFunctionAnalysis.BodyContent = |%v|", string(goFunctionAnalysis.BodyContent))
 
-			for index, functionCallByteList := range goFunctionCallRegexp.FindAll(goFunctionAnalysis.BodyContent, -1) {
-				utility2.TestOutput("index = %v, string(functionCallByteList) = %v", index, string(functionCallByteList))
-				utility2.TestOutput("goFileAnalysis.PackageName = %v", goFileAnalysis.PackageName)
+			for _, functionCallByteList := range goFunctionCallRegexp.FindAll(goFunctionAnalysis.BodyContent, -1) {
+				// utility2.TestOutput("index = %v, string(functionCallByteList) = %v", index, string(functionCallByteList))
+				// utility2.TestOutput("goFileAnalysis.PackageName = %v", goFileAnalysis.PackageName)
 
 				callFrom := goFunctionCallRegexp.ReplaceAllString(string(functionCallByteList), "$CALL")
 				callFunction := goFunctionCallRegexp.ReplaceAllString(string(functionCallByteList), "$NAME")
 				callParam := goFunctionCallRegexp.ReplaceAllString(string(functionCallByteList), "$PARAM")
+				var callParamList []string
 
-				utility2.TestOutput("call from: %v", callFrom)
-				utility2.TestOutput("call function: %v", callFunction)
-				utility2.TestOutput("call param: %v", callParam)
+				if len(callParam) != 0 {
+					callParamStringList := strings.Split(callParam, ",")
+					callParamList = make([]string, 0, len(callParamStringList))
+					for _, callParam := range callParamStringList {
+						callParamList = append(callParamList, utility2.FixBracketMatchingResult(strings.TrimSpace(callParam)))
+					}
+				}
 
 				if len(callFrom) != 0 {
 					if _, hasPackage := goFileAnalysis.ImportAliasMap[callFrom]; hasPackage {
 						if _, hasPackage := goFunctionAnalysis.OuterPackageCallMap[callFrom]; !hasPackage {
 							goFunctionAnalysis.OuterPackageCallMap[callFrom] = make(map[string][][]string)
 						}
-						goFunctionAnalysis.OuterPackageCallMap[callFrom][callFunction] = make([][]string, 0)
-
-						if len(callParam) != 0 {
-							callParamStringList := strings.Split(callParam, ",")
-							callParamList := make([]string, 0, len(callParamStringList))
-							for _, callParam := range callParamStringList {
-								callParamList = append(callParamList, strings.TrimSpace(callParam))
-							}
-							goFunctionAnalysis.OuterPackageCallMap[callFrom][callFunction] = append(goFunctionAnalysis.OuterPackageCallMap[callFrom][callFunction], callParamList)
+						if _, hasCallFunction := goFunctionAnalysis.OuterPackageCallMap[callFrom][callFunction]; !hasCallFunction {
+							goFunctionAnalysis.OuterPackageCallMap[callFrom][callFunction] = make([][]string, 0)
 						}
+						goFunctionAnalysis.OuterPackageCallMap[callFrom][callFunction] = append(goFunctionAnalysis.OuterPackageCallMap[callFrom][callFunction], callParamList)
+						// utility2.TestOutput("call from outer package %v, call function %v, call param %v", callFrom, callFunction, callParamList)
 					} else {
-						// utility2.TestOutput("This is call member function: %v.%v", callFrom, callFunction)
-						// if _, hasMember := goFunctionAnalysis.MemberCallMap[callFrom]; !hasMember {
-						// 	goFunctionAnalysis.MemberCallMap[callFrom] = make(map[string]int)
-						// }
-						// goFunctionAnalysis.MemberCallMap[callFrom][callFunction]++
+						if _, hasMember := goFunctionAnalysis.MemberCallMap[callFrom]; !hasMember {
+							goFunctionAnalysis.MemberCallMap[callFrom] = make(map[string][][]string)
+						}
+						if _, hasCallFunction := goFunctionAnalysis.MemberCallMap[callFrom][callFunction]; !hasCallFunction {
+							goFunctionAnalysis.MemberCallMap[callFrom][callFunction] = make([][]string, 0)
+						}
+						goFunctionAnalysis.MemberCallMap[callFrom][callFunction] = append(goFunctionAnalysis.MemberCallMap[callFrom][callFunction], callParamList)
+						// utility2.TestOutput("call from member %v, call function %v, call param %v", callFrom, callFunction, callParamList)
 					}
 				} else {
-					// utility2.TestOutput("This is call inner package function: %v", callFunction)
-					// goFunctionAnalysis.InnerPackageCallMap[callFunction]++
+					if _, hasCallFunction := goFunctionAnalysis.InnerPackageCallMap[callFunction]; !hasCallFunction {
+						goFunctionAnalysis.InnerPackageCallMap[callFunction] = make([][]string, 0)
+					}
+					goFunctionAnalysis.InnerPackageCallMap[callFunction] = append(goFunctionAnalysis.InnerPackageCallMap[callFunction], callParamList)
+					// utility2.TestOutput("call from inner package, call function %v, call param %v", callFunction, callParamList)
 				}
+
+				// utility2.TestOutput(ui.CommonNote2)
 			}
 		}
 	}
@@ -672,7 +680,7 @@ func outputAnalyzeGoFileResult(goFileAnalysis *GoFileAnalysis) string {
 			// function body call map
 			functionCallMapContent := ""
 			if len(functionAnalysis.OuterPackageCallMap) != 0 {
-				functionCallMapContent = parseGoFunctionCallMapContent(templateStyleRegexp, functionAnalysis.OuterPackageCallMap)
+				// functionCallMapContent = parseGoFunctionCallMapContent(templateStyleRegexp, functionAnalysis.OuterPackageCallMap)
 			}
 			functionDefinitionContent = strings.Replace(functionDefinitionContent, global.AnalyzeRPFunctionCallMap, functionCallMapContent, -1)
 

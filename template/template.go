@@ -31,5 +31,6 @@ func init() {
 		global.GoKeywordImportAliasTemplate: TEGoKeywordImportAlias,
 		global.GoFunctionDefinitionTemplate: TEGoFunctionDefinition,
 		global.GoFunctionCallTemplate:       TEGoFunctionCall,
+		global.GoTypeConvertTemplate:        TEGoTypeConvert,
 	}
 }

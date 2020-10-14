@@ -16,7 +16,10 @@ var TEGoKeywordImportAlias TemplateExpression = `(?P<ALIAS>\w+\s+)??TK_DoubleQuo
 var TEGoFunctionDefinition TemplateExpression = `(?ms)^func\s*(?P<MEMBER>\(.*?\))?\s*(?P<NAME>\w+)\s*(?P<PARAM>\(.*?\)){1}\s*(?P<RETURN>\(.*?\)|[\.\*\w]+)?\s*\{`
 
 // TEGoFunctionCall go function 调用的模板表达式
-var TEGoFunctionCall TemplateExpression = `(?ms)((?P<CALL>TK_IDENTIFIER)\.)?(?P<NAME>TK_IDENTIFIER)\((?P<PARAM>.*?)\)`
+var TEGoFunctionCall TemplateExpression = `(?ms)((?P<CALL>TK_IDENTIFIER)\.)?(?P<NAME>TK_IDENTIFIER)\((?P<PARAM>[^\n]*)\)`
 
 // TEOptionIgnoreValue 指令选项 ignore 的模板表达式
 var TEOptionIgnoreValue TemplateExpression = `ignore(\s+TK_PATH){1}`
+
+// TEGoTypeConvert go 内建类型转换的模板表达式
+var TEGoTypeConvert TemplateExpression = `^(?P<IDENTIFIER>TK_IDENTIFIER)\(.*\)$`

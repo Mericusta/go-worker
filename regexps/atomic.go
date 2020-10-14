@@ -59,3 +59,12 @@ var AEGoCommentLine AtomicExpression = `//.*`
 
 // AEGoTemplate Go 语言模板表达式
 var AEGoTemplate AtomicExpression = `(?P<NAME>\w+)\s+template\.Typename`
+
+// AEInteger 整数数值的表达式
+var AEInteger AtomicExpression = `^\d+$`
+
+// AEFloat 浮点数数值的表达式
+var AEFloat AtomicExpression = `^\d+\.\d+$`
+
+// AEComplex 复数数值的表达式
+var AEComplex AtomicExpression = `^\d+(\.\d+)?\+\d+(\.\d+)?i$`

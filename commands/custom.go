@@ -6,10 +6,13 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/go-worker/global"
+	"github.com/go-worker/regexps"
 	"github.com/go-worker/ui"
 	"github.com/go-worker/utility"
 	"github.com/go-worker/utility2"
@@ -867,12 +870,12 @@ func ProofOfArrayOrdered(paramList []string) {
 
 // ----------------------------------------------------------------
 
-// Command Example: custom execute 6 resources/templater_example.go
+// Command Example: custom execute 6 resources/template_example.template.go
 // Command Expression:
-// - custom                        : command const content
-// - execute                       : command const content
-// - 6                             : specify executor
-// - resources/templater_example.go: specify a file to analyze
+// - custom                                : command const content
+// - execute                               : command const content
+// - 6                                     : specify executor
+// - resources/template_example.template.go: specify a file to analyze
 
 var TemplateType string = "template.TypeName"
 
@@ -884,6 +887,8 @@ type GoTemplateFunctionAnalysis struct {
 
 // GoCommandToolTemplater go 语言命令行工具：模板代码生成器
 func GoCommandToolTemplater(paramList []string) {
+	checkTypeAtomicExpression()
+
 	if len(paramList) < 1 {
 		ui.OutputErrorInfo(ui.CMDCustomExecutorHasNotEnoughParam, 5)
 		return
@@ -930,10 +935,13 @@ func GoCommandToolTemplater(paramList []string) {
 		utility2.TestOutput("to deduction template param map: %v", toDeductionTemplateParamMap)
 		utility2.TestOutput("to deduction template return map: %v", toDeductionTemplateReturnMap)
 
-		templateFunctionAnalysisMap[functionName] = &GoTemplateFunctionAnalysis{
-			Analysis:                     functionAnalysis,
-			ToDeductionTemplateParamMap:  toDeductionTemplateParamMap,
-			ToDeductionTemplateReturnMap: toDeductionTemplateReturnMap,
+		if len(toDeductionTemplateParamMap) != 0 || len(toDeductionTemplateReturnMap) != 0 {
+			utility2.TestOutput("function %v is template function, need deduction", functionName)
+			templateFunctionAnalysisMap[functionName] = &GoTemplateFunctionAnalysis{
+				Analysis:                     functionAnalysis,
+				ToDeductionTemplateParamMap:  toDeductionTemplateParamMap,
+				ToDeductionTemplateReturnMap: toDeductionTemplateReturnMap,
+			}
 		}
 	}
 
@@ -941,28 +949,128 @@ func GoCommandToolTemplater(paramList []string) {
 	utility2.TestOutput("get template functions caller from file analysis")
 	for functionName, functionAnalysis := range goFileAnalysis.FunctionMap {
 		// inner package call function
-		for callFunction, times := range functionAnalysis.InnerPackageCallMap {
+		for callFunction, callParamList := range functionAnalysis.InnerPackageCallMap {
 			if _, isTemplateFunction := templateFunctionAnalysisMap[callFunction]; isTemplateFunction {
-				utility2.TestOutput("%v call inner package template function %v times %v", functionName, callFunction, times)
+				for _, callParam := range callParamList {
+					utility2.TestOutput("%v call inner package template function %v, param %v", functionName, callFunction, callParam)
+					for _, param := range callParam {
+						paramType := goValueTypeDeduction(param)
+						utility2.TestOutput("deduction: param %v to type %v", param, paramType)
+					}
+				}
 			}
 		}
 
 		// outer package call function
 		for callFrom, callFunctionCountMap := range functionAnalysis.OuterPackageCallMap {
-			for callFunction, times := range callFunctionCountMap {
+			for callFunction, callParamList := range callFunctionCountMap {
 				if _, isTemplateFunction := templateFunctionAnalysisMap[callFunction]; isTemplateFunction {
-					utility2.TestOutput("%v call package %v template function %v times %v", functionName, callFrom, callFunction, times)
+					for _, callParam := range callParamList {
+						utility2.TestOutput("%v call package %v template function %v, param %v", functionName, callFrom, callFunction, callParam)
+						for _, param := range callParam {
+							paramType := goValueTypeDeduction(param)
+							utility2.TestOutput("deduction: param %v to type %v", param, paramType)
+						}
+					}
 				}
 			}
 		}
 
 		// member call function
 		for callFrom, callFunctionCountMap := range functionAnalysis.MemberCallMap {
-			for callFunction, times := range callFunctionCountMap {
+			for callFunction, callParamList := range callFunctionCountMap {
 				if _, isTemplateFunction := templateFunctionAnalysisMap[callFunction]; isTemplateFunction {
-					utility2.TestOutput("%v call member %v template function %v times %v", functionName, callFrom, callFunction, times)
+					for _, callParam := range callParamList {
+						utility2.TestOutput("%v call member %v template function %v, param %v", functionName, callFrom, callFunction, callParam)
+						for _, param := range callParam {
+							paramType := goValueTypeDeduction(param)
+							utility2.TestOutput("deduction: param %v to type %v", param, paramType)
+						}
+					}
 				}
 			}
 		}
 	}
+}
+
+type GoValueType int
+
+const (
+	tUnknown    GoValueType = iota // 0
+	tInt                           // 1
+	tInt8                          // 2
+	tInt16                         // 3
+	tInt32                         // 4
+	tInt64                         // 5
+	tUint                          // 6
+	tUint8                         // 7
+	tUint16                        // 8
+	tUint32                        // 9
+	tUint64                        // 10
+	tFloat32                       // 11
+	tFloat64                       // 12
+	tComplex64                     // 13
+	tComplex128                    // 14
+	tBool                          // 15
+	tString                        // 16
+	tUintptr                       // 17
+	fFunc                          // 18
+)
+
+var atomicExpressionEnumGoValueTypeMap map[global.AtomicExpressionEnum]GoValueType
+var goTypeConvertRegexp *regexp.Regexp
+var valueTypeStringMap map[string]GoValueType
+
+func checkTypeAtomicExpression() {
+	atomicExpressionEnumGoValueTypeMap = map[global.AtomicExpressionEnum]GoValueType{
+		global.AEInteger: tInt,
+		global.AEFloat:   tFloat64,
+		global.AEComplex: tComplex128,
+	}
+	for toCheckTypeAtomicExpressionEnum := range atomicExpressionEnumGoValueTypeMap {
+		if _, hasRegexp := regexps.AtomicExpressionEnumRegexpMap[toCheckTypeAtomicExpressionEnum]; !hasRegexp {
+			ui.OutputWarnInfo(ui.CommonWarn3, toCheckTypeAtomicExpressionEnum)
+		}
+	}
+
+	if goTypeConvertRegexp = regexps.GetRegexpByTemplateEnum(global.GoTypeConvertTemplate); goTypeConvertRegexp == nil {
+		ui.OutputWarnInfo(ui.CommonWarn5, global.GoTypeConvertTemplate)
+	}
+
+	valueTypeStringMap = map[string]GoValueType{
+		"int":        tInt,
+		"int8":       tInt8,
+		"int16":      tInt16,
+		"int32":      tInt32,
+		"int64":      tInt64,
+		"uint":       tUint,
+		"uint8":      tUint8,
+		"uint16":     tUint16,
+		"uint32":     tUint32,
+		"uint64":     tUint64,
+		"float32":    tFloat32,
+		"float64":    tFloat64,
+		"complex64":  tComplex64,
+		"complex128": tComplex128,
+		"bool":       tBool,
+		"string":     tString,
+		"uintptr":    tUintptr,
+	}
+}
+
+func goValueTypeDeduction(valueString string) GoValueType {
+	for toCheckTypeAtomicExpressionEnum, goValueType := range atomicExpressionEnumGoValueTypeMap {
+		if regexps.AtomicExpressionEnumRegexpMap[toCheckTypeAtomicExpressionEnum].MatchString(valueString) {
+			return goValueType
+		}
+	}
+
+	if goTypeConvertRegexp.MatchString(valueString) {
+		identifier := goTypeConvertRegexp.ReplaceAllString(valueString, "$IDENTIFIER")
+		if goValueType, isGoType := valueTypeStringMap[identifier]; isGoType {
+			return goValueType
+		}
+	}
+
+	return tUnknown
 }

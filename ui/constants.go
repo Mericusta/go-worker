@@ -60,7 +60,10 @@ var CommonWarn1 string = "File to create does not have suffix"
 var CommonWarn2 string = "Command %v option %v does not regist regexp"
 
 // CommonWarn3 通用警告提示文本：原子表达式的解析式不存在
-var CommonWarn3 string = "Atomic %v does not regist regexp"
+var CommonWarn3 string = "Atomic Expression %v does not regist regexp"
 
 // CommonWarn4 通用警告提示文本：文件不存在
 var CommonWarn4 string = "File %v does not exist"
+
+// CommonWarn5 通用警告提示文本：模板表达式的解析式不存在
+var CommonWarn5 string = "Template Expression %v does not regist regexp"

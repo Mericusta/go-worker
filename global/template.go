@@ -20,6 +20,8 @@ const (
 	GoFunctionCallTemplate TemplateEnum = 6
 	// OptionIgnoreValueTemplate ignore 选项模板
 	OptionIgnoreValueTemplate TemplateEnum = 7
+	// GoTypeConvertTemplate go 内建类型转换的模板
+	GoTypeConvertTemplate TemplateEnum = 8
 
 	// 外部模板
 

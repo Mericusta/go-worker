@@ -41,3 +41,15 @@ func CalculatePunctuationMarksContentLength(afterLeftContent string, punctuation
 		return leftCount == rightCount
 	})
 }
+
+// FixBracketMatchingResult 修正贪婪括号匹配的错误 type(x)( -> type(x)
+func FixBracketMatchingResult(content string) string {
+	leftBracketIndex := strings.Index(content, string(global.PunctuationMarkLeftBracket))
+	if leftBracketIndex == -1 {
+		return content
+	}
+	bracketContentLength := CalculatePunctuationMarksContentLength(content[leftBracketIndex+1:], global.PunctuationMarkBracket)
+	// first 1 is because from 0
+	// last 1 is right bracket
+	return content[:leftBracketIndex+1+bracketContentLength+1]
+}
