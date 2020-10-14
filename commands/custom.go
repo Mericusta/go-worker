@@ -883,6 +883,8 @@ type GoTemplateFunctionAnalysis struct {
 	Analysis                     *GoFunctionAnalysis
 	ToDeductionTemplateParamMap  map[string][]string
 	ToDeductionTemplateReturnMap map[string][]string
+	ParamDeductionMap            map[string]GoValueType
+	ReturnDeductionMap           map[string]GoValueType
 }
 
 // GoCommandToolTemplater go 语言命令行工具：模板代码生成器
@@ -917,6 +919,8 @@ func GoCommandToolTemplater(paramList []string) {
 
 		toDeductionTemplateParamMap := make(map[string][]string)
 		toDeductionTemplateReturnMap := make(map[string][]string)
+		paramDeductionMap := make(map[string]GoValueType)
+		returnDeductionMap := make(map[string]GoValueType)
 
 		for param, paramType := range functionAnalysis.ParamsMap {
 			if paramType == TemplateType {
@@ -941,6 +945,8 @@ func GoCommandToolTemplater(paramList []string) {
 				Analysis:                     functionAnalysis,
 				ToDeductionTemplateParamMap:  toDeductionTemplateParamMap,
 				ToDeductionTemplateReturnMap: toDeductionTemplateReturnMap,
+				ParamDeductionMap:            make(map[string]GoValueType),
+				ReturnDeductionMap:           make(map[string]GoValueType),
 			}
 		}
 	}
@@ -950,12 +956,13 @@ func GoCommandToolTemplater(paramList []string) {
 	for functionName, functionAnalysis := range goFileAnalysis.FunctionMap {
 		// inner package call function
 		for callFunction, callParamList := range functionAnalysis.InnerPackageCallMap {
-			if _, isTemplateFunction := templateFunctionAnalysisMap[callFunction]; isTemplateFunction {
+			if templateFunctionAnalysis, isTemplateFunction := templateFunctionAnalysisMap[callFunction]; isTemplateFunction {
 				for _, callParam := range callParamList {
 					utility2.TestOutput("%v call inner package template function %v, param %v", functionName, callFunction, callParam)
 					for _, param := range callParam {
 						paramType := goValueTypeDeduction(param)
 						utility2.TestOutput("deduction: param %v to type %v", param, paramType)
+						templateFunctionAnalysis.DeductionResult = append(templateFunctionAnalysis.DeductionResult)
 					}
 				}
 			}
