@@ -880,11 +880,11 @@ func ProofOfArrayOrdered(paramList []string) {
 var TemplateType string = "template.TypeName"
 
 type GoTemplateFunctionAnalysis struct {
-	Analysis                     *GoFunctionAnalysis
-	ToDeductionTemplateParamMap  map[string][]string
-	ToDeductionTemplateReturnMap map[string][]string
-	ParamDeductionMap            map[string]GoValueType
-	ReturnDeductionMap           map[string]GoValueType
+	Analysis                           *GoFunctionAnalysis
+	ToDeductionTemplateParamIndexList  []int
+	ToDeductionTemplateReturnIndexList []int
+	ParamDeductionMapList              []map[int]GoValueType
+	ReturnDeductionMapList             []map[int]GoValueType
 }
 
 // GoCommandToolTemplater go 语言命令行工具：模板代码生成器
@@ -917,36 +917,34 @@ func GoCommandToolTemplater(paramList []string) {
 	for functionName, functionAnalysis := range goFileAnalysis.FunctionMap {
 		utility2.TestOutput("function name: %v", functionName)
 
-		toDeductionTemplateParamMap := make(map[string][]string)
-		toDeductionTemplateReturnMap := make(map[string][]string)
-		paramDeductionMap := make(map[string]GoValueType)
-		returnDeductionMap := make(map[string]GoValueType)
+		toDeductionTemplateParamIndexList := make([]int, 0)
+		toDeductionTemplateReturnIndexList := make([]int, 0)
 
-		for param, paramType := range functionAnalysis.ParamsMap {
-			if paramType == TemplateType {
-				utility2.TestOutput("in param list, template value %v", param)
-				toDeductionTemplateParamMap[param] = make([]string, 0)
+		for paramIndex, paramValue := range functionAnalysis.ParamsMap {
+			if paramValue.Type == TemplateType {
+				utility2.TestOutput("in param list, template value %v", paramValue.Name)
+				toDeductionTemplateParamIndexList = append(toDeductionTemplateParamIndexList, paramIndex)
 			}
 		}
 
-		for returnValue, returnType := range functionAnalysis.ReturnMap {
-			if returnType == TemplateType {
-				utility2.TestOutput("in return list, template value %v", returnValue)
-				toDeductionTemplateReturnMap[returnValue] = make([]string, 0)
+		for returnIndex, returnValue := range functionAnalysis.ReturnMap {
+			if returnValue.Type == TemplateType {
+				utility2.TestOutput("in return list, template value %v", returnValue.Name)
+				toDeductionTemplateReturnIndexList = append(toDeductionTemplateReturnIndexList, returnIndex)
 			}
 		}
 
-		utility2.TestOutput("to deduction template param map: %v", toDeductionTemplateParamMap)
-		utility2.TestOutput("to deduction template return map: %v", toDeductionTemplateReturnMap)
+		utility2.TestOutput("to deduction template param index list: %v", toDeductionTemplateParamIndexList)
+		utility2.TestOutput("to deduction template return index list: %v", toDeductionTemplateReturnIndexList)
 
-		if len(toDeductionTemplateParamMap) != 0 || len(toDeductionTemplateReturnMap) != 0 {
+		if len(toDeductionTemplateParamIndexList) != 0 || len(toDeductionTemplateReturnIndexList) != 0 {
 			utility2.TestOutput("function %v is template function, need deduction", functionName)
 			templateFunctionAnalysisMap[functionName] = &GoTemplateFunctionAnalysis{
-				Analysis:                     functionAnalysis,
-				ToDeductionTemplateParamMap:  toDeductionTemplateParamMap,
-				ToDeductionTemplateReturnMap: toDeductionTemplateReturnMap,
-				ParamDeductionMap:            make(map[string]GoValueType),
-				ReturnDeductionMap:           make(map[string]GoValueType),
+				Analysis:                           functionAnalysis,
+				ToDeductionTemplateParamIndexList:  toDeductionTemplateParamIndexList,
+				ToDeductionTemplateReturnIndexList: toDeductionTemplateReturnIndexList,
+				ParamDeductionMapList:              make([]map[int]GoValueType, 0),
+				ReturnDeductionMapList:             make([]map[int]GoValueType, 0),
 			}
 		}
 	}
@@ -959,11 +957,13 @@ func GoCommandToolTemplater(paramList []string) {
 			if templateFunctionAnalysis, isTemplateFunction := templateFunctionAnalysisMap[callFunction]; isTemplateFunction {
 				for _, callParam := range callParamList {
 					utility2.TestOutput("%v call inner package template function %v, param %v", functionName, callFunction, callParam)
-					for _, param := range callParam {
+					paramDeductionMap := make(map[int]GoValueType)
+					for index, param := range callParam {
 						paramType := goValueTypeDeduction(param)
 						utility2.TestOutput("deduction: param %v to type %v", param, paramType)
-						templateFunctionAnalysis.DeductionResult = append(templateFunctionAnalysis.DeductionResult)
+						paramDeductionMap[index] = paramType
 					}
+					templateFunctionAnalysis.ParamDeductionMapList = append(templateFunctionAnalysis.ParamDeductionMapList, paramDeductionMap)
 				}
 			}
 		}

@@ -324,12 +324,18 @@ type GoFileAnalysis struct {
 type GoFunctionAnalysis struct {
 	Class               string
 	Name                string
-	ParamsMap           map[string]string
-	ReturnMap           map[string]string
+	ParamsMap           map[int]*GoFunctionVariable
+	ReturnMap           map[int]*GoFunctionVariable
 	InnerPackageCallMap map[string][][]string            // call function from inner package
 	OuterPackageCallMap map[string]map[string][][]string // call function from outer package
 	MemberCallMap       map[string]map[string][][]string // call member function
 	BodyContent         []byte
+}
+
+type GoFunctionVariable struct {
+	Index int
+	Name  string
+	Type  string
 }
 
 func analyzeGoFile(toAnalyzeFile, toWriteFile *os.File) (*GoFileAnalysis, error) {
@@ -366,15 +372,15 @@ func analyzeGoFile(toAnalyzeFile, toWriteFile *os.File) (*GoFileAnalysis, error)
 	analyzeGoFunctionBody(goFileAnalysis, toAnalyzeContent)
 
 	// 输出解析结果
-	functionListContent := outputAnalyzeGoFileResult(goFileAnalysis)
+	// functionListContent := outputAnalyzeGoFileResult(goFileAnalysis)
 
 	// 输出到文件
-	if toWriteFile != nil {
-		_, writeError := toWriteFile.WriteString(functionListContent)
-		if writeError != nil {
-			return nil, writeError
-		}
-	}
+	// if toWriteFile != nil {
+	// 	_, writeError := toWriteFile.WriteString(functionListContent)
+	// 	if writeError != nil {
+	// 		return nil, writeError
+	// 	}
+	// }
 
 	return goFileAnalysis, nil
 }
@@ -464,8 +470,8 @@ func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte
 	functionDefinitionByteList := functionDefinitionRegexp.FindAll(fileContentByte, -1)
 	for _, functionDefinitionByte := range functionDefinitionByteList {
 		functionAnalysis := &GoFunctionAnalysis{
-			ParamsMap:           make(map[string]string),
-			ReturnMap:           make(map[string]string),
+			ParamsMap:           make(map[int]*GoFunctionVariable),
+			ReturnMap:           make(map[int]*GoFunctionVariable),
 			InnerPackageCallMap: make(map[string][][]string),
 			OuterPackageCallMap: make(map[string]map[string][][]string),
 			MemberCallMap:       make(map[string]map[string][][]string),
@@ -488,16 +494,24 @@ func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte
 		if paramsStringWithPunctuationMark != "" {
 			paramsString := bracketsContentRegexp.ReplaceAllString(paramsStringWithPunctuationMark, "$CONTENT")
 			typeString := ""
-			unknownTypeNameList := make([]string, 0)
-			for _, paramString := range strings.Split(paramsString, ",") {
+			unknownTypeVariableList := make([]*GoFunctionVariable, 0)
+			for index, paramString := range strings.Split(paramsString, ",") {
 				paramStringList := strings.Split(strings.TrimSpace(paramString), " ")
 				if len(paramStringList) == 1 {
-					unknownTypeNameList = append(unknownTypeNameList, paramStringList[0])
+					unknownTypeVariableList = append(unknownTypeVariableList, &GoFunctionVariable{
+						Index: index,
+						Name:  paramStringList[0],
+					})
 				} else {
-					functionAnalysis.ParamsMap[paramStringList[0]] = paramStringList[1]
+					functionAnalysis.ParamsMap[index] = &GoFunctionVariable{
+						Index: index,
+						Name:  paramStringList[0],
+						Type:  paramStringList[1],
+					}
 					if typeString == "" {
-						for _, unknownTypeName := range unknownTypeNameList {
-							functionAnalysis.ParamsMap[unknownTypeName] = paramStringList[1]
+						for _, unknownTypeVariable := range unknownTypeVariableList {
+							unknownTypeVariable.Type = paramStringList[1]
+							functionAnalysis.ParamsMap[unknownTypeVariable.Index] = unknownTypeVariable
 						}
 					}
 				}
@@ -507,12 +521,20 @@ func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte
 		returnStringWithPunctuationMark := functionDefinitionRegexp.ReplaceAllString(string(functionDefinitionByte), "$RETURN")
 		if returnStringWithPunctuationMark != "" {
 			returnContent := bracketsContentRegexp.ReplaceAllString(returnStringWithPunctuationMark, "$CONTENT")
-			for _, returnString := range strings.Split(returnContent, ",") {
+			for index, returnString := range strings.Split(returnContent, ",") {
 				returnStringList := strings.Split(strings.TrimSpace(returnString), " ")
 				if len(returnStringList) == 1 {
-					functionAnalysis.ReturnMap[fmt.Sprintf("%v", len(functionAnalysis.ReturnMap))] = returnStringList[0]
+					functionAnalysis.ReturnMap[len(functionAnalysis.ReturnMap)] = &GoFunctionVariable{
+						Index: index,
+						Name:  fmt.Sprintf("%v", len(functionAnalysis.ReturnMap)),
+						Type:  returnStringList[0],
+					}
 				} else if len(returnStringList) == 2 {
-					functionAnalysis.ReturnMap[returnStringList[0]] = returnStringList[1]
+					functionAnalysis.ReturnMap[len(functionAnalysis.ReturnMap)] = &GoFunctionVariable{
+						Index: index,
+						Name:  returnStringList[0],
+						Type:  returnStringList[1],
+					}
 				}
 			}
 		}
@@ -666,14 +688,14 @@ func outputAnalyzeGoFileResult(goFileAnalysis *GoFileAnalysis) string {
 			// function params
 			functionParamListContent := ""
 			if len(functionAnalysis.ParamsMap) != 0 {
-				functionParamListContent = parseGoFunctionParamOrReturnListContent(templateStyleRegexp, functionAnalysis.ParamsMap, functionParamList)
+				// functionParamListContent = parseGoFunctionParamOrReturnListContent(templateStyleRegexp, functionAnalysis.ParamsMap, functionParamList)
 			}
 			functionDefinitionContent = strings.Replace(functionDefinitionContent, global.AnalyzeRPFunctionParamList, functionParamListContent, -1)
 
 			// function return
 			functionReturnListContent := ""
 			if len(functionAnalysis.ReturnMap) != 0 {
-				functionReturnListContent = parseGoFunctionParamOrReturnListContent(templateStyleRegexp, functionAnalysis.ReturnMap, functionReturnList)
+				// functionReturnListContent = parseGoFunctionParamOrReturnListContent(templateStyleRegexp, functionAnalysis.ReturnMap, functionReturnList)
 			}
 			functionDefinitionContent = strings.Replace(functionDefinitionContent, global.AnalyzeRPFunctionReturnList, functionReturnListContent, -1)
 
