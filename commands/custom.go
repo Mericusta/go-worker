@@ -953,48 +953,47 @@ func GoCommandToolTemplater(paramList []string) {
 	utility2.TestOutput("get template functions caller from file analysis")
 	for functionName, functionAnalysis := range goFileAnalysis.FunctionMap {
 		// inner package call function
-		for callFunction, callParamList := range functionAnalysis.InnerPackageCallMap {
-			if templateFunctionAnalysis, isTemplateFunction := templateFunctionAnalysisMap[callFunction]; isTemplateFunction {
-				for _, callParam := range callParamList {
-					utility2.TestOutput("%v call inner package template function %v, param %v", functionName, callFunction, callParam)
-					paramDeductionMap := make(map[int]GoValueType)
-					for index, param := range callParam {
-						paramType := goValueTypeDeduction(param)
-						utility2.TestOutput("deduction: param %v to type %v", param, paramType)
-						paramDeductionMap[index] = paramType
-					}
-					templateFunctionAnalysis.ParamDeductionMapList = append(templateFunctionAnalysis.ParamDeductionMapList, paramDeductionMap)
-				}
-			}
-		}
+		deduction(functionAnalysis.InnerPackageCallMap, templateFunctionAnalysisMap, func(callFunction string, callParam []string) {
+			utility2.TestOutput(ui.CommonNote2)
+			utility2.TestOutput("%v call inner package template function %v, param %v", functionName, callFunction, callParam)
+		}, func(param string, paramType GoValueType) {
+			utility2.TestOutput("deduction: param %v to type %v", param, paramType)
+		})
 
 		// outer package call function
-		for callFrom, callFunctionCountMap := range functionAnalysis.OuterPackageCallMap {
-			for callFunction, callParamList := range callFunctionCountMap {
-				if _, isTemplateFunction := templateFunctionAnalysisMap[callFunction]; isTemplateFunction {
-					for _, callParam := range callParamList {
-						utility2.TestOutput("%v call package %v template function %v, param %v", functionName, callFrom, callFunction, callParam)
-						for _, param := range callParam {
-							paramType := goValueTypeDeduction(param)
-							utility2.TestOutput("deduction: param %v to type %v", param, paramType)
-						}
-					}
-				}
-			}
+		for callFrom, callFunctionMap := range functionAnalysis.OuterPackageCallMap {
+			deduction(callFunctionMap, templateFunctionAnalysisMap, func(callFunction string, callParam []string) {
+				utility2.TestOutput(ui.CommonNote2)
+				utility2.TestOutput("%v call package %v template function %v, param %v", functionName, callFrom, callFunction, callParam)
+			}, func(param string, paramType GoValueType) {
+				utility2.TestOutput("deduction: param %v to type %v", param, paramType)
+			})
 		}
 
 		// member call function
-		for callFrom, callFunctionCountMap := range functionAnalysis.MemberCallMap {
-			for callFunction, callParamList := range callFunctionCountMap {
-				if _, isTemplateFunction := templateFunctionAnalysisMap[callFunction]; isTemplateFunction {
-					for _, callParam := range callParamList {
-						utility2.TestOutput("%v call member %v template function %v, param %v", functionName, callFrom, callFunction, callParam)
-						for _, param := range callParam {
-							paramType := goValueTypeDeduction(param)
-							utility2.TestOutput("deduction: param %v to type %v", param, paramType)
-						}
-					}
+		for callFrom, callFunctionMap := range functionAnalysis.MemberCallMap {
+			deduction(callFunctionMap, templateFunctionAnalysisMap, func(callFunction string, callParam []string) {
+				utility2.TestOutput(ui.CommonNote2)
+				utility2.TestOutput("%v call member %v template function %v, param %v", functionName, callFrom, callFunction, callParam)
+			}, func(param string, paramType GoValueType) {
+				utility2.TestOutput("deduction: param %v to type %v", param, paramType)
+			})
+		}
+	}
+}
+
+func deduction(callFunctionMap map[string][][]string, templateFunctionAnalysisMap map[string]*GoTemplateFunctionAnalysis, testLog1 func(string, []string), testLog2 func(string, GoValueType)) {
+	for callFunction, callParamList := range callFunctionMap {
+		if templateFunctionAnalysis, isTemplateFunction := templateFunctionAnalysisMap[callFunction]; isTemplateFunction {
+			for _, callParam := range callParamList {
+				testLog1(callFunction, callParam)
+				paramDeductionMap := make(map[int]GoValueType)
+				for index, param := range callParam {
+					paramType := goValueTypeDeduction(param)
+					testLog2(param, paramType)
+					paramDeductionMap[index] = paramType
 				}
+				templateFunctionAnalysis.ParamDeductionMapList = append(templateFunctionAnalysis.ParamDeductionMapList, paramDeductionMap)
 			}
 		}
 	}
