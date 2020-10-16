@@ -322,7 +322,9 @@ type GoFileAnalysis struct {
 
 // GoFunctionAnalysis go 函数分析结果
 type GoFunctionAnalysis struct {
-	Class               string
+	Class               string // 所属类
+	ClassValue          string // 类对象命名
+	ClassValueType      string // 类对象类型
 	Name                string
 	ParamsMap           map[int]*GoFunctionVariable
 	ReturnMap           map[int]*GoFunctionVariable
@@ -485,6 +487,8 @@ func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte
 				ui.OutputWarnInfo(ui.CMDAnalyzeGoFunctionDefinitionSyntaxError)
 				continue
 			}
+			functionAnalysis.ClassValue = memberStringList[0]
+			functionAnalysis.ClassValueType = memberStringList[1]
 			functionAnalysis.Class = utility.TraitStructName(memberStringList[1])
 		}
 		// 解析函数名
@@ -526,7 +530,7 @@ func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte
 				if len(returnStringList) == 1 {
 					functionAnalysis.ReturnMap[len(functionAnalysis.ReturnMap)] = &GoFunctionVariable{
 						Index: index,
-						Name:  fmt.Sprintf("%v", len(functionAnalysis.ReturnMap)),
+						Name:  "",
 						Type:  returnStringList[0],
 					}
 				} else if len(returnStringList) == 2 {

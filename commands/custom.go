@@ -880,11 +880,14 @@ func ProofOfArrayOrdered(paramList []string) {
 var TemplateType string = "template.TypeName"
 
 type GoTemplateFunctionAnalysis struct {
-	Analysis                           *GoFunctionAnalysis
-	ToDeductionTemplateParamIndexList  []int
+	Analysis *GoFunctionAnalysis
+	// DeductionAnalysis *GoFunctionAnalysis
+	// ToDeductionTemplateParamIndexList  []int
 	ToDeductionTemplateReturnIndexList []int
-	ParamDeductionMapList              []map[int]GoValueType
-	ReturnDeductionMapList             []map[int]GoValueType
+	ParamDeductionGroupMap             map[int]map[int]GoValueType
+	// ParamDeductionAnalysisList         []*GoTemplateFunctionAnalysis
+	ReturnDeductionGroupMap map[int]map[int]GoValueType
+	DeductionFunctionMap    map[int]map[int]string // param deduction index : return deduction index : deduction function
 }
 
 // GoCommandToolTemplater go 语言命令行工具：模板代码生成器
@@ -940,52 +943,123 @@ func GoCommandToolTemplater(paramList []string) {
 		if len(toDeductionTemplateParamIndexList) != 0 || len(toDeductionTemplateReturnIndexList) != 0 {
 			utility2.TestOutput("function %v is template function, need deduction", functionName)
 			templateFunctionAnalysisMap[functionName] = &GoTemplateFunctionAnalysis{
-				Analysis:                           functionAnalysis,
-				ToDeductionTemplateParamIndexList:  toDeductionTemplateParamIndexList,
+				Analysis: functionAnalysis,
+				// DeductionAnalysis: &GoFunctionAnalysis{
+				// 	Class:          functionAnalysis.Class,
+				// 	ClassValue:     functionAnalysis.ClassValue,
+				// 	ClassValueType: functionAnalysis.ClassValueType,
+				// },
+				// ToDeductionTemplateParamIndexList:  toDeductionTemplateParamIndexList,
 				ToDeductionTemplateReturnIndexList: toDeductionTemplateReturnIndexList,
-				ParamDeductionMapList:              make([]map[int]GoValueType, 0),
-				ReturnDeductionMapList:             make([]map[int]GoValueType, 0),
+				ParamDeductionGroupMap:             make(map[int]map[int]GoValueType, 0),
+				// ParamDeductionAnalysisList:         make([]*GoTemplateFunctionAnalysis, 0),
+				ReturnDeductionGroupMap: make(map[int]map[int]GoValueType, 0),
+				DeductionFunctionMap:    make(map[int]map[int]string),
 			}
 		}
 	}
 
-	// get template functions caller
-	utility2.TestOutput("get template functions caller from file analysis")
+	utility2.TestOutput("deduction function param type")
 	for functionName, functionAnalysis := range goFileAnalysis.FunctionMap {
 		// inner package call function
-		deduction(functionAnalysis.InnerPackageCallMap, templateFunctionAnalysisMap, func(callFunction string, callParam []string) {
+		paramDeduction(functionAnalysis.InnerPackageCallMap, templateFunctionAnalysisMap, func(callFunction string, callParam []string) {
 			utility2.TestOutput(ui.CommonNote2)
 			utility2.TestOutput("%v call inner package template function %v, param %v", functionName, callFunction, callParam)
 		}, func(param string, paramType GoValueType) {
-			utility2.TestOutput("deduction: param %v to type %v", param, paramType)
+			utility2.TestOutput("param deduction: param %v to type %v", param, paramType)
 		})
 
 		// outer package call function
 		for callFrom, callFunctionMap := range functionAnalysis.OuterPackageCallMap {
-			deduction(callFunctionMap, templateFunctionAnalysisMap, func(callFunction string, callParam []string) {
+			paramDeduction(callFunctionMap, templateFunctionAnalysisMap, func(callFunction string, callParam []string) {
 				utility2.TestOutput(ui.CommonNote2)
 				utility2.TestOutput("%v call package %v template function %v, param %v", functionName, callFrom, callFunction, callParam)
 			}, func(param string, paramType GoValueType) {
-				utility2.TestOutput("deduction: param %v to type %v", param, paramType)
+				utility2.TestOutput("param deduction: param %v to type %v", param, paramType)
 			})
 		}
 
 		// member call function
 		for callFrom, callFunctionMap := range functionAnalysis.MemberCallMap {
-			deduction(callFunctionMap, templateFunctionAnalysisMap, func(callFunction string, callParam []string) {
+			paramDeduction(callFunctionMap, templateFunctionAnalysisMap, func(callFunction string, callParam []string) {
 				utility2.TestOutput(ui.CommonNote2)
 				utility2.TestOutput("%v call member %v template function %v, param %v", functionName, callFrom, callFunction, callParam)
 			}, func(param string, paramType GoValueType) {
-				utility2.TestOutput("deduction: param %v to type %v", param, paramType)
+				utility2.TestOutput("param deduction: param %v to type %v", param, paramType)
 			})
 		}
 	}
+
+	utility2.TestOutput("deduction function return type")
+	for _, templateFunctionAnalysis := range templateFunctionAnalysisMap {
+		utility2.TestOutput(ui.CommonNote2)
+		templateFunctionAnalysis.ReturnDeductionGroupMap = returnDeduction(templateFunctionAnalysis)
+	}
+
+	for functionName, templateFunctionAnalysis := range templateFunctionAnalysisMap {
+		utility2.TestOutput("function %v deduction", functionName)
+		for deductionGroup, paramIndexDeductionMap := range templateFunctionAnalysis.ParamDeductionGroupMap {
+			utility2.TestOutput("deductionGroup = %v, paramIndexDeductionMap = %v", deductionGroup, paramIndexDeductionMap)
+			deductionFunction := goFunctionDefintion
+
+			// replace class
+			rpClassContent := goTemplateRPFunctionClass
+			if len(templateFunctionAnalysis.Analysis.ClassValue) != 0 && len(templateFunctionAnalysis.Analysis.ClassValueType) != 0 {
+				rpClassContent = fmt.Sprintf("%v ", rpClassContent)
+				rpClassContent = strings.Replace(rpClassContent, goTemplateRPFunctionClassValueKey, templateFunctionAnalysis.Analysis.ClassValue, 1)
+				rpClassContent = strings.Replace(rpClassContent, goTemplateRPFunctionClassValueTypeKey, templateFunctionAnalysis.Analysis.ClassValueType, 1)
+				deductionFunction = strings.Replace(deductionFunction, goTemplateRPFunctionClassKey, rpClassContent, 1)
+			} else {
+				deductionFunction = strings.Replace(deductionFunction, goTemplateRPFunctionClassKey, "", 1)
+			}
+
+			// replace function name
+			deductionFunction = strings.Replace(deductionFunction, goTemplateRPFunctionNameKey, functionName, 1)
+
+			// replace param list
+			rpParamListContent := ""
+			for index, deductionType := range paramIndexDeductionMap {
+				paramValueTypeContent := goTemplateRPFunctionParamList
+				paramValueTypeContent = strings.Replace(paramValueTypeContent, goTemplateRPFunctionParamValueKey, templateFunctionAnalysis.Analysis.ParamsMap[index].Name, 1)
+				paramValueTypeContent = strings.Replace(paramValueTypeContent, goTemplateRPFunctionParamTypeKey, typeStringMap[deductionType], 1)
+				if rpParamListContent == "" {
+					rpParamListContent = paramValueTypeContent
+				} else {
+					rpParamListContent = fmt.Sprintf("%v, %v", rpParamListContent, paramValueTypeContent)
+				}
+			}
+			deductionFunction = strings.Replace(deductionFunction, goTemplateRPFunctionParamListKey, rpParamListContent, 1)
+
+			// replace return list
+			returnDeductionMap := templateFunctionAnalysis.ReturnDeductionGroupMap[deductionGroup]
+			utility2.TestOutput("returnDeductionMap = %v", returnDeductionMap)
+			rpReturnListContent := ""
+			for deductionIndex, deductionType := range returnDeductionMap {
+				returnValueName := templateFunctionAnalysis.Analysis.ReturnMap[deductionIndex].Name
+				returnValueTypeContent := goTemplateRPFunctionReturnList
+				returnValueTypeContent = strings.Replace(returnValueTypeContent, goTemplateRPFunctionReturnValueKey, returnValueName, 1)
+				returnValueTypeContent = strings.Replace(returnValueTypeContent, goTemplateRPFunctionReturnTypeKey, typeStringMap[deductionType], 1)
+				if rpReturnListContent == "" {
+					rpReturnListContent = returnValueTypeContent
+				} else {
+					rpReturnListContent = fmt.Sprintf("%v, %v", rpReturnListContent, returnValueTypeContent)
+				}
+			}
+			if len(returnDeductionMap) > 1 {
+				rpReturnListContent = fmt.Sprintf(" (%v)", rpReturnListContent)
+			}
+			deductionFunction = strings.Replace(deductionFunction, goTemplateRPFunctionReturnListKey, rpReturnListContent, 1)
+
+			utility2.TestOutput("deductionFunction = %v", deductionFunction)
+		}
+		utility2.TestOutput(ui.CommonNote2)
+	}
 }
 
-func deduction(callFunctionMap map[string][][]string, templateFunctionAnalysisMap map[string]*GoTemplateFunctionAnalysis, testLog1 func(string, []string), testLog2 func(string, GoValueType)) {
+func paramDeduction(callFunctionMap map[string][][]string, templateFunctionAnalysisMap map[string]*GoTemplateFunctionAnalysis, testLog1 func(string, []string), testLog2 func(string, GoValueType)) {
 	for callFunction, callParamList := range callFunctionMap {
 		if templateFunctionAnalysis, isTemplateFunction := templateFunctionAnalysisMap[callFunction]; isTemplateFunction {
-			for _, callParam := range callParamList {
+			for deductionGroup, callParam := range callParamList {
 				testLog1(callFunction, callParam)
 				paramDeductionMap := make(map[int]GoValueType)
 				for index, param := range callParam {
@@ -993,39 +1067,78 @@ func deduction(callFunctionMap map[string][][]string, templateFunctionAnalysisMa
 					testLog2(param, paramType)
 					paramDeductionMap[index] = paramType
 				}
-				templateFunctionAnalysis.ParamDeductionMapList = append(templateFunctionAnalysis.ParamDeductionMapList, paramDeductionMap)
+				templateFunctionAnalysis.ParamDeductionGroupMap[deductionGroup] = paramDeductionMap
 			}
 		}
 	}
 }
 
+// after param deduction
+// for each param deduction result
+// it will deduction more than one gourp
+func returnDeduction(afterParamDeductionTemplateFunctionAnalysis *GoTemplateFunctionAnalysis) map[int]map[int]GoValueType {
+	returnDeductionGroup := make(map[int]map[int]GoValueType)
+	for deductionGroup := range afterParamDeductionTemplateFunctionAnalysis.ParamDeductionGroupMap {
+		returnDeductionMap := make(map[int]GoValueType, 0)
+		for _, deductionIndex := range afterParamDeductionTemplateFunctionAnalysis.ToDeductionTemplateReturnIndexList {
+			// TODO:
+			returnValueName := afterParamDeductionTemplateFunctionAnalysis.Analysis.ReturnMap[deductionIndex].Name
+			returnDeductionMap[deductionIndex] = tUnknown
+			utility2.TestOutput("deduction function %v No.%v return value(name: %v) type to %v", afterParamDeductionTemplateFunctionAnalysis.Analysis.Name, deductionIndex, returnValueName, tUnknown)
+		}
+		returnDeductionGroup[deductionGroup] = returnDeductionMap
+	}
+	return returnDeductionGroup
+}
+
+var goFunctionDefintion string = "func RP_CLASSRP_FUNCTION_NAME(RP_PARAM_LIST)RP_RETURN_LIST {}"
+
+var goTemplateRPFunctionClassKey string = "RP_CLASS"
+var goTemplateRPFunctionClass string = "(CLASS_VALUE CLASS_VALUE_TYPE)"
+
+var goTemplateRPFunctionClassValueKey string = "CLASS_VALUE"
+var goTemplateRPFunctionClassValueTypeKey string = "CLASS_VALUE_TYPE"
+
+var goTemplateRPFunctionNameKey string = "RP_FUNCTION_NAME"
+
+var goTemplateRPFunctionParamListKey string = "RP_PARAM_LIST"
+var goTemplateRPFunctionParamList string = "PARAM_VALUE PARAM_TYPE"
+var goTemplateRPFunctionParamValueKey = "PARAM_VALUE"
+var goTemplateRPFunctionParamTypeKey string = "PARAM_TYPE"
+
+var goTemplateRPFunctionReturnListKey string = "RP_RETURN_LIST"
+var goTemplateRPFunctionReturnList string = "RETURN_VALUE RETURN_TYPE"
+var goTemplateRPFunctionReturnValueKey = "RETURN_VALUE"
+var goTemplateRPFunctionReturnTypeKey string = "RETURN_TYPE"
+
 type GoValueType int
 
 const (
-	tUnknown    GoValueType = iota // 0
-	tInt                           // 1
-	tInt8                          // 2
-	tInt16                         // 3
-	tInt32                         // 4
-	tInt64                         // 5
-	tUint                          // 6
-	tUint8                         // 7
-	tUint16                        // 8
-	tUint32                        // 9
-	tUint64                        // 10
-	tFloat32                       // 11
-	tFloat64                       // 12
-	tComplex64                     // 13
-	tComplex128                    // 14
-	tBool                          // 15
-	tString                        // 16
-	tUintptr                       // 17
-	fFunc                          // 18
+	tUnknown    GoValueType = iota // 0  0
+	tInt                           // 1  1
+	tInt8                          // 2  2
+	tInt16                         // 3  3
+	tInt32                         // 4  4
+	tInt64                         // 5  5
+	tUint                          // 6  6
+	tUint8                         // 7  7
+	tUint16                        // 8  8
+	tUint32                        // 9  9
+	tUint64                        // 10 A
+	tFloat32                       // 11 B
+	tFloat64                       // 12 C
+	tComplex64                     // 13 D
+	tComplex128                    // 14 E
+	tBool                          // 15 F
+	tString                        // 16 G
+	tUintptr                       // 17 H
+	fFunc                          // 18 I
 )
 
 var atomicExpressionEnumGoValueTypeMap map[global.AtomicExpressionEnum]GoValueType
 var goTypeConvertRegexp *regexp.Regexp
 var valueTypeStringMap map[string]GoValueType
+var typeStringMap map[GoValueType]string
 
 func checkTypeAtomicExpression() {
 	atomicExpressionEnumGoValueTypeMap = map[global.AtomicExpressionEnum]GoValueType{
@@ -1061,6 +1174,12 @@ func checkTypeAtomicExpression() {
 		"bool":       tBool,
 		"string":     tString,
 		"uintptr":    tUintptr,
+	}
+
+	typeStringMap = make(map[GoValueType]string)
+	typeStringMap[tUnknown] = TemplateType
+	for typeString, typeEnum := range valueTypeStringMap {
+		typeStringMap[typeEnum] = typeString
 	}
 }
 
