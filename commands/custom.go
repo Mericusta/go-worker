@@ -887,7 +887,7 @@ type GoTemplateFunctionAnalysis struct {
 	ParamDeductionGroupMap             map[int]map[int]GoValueType
 	// ParamDeductionAnalysisList         []*GoTemplateFunctionAnalysis
 	ReturnDeductionGroupMap map[int]map[int]GoValueType
-	DeductionFunctionMap    map[int]map[int]string // param deduction index : return deduction index : deduction function
+	DeductionFunctionMap    map[int]string // deduction group : deduction function
 }
 
 // GoCommandToolTemplater go 语言命令行工具：模板代码生成器
@@ -954,7 +954,7 @@ func GoCommandToolTemplater(paramList []string) {
 				ParamDeductionGroupMap:             make(map[int]map[int]GoValueType, 0),
 				// ParamDeductionAnalysisList:         make([]*GoTemplateFunctionAnalysis, 0),
 				ReturnDeductionGroupMap: make(map[int]map[int]GoValueType, 0),
-				DeductionFunctionMap:    make(map[int]map[int]string),
+				DeductionFunctionMap:    make(map[int]string),
 			}
 		}
 	}
@@ -996,10 +996,11 @@ func GoCommandToolTemplater(paramList []string) {
 		templateFunctionAnalysis.ReturnDeductionGroupMap = returnDeduction(templateFunctionAnalysis)
 	}
 
+	utility2.TestOutput("generate new function definition with deduction type")
 	for functionName, templateFunctionAnalysis := range templateFunctionAnalysisMap {
 		utility2.TestOutput("function %v deduction", functionName)
 		for deductionGroup, paramIndexDeductionMap := range templateFunctionAnalysis.ParamDeductionGroupMap {
-			utility2.TestOutput("deductionGroup = %v, paramIndexDeductionMap = %v", deductionGroup, paramIndexDeductionMap)
+			utility2.TestOutput("deductionGroup = %v", deductionGroup)
 			deductionFunction := goFunctionDefintion
 
 			// replace class
@@ -1014,9 +1015,10 @@ func GoCommandToolTemplater(paramList []string) {
 			}
 
 			// replace function name
-			deductionFunction = strings.Replace(deductionFunction, goTemplateRPFunctionNameKey, functionName, 1)
+			deductionFunction = strings.Replace(deductionFunction, goTemplateRPFunctionNameKey, fmt.Sprintf("%vType%v", functionName, deductionGroup), 1)
 
 			// replace param list
+			utility2.TestOutput("paramIndexDeductionMap = %v", paramIndexDeductionMap)
 			rpParamListContent := ""
 			for index, deductionType := range paramIndexDeductionMap {
 				paramValueTypeContent := goTemplateRPFunctionParamList
@@ -1051,8 +1053,18 @@ func GoCommandToolTemplater(paramList []string) {
 			deductionFunction = strings.Replace(deductionFunction, goTemplateRPFunctionReturnListKey, rpReturnListContent, 1)
 
 			utility2.TestOutput("deductionFunction = %v", deductionFunction)
+			templateFunctionAnalysis.DeductionFunctionMap[deductionGroup] = deductionFunction
 		}
 		utility2.TestOutput(ui.CommonNote2)
+	}
+
+	utility2.TestOutput("output new function definition to file")
+	for _, templateFunctionAnalysis := range templateFunctionAnalysisMap {
+		for deductionGroup, deductionFunction := range templateFunctionAnalysis.DeductionFunctionMap {
+			function := strings.Replace(deductionFunction, goTemplateRPFunctionBodyKey, string(templateFunctionAnalysis.Analysis.BodyContent), 1)
+			utility2.TestOutput("%v function = \n%v\n", deductionGroup, function)
+			utility2.TestOutput(ui.CommonNote2)
+		}
 	}
 }
 
@@ -1091,7 +1103,7 @@ func returnDeduction(afterParamDeductionTemplateFunctionAnalysis *GoTemplateFunc
 	return returnDeductionGroup
 }
 
-var goFunctionDefintion string = "func RP_CLASSRP_FUNCTION_NAME(RP_PARAM_LIST)RP_RETURN_LIST {}"
+var goFunctionDefintion string = "func RP_CLASSRP_FUNCTION_NAME(RP_PARAM_LIST)RP_RETURN_LIST RP_FUNCTION_BODY"
 
 var goTemplateRPFunctionClassKey string = "RP_CLASS"
 var goTemplateRPFunctionClass string = "(CLASS_VALUE CLASS_VALUE_TYPE)"
@@ -1111,28 +1123,30 @@ var goTemplateRPFunctionReturnList string = "RETURN_VALUE RETURN_TYPE"
 var goTemplateRPFunctionReturnValueKey = "RETURN_VALUE"
 var goTemplateRPFunctionReturnTypeKey string = "RETURN_TYPE"
 
+var goTemplateRPFunctionBodyKey = "RP_FUNCTION_BODY"
+
 type GoValueType int
 
 const (
-	tUnknown    GoValueType = iota // 0  0
-	tInt                           // 1  1
-	tInt8                          // 2  2
-	tInt16                         // 3  3
-	tInt32                         // 4  4
-	tInt64                         // 5  5
-	tUint                          // 6  6
-	tUint8                         // 7  7
-	tUint16                        // 8  8
-	tUint32                        // 9  9
-	tUint64                        // 10 A
-	tFloat32                       // 11 B
-	tFloat64                       // 12 C
-	tComplex64                     // 13 D
-	tComplex128                    // 14 E
-	tBool                          // 15 F
-	tString                        // 16 G
-	tUintptr                       // 17 H
-	fFunc                          // 18 I
+	tUnknown    GoValueType = iota // 0
+	tInt                           // 1
+	tInt8                          // 2
+	tInt16                         // 3
+	tInt32                         // 4
+	tInt64                         // 5
+	tUint                          // 6
+	tUint8                         // 7
+	tUint16                        // 8
+	tUint32                        // 9
+	tUint64                        // 10
+	tFloat32                       // 11
+	tFloat64                       // 12
+	tComplex64                     // 13
+	tComplex128                    // 14
+	tBool                          // 15
+	tString                        // 16
+	tUintptr                       // 17
+	fFunc                          // 18
 )
 
 var atomicExpressionEnumGoValueTypeMap map[global.AtomicExpressionEnum]GoValueType
