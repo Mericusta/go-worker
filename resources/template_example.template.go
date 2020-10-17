@@ -21,11 +21,12 @@ func TemplateOperatorPlus(t1 template.TypeName, t2 template.TypeName) (t3 templa
 	return t3, t1 - t2
 }
 
-func TemplateSelfIncrease(t1 template.TypeName) template.TypeName {
-	return func(template.TypeName) template.TypeName {
-		return t1 + 1
-	}
-}
+// // 不支持匿名函数推导
+// func TemplateSelfIncrease(t1 template.TypeName) template.TypeName {
+// 	return func(template.TypeName) template.TypeName {
+// 		return t1 + 1
+// 	}
+// }
 
 // template struct dedection
 
