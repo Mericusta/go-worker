@@ -9,6 +9,9 @@ var CMDAnalyzeOccursError string = "File to analyze occurs error: %v"
 // CMDAnalyzeGoKeywordRegexpNotExist 分析 go 文件，关键词的解析式不存在
 var CMDAnalyzeGoKeywordRegexpNotExist string = "Analyze Go file, keyword %v regexp does not exist"
 
+// CMDAnalyzeGoDuplicateFunctionInPackage 分析 go 文件，关键词的解析式不存在
+var CMDAnalyzeGoDuplicateFunctionInPackage string = "Analyze Go file, duplicate function %v in package %v"
+
 // CMDAnalyzeGoFunctionDefinitionSyntaxError 分析 go 文件，函数定义语法错误
 var CMDAnalyzeGoFunctionDefinitionSyntaxError string = "Analyze Go file, function definition syntax error"
 
@@ -23,6 +26,9 @@ var CMDAnalyzeGoFileAnalysisNotExist string = "Analyze Go project, file No %v do
 
 // CMDAnalyzeGoPackageAnalysisNotExist 分析 go 项目，包的分析结果不存在
 var CMDAnalyzeGoPackageAnalysisNotExist string = "Analyze Go project, package %v does not have analysis"
+
+// CMDAnalyzeGoFunctionAnalysisNotExist 分析 go 项目，函数的分析结果不存在
+var CMDAnalyzeGoFunctionAnalysisNotExist string = "Analyze Go project, function %v does not have analysis"
 
 // AnalyzeGoFileResultTemplate 分析 go 文件，输出结果的文本模板
 var AnalyzeGoFileResultTemplate = `

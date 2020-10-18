@@ -34,7 +34,7 @@ var AEConvertOptionValue AtomicExpression = `csv(\s+[_\w-]+){1}`
 var AEConvertACOptionValue AtomicExpression = `(create|append)(\s+[_\/\.\w-]+){1}`
 
 // AEAnalyzeOptionValue 解析 analyze 指令参数的表达式
-var AEAnalyzeOptionValue AtomicExpression = `(file|directory)(\s+[_\.\w-]+)+`
+// var AEAnalyzeOptionValue AtomicExpression = `(file|directory)(\s+[_\.\w-]+)+`
 
 // AEGoKeywordPackageValue go package 关键词的表达式
 var AEGoKeywordPackageValue AtomicExpression = `^package\s+[_\w-]+`

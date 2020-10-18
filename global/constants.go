@@ -48,6 +48,7 @@ var (
 	PunctuationMarkRightBracket     = ')'
 	PunctuationMarkLeftCurlyBraces  = '{'
 	PunctuationMarkRightCurlyBraces = '}'
+	PunctuationMarkPoint            = '.'
 )
 
 // 逻辑常量

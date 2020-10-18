@@ -72,7 +72,7 @@ func registAtomicExpression() {
 		global.AECreateOptionValue:     AECreateOptionValue,
 		global.AEConvertOptionValue:    AEConvertOptionValue,
 		global.AEConvertACOptionValue:  AEConvertACOptionValue,
-		global.AEAnalyzeOptionValue:    AEAnalyzeOptionValue,
+		// global.AEAnalyzeOptionValue:    AEAnalyzeOptionValue,
 		global.AEGoKeywordPackageValue: AEGoKeywordPackageValue,
 		global.AETemplateStyle:         AETemplateStyle,
 		global.AESpaceLine:             AESpaceLine,
@@ -108,10 +108,10 @@ func registTemplateKeywordReplaceString() {
 		template.TK_CreateOVExpression:        string(AECreateOptionValue),
 		template.TK_ConvertOVExpression:       string(AEConvertOptionValue),
 		template.TK_ConvertACOptionExpression: string(AEConvertACOptionValue),
-		template.TK_AnalyzeOVExpression:       string(AEAnalyzeOptionValue),
-		template.TK_Identifier:                string(AEIdentifier),
-		template.TK_AERemoveOVExpression:      string(AERemoveOptionValue),
-		template.TK_OIVExpression:             string(template.TEOptionIgnoreValue),
+		// template.TK_AnalyzeOVExpression:       string(AEAnalyzeOptionValue),
+		template.TK_Identifier:           string(AEIdentifier),
+		template.TK_AERemoveOVExpression: string(AERemoveOptionValue),
+		template.TK_OIVExpression:        string(template.TEOptionIgnoreValue),
 	}
 }
 

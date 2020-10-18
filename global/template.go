@@ -22,6 +22,10 @@ const (
 	OptionIgnoreValueTemplate TemplateEnum = 7
 	// GoTypeConvertTemplate go 内建类型转换的模板
 	GoTypeConvertTemplate TemplateEnum = 8
+	// GoVariableDeclarationTemplate go variable 声明的模板
+	GoVariableDeclarationTemplate TemplateEnum = 9
+	// GoVariableInitializationTemplate go variable 初始化的模板
+	GoVariableInitializationTemplate TemplateEnum = 10
 
 	// 外部模板
 

@@ -1,24 +1,88 @@
 package templateexample
 
-import "github.com/go-worker/resources/template"
+import (
+	f "fmt"
 
+	"github.com/go-worker/resources/template"
+)
+
+var var1 ExampleStruct
+var var2 string = "asd"
+var var3 int = 1
+
+// common interface
+type ExampleInterface interface {
+	Example()
+}
+
+// common struct
 type ExampleStruct struct {
-	v int // This is a struct member
+	v interface{} // This is a struct member
 }
 
-// Plus is a function
-func (es ExampleStruct) Plus(oes ExampleStruct) {
-
+// common struct define template function
+func (es ExampleStruct) Set(t1 template.TypeName) {
+	es.v = t1
 }
 
-// template function deduction
+// common struct define template function
+func (es ExampleStruct) Get() template.TypeName {
+	return es.v
+}
 
-// template <typename T1, typename T2, typename T3>
-// func templateOperatorPlus(t1 T1, t2 T2) T3 {
+// ----------------------------------------------------------------
+
+// template interface
+type TemplateInterface interface {
+	TExample(t1 template.TypeName, t2 template.TypeName)
+}
+
+// template struct
+type TemplateStruct struct {
+	tV template.TypeName
+	iV int
+}
+
+// template struct define template function
+func (ts TemplateStruct) Set(v template.TypeName) {
+	ts.tV = v
+}
+
+// template struct define template function
+func (ts TemplateStruct) Get() template.TypeName {
+	return ts.tV
+}
+
+// ----------------------------------------------------------------
+
+// common struct implement common interface
+func (es ExampleStruct) Example() {
+	f.Println("This is Example from ExampleStruct")
+}
+
+// template struct implement common interface
+func (ts TemplateStruct) Example() {
+	f.Println("This is Example from TemplateStruct")
+}
+
+// ----------------------------------------------------------------
+
+// common struct implement template interface
+func (es ExampleStruct) TExample(t1 template.TypeName, t2 template.TypeName) {
+	f.Println("This is TExample from ExampleStruct")
+}
+
+// template struct implement template interface
+func (ts TemplateStruct) TExample(t1 template.TypeName, t2 template.TypeName) {
+	f.Println("This is TExample from TemplateStruct")
+}
+
+// ----------------------------------------------------------------
+
+// define template function
 func TemplateOperatorPlus(t1 template.TypeName, t2 template.TypeName) (t3 template.TypeName, t4 template.TypeName) {
 	// Go 中没有运算符重载，所以使用该 templateAdd 的的 template.TypeName 只能被推导为内建支持 + 运算符的类型
-	t3 = t1 + t2
-	return t3, t1 - t2
+	return t1, t2
 }
 
 // // 不支持匿名函数推导
@@ -28,51 +92,70 @@ func TemplateOperatorPlus(t1 template.TypeName, t2 template.TypeName) (t3 templa
 // 	}
 // }
 
-// template struct dedection
-
-type TemplateStruct struct {
-	tV template.TypeName
-	iV int
-}
-
-func (ts TemplateStruct) Result() template.TypeName {
-	return ts.tV + ts.iV
-}
-
 func templateCaller() {
 	// T -> func(int, int) int
-	v1 := TemplateOperatorPlus(1, 2)
+	v1, _ := TemplateOperatorPlus(1, 2)
 
 	// T -> func(int, float64) float64 -> implicit type conversion
-	v2 := TemplateOperatorPlus(1, 2.0)
+	_, v2 := TemplateOperatorPlus(1, 2.0)
+
+	// T -> func(string, string) string -> maybe STL Vector
+	TemplateOperatorPlus("1", "2")
 
 	// T -> func([]int, []int) []int -> maybe STL Vector
-	v3 := TemplateOperatorPlus([]int{1}, []int{2})
+	TemplateOperatorPlus([]int{1}, []int{2})
 
 	// T -> func(ExampleStruct, ExampleStruct) ExampleStruct
-	v4 := TemplateOperatorPlus(ExampleStruct{v: 1}, ExampleStruct{v: 2})
+	es, _ := TemplateOperatorPlus(ExampleStruct{v: 1}, ExampleStruct{v: v1})
+
+	// T -> func(String)
+	es.Set(v2)
+
+	// T -> func()interface{}
+	es.Get()
+
+	// call interface Example
+	es.Example()
+
+	// call template interface TExample
+	es.TExample()
 
 	// T -> func(*ExampleStruct, *ExampleStruct) *ExampleStruct
-	v5 := TemplateOperatorPlus(&ExampleStruct{v: 1}, &ExampleStruct{v: 2})
+	TemplateOperatorPlus(&ExampleStruct{v: 1}, &ExampleStruct{v: 2})
+
+	var ts TemplateStruct
 
 	// T -> struct { int, int }
-	v6 := TemplateStruct{tV: 1, iV: 2}
+	ts = TemplateStruct{tV: 1, iV: 2}
 
 	// T -> struct { float64, int }
-	v7 := TemplateStruct{tV: 1.0, iV: 2}
+	ts = TemplateStruct{tV: 1.0, iV: 2}
 
 	// T -> struct { exampleStruct, int }
-	v8 := TemplateStruct{tV: ExampleStruct{}, iV: 2}
+	ts = TemplateStruct{tV: ExampleStruct{}, iV: 2}
 
-	// T -> func() exampleStruct
-	v9 := v8.Result()
+	// T -> func(ExampleStruct)
+	ts.Set(es)
+
+	// T -> func() ExampleStruct
+	v4 := ts.Get()
+
+	// call interface Example
+	ts.Example()
+
+	// call template interface TExample
+	ts.TExample(v4, v4)
 
 	// no call
-	v10 := TemplateOperatorPlus
+	v5 := TemplateOperatorPlus
 
 	// T -> func(int, float32) float32 -> explicit specify type to float32
-	v11 := TemplateOperatorPlus(float32(1), float32(2.0))
+	v5(float32(1), float32(2.0))
 
 	// T -> func(complex128, complex128) -> complex128
-	v12 := TemplateOperatorPlus(1+2i, 1.1+2.2i)
+	v5(1+2i, 1.1+2.2i)
+
+	f.Println("This is Println call from alias f -> fmt")
+
+	v6 := v5
 }
