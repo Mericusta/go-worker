@@ -33,6 +33,7 @@ func init() {
 		4: RandomGenerateOnmyojiEquipments,
 		5: ProofOfArrayOrdered,
 		6: GoCommandToolTemplater,
+		7: GoFileSplitter,
 	}
 }
 
@@ -1227,4 +1228,133 @@ func goValueTypeDeduction(valueString string) goValueType {
 	}
 
 	return tUnknown
+}
+
+// ----------------------------------------------------------------
+
+// custom execute 7 resources/template_example.template.go
+
+// Command Example: custom execute 7 resources/template_example.template.go
+// Command Expression:
+// - custom                                : command const content
+// - execute                               : command const content
+// - 7                                     : specify executor
+// - resources/template_example.template.go: specify a file to split
+
+type goFileLineState int
+
+func (s goFileLineState) String() string {
+	switch s {
+	case lineStateNone:
+		return "None"
+	case lineStateSpace:
+		return "Space"
+	case lineStateComment:
+		return "Comment"
+	case lineStatePackage:
+		return "Package"
+	case lineStateImport:
+		return "Import"
+	}
+	return ""
+}
+
+const (
+	lineStateNone    = 1 << iota // 0000 0000
+	lineStateSpace               // 0000 0001
+	lineStateComment             // 0000 0010
+	lineStateTODO1
+	lineStateTODO2
+	lineStateTODO3
+	lineStateTODO4
+	lineStateTODO5
+	lineStateTODO6
+	lineStatePackage // 0000 0001 0000 0000
+	lineStateImport  // 0000 0010 0000 0000
+)
+
+// GoFileSplitter go 文件切分示例
+func GoFileSplitter(paramList []string) {
+	if len(paramList) < 1 {
+		ui.OutputErrorInfo(ui.CMDCustomExecutorHasNotEnoughParam, 5)
+		return
+	}
+	filename := paramList[0]
+
+	// keywordPackageRegexp, hasKeywordPackageRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEGoKeywordPackageValue]
+
+	if !checkGoSyntaxKeyworkRegexp() {
+		return
+	}
+
+	// fileAnalysis := &goFileAnalysis{
+	// 	FilePath: filename,
+	// }
+
+	var lineState goFileLineState = lineStateNone
+
+	packageScopeTodo := true
+	importScopeTodo := true
+
+	utility2.TestOutput("split file content to line text one by one")
+	utility.ReadFileLineOneByOne(filename, func(line string) (next bool) {
+		next = true
+
+		utility2.TestOutput("line = |%v|", line)
+
+		if len(line) == 0 {
+			lineState = lineStateSpace
+			return next
+		}
+
+		// package
+		if packageScopeTodo || regexps.AtomicExpressionEnumRegexpMap[global.AEGoKeywordPackageValue].MatchString(line) {
+			lineState = lineStatePackage
+
+			utility2.TestOutput("line state is: %v", lineState.String())
+			utility2.TestOutput("line is package: |%v|", line)
+
+			packageScopeTodo = false
+
+			// next = false
+			return next
+		}
+
+		// import
+		if importScopeTodo || regexps.GetRegexpByTemplateEnum(global.GoKeywordImportValueTemplate).MatchString(line) {
+			lineState = lineStateImport
+
+			utility2.TestOutput("line state is: %v", lineState.String())
+			utility2.TestOutput("line is import: |%v|", line)
+
+			importScopeTodo = false
+
+			next = false
+			return next
+		} else {
+			next = false
+			return next
+		}
+
+		return next
+	})
+}
+
+func checkGoSyntaxKeyworkRegexp() bool {
+	if keywordPackageRegexp, hasKeywordPackageRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEGoKeywordPackageValue]; !hasKeywordPackageRegexp || keywordPackageRegexp == nil {
+		ui.OutputErrorInfo(ui.CommonWarn3, global.AEGoKeywordPackageValue)
+		return false
+	}
+
+	if keywordImportValueRegexp := regexps.GetRegexpByTemplateEnum(global.GoKeywordImportValueTemplate); keywordImportValueRegexp == nil {
+		ui.OutputErrorInfo(ui.CommonWarn5, global.GoKeywordImportValueTemplate)
+		return false
+	}
+
+	if goKeywordImportAliasRegexp := regexps.GetRegexpByTemplateEnum(global.GoKeywordImportAliasTemplate); goKeywordImportAliasRegexp == nil {
+		ui.OutputErrorInfo(ui.CommonWarn5, global.GoKeywordImportAliasTemplate)
+		return false
+	}
+
+	return true
 }

@@ -735,6 +735,9 @@ func analyzeGoFunctionBody(goFileAnalysis *goFileAnalysis, fileContentByte []byt
 				}
 			} else if punctuationMarkLeftBracket != -1 && punctuationMarkLeftCurlyBracesIndex == -1 {
 				utility2.TestOutput("variableInit is function call return %v", variableInitString)
+				// if punctuationMarkPointIndex != -1 {
+
+				// }
 			} else if punctuationMarkLeftBracket == -1 && punctuationMarkLeftCurlyBracesIndex != -1 {
 				utility2.TestOutput("variableInit is struct instance: %v", variableInitString[0:punctuationMarkLeftCurlyBracesIndex])
 			} else {

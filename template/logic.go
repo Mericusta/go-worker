@@ -24,8 +24,19 @@ var TEOptionIgnoreValue TemplateExpression = `ignore(\s+TK_PATH){1}`
 // TEGoTypeConvert go 内建类型转换的模板表达式
 var TEGoTypeConvert TemplateExpression = `^(?P<IDENTIFIER>TK_IDENTIFIER)\(.*\)$`
 
-// TEGoVariableDeclaration go variable 声明的模板
+// TEGoVariableDeclaration go variable 声明的模板表达式
 var TEGoVariableDeclaration TemplateExpression = `var\s+(?P<NAME>TK_IDENTIFIER)\s+(?P<TYPE>TK_IDENTIFIER(\.TK_IDENTIFIER)?)`
 
-// TEGoVariableInitialization go variable 初始化的模板
+// TEGoVariableInitialization go variable 初始化的模板表达式
 var TEGoVariableInitialization TemplateExpression = `(?P<LIST>[^\n]*?)\s*:=\s*(?P<INIT>.*?)\n`
+
+// TEGoLinePackage Go 语言 package 行的模板表达式
+var TEGoLinePackage TemplateExpression = `^package\s+(?P<NAME>TK_IDENTIFIER)`
+
+// TEGoLineImportOneLine Go 语言 import 单行的模板表达式
+var TEGoLineImportOneLine TemplateExpression = `^import\s+(?P<ALIAS>\w+\s+)??TK_DoubleQuotesContent`
+
+// TEGoLineImportMultiLineStart Go 语言 import 多行起始位置的模板表达式
+var TEGoLineImportMultiLineStart TemplateExpression = `^import\s+\(`
+
+var TEGoLineScopeEnd
