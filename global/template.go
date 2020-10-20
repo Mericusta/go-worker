@@ -27,6 +27,16 @@ const (
 	// GoVariableInitializationTemplate go variable 初始化的模板
 	GoVariableInitializationTemplate TemplateEnum = 10
 
+	// GoFileSplitterScopePackageTemplate Go 语言文件切分器 package 域的模板表达式
+	GoFileSplitterScopePackageTemplate TemplateEnum = 11
+	// GoFileSplitterScopeImportTemplate Go 语言文件切分器 import 域的模板表达式
+	GoFileSplitterScopeImportTemplate TemplateEnum = 12
+
+	// // GoFileSplitterScopeImportTemplate Go 语言 import 多行内包名与路径的表达式
+	// GoFileSplitterScopeImportTemplate TemplateEnum = 12
+	// // GoLineImportOneLine Go 语言 import 单行的模板表达式
+	// GoLineImportOneLine TemplateEnum = 13
+
 	// 外部模板
 
 	// CommandBindTemplate bind 指令模板

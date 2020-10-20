@@ -30,13 +30,14 @@ var TEGoVariableDeclaration TemplateExpression = `var\s+(?P<NAME>TK_IDENTIFIER)\
 // TEGoVariableInitialization go variable 初始化的模板表达式
 var TEGoVariableInitialization TemplateExpression = `(?P<LIST>[^\n]*?)\s*:=\s*(?P<INIT>.*?)\n`
 
-// TEGoLinePackage Go 语言 package 行的模板表达式
-var TEGoLinePackage TemplateExpression = `^package\s+(?P<NAME>TK_IDENTIFIER)`
+// TEGoFileSplitterScopePackage Go 语言文件切分器 package 域的模板表达式
+var TEGoFileSplitterScopePackage TemplateExpression = `^package\s+(?P<NAME>TK_IDENTIFIER)`
 
-// TEGoLineImportOneLine Go 语言 import 单行的模板表达式
-var TEGoLineImportOneLine TemplateExpression = `^import\s+(?P<ALIAS>\w+\s+)??TK_DoubleQuotesContent`
+// TEGoFileSplitterScopeImport Go 语言文件切分器 import 域的模板表达式
+var TEGoFileSplitterScopeImport TemplateExpression = `^import(\s*\(|\s+TK_GoKeywordImportAlias)`
 
-// TEGoLineImportMultiLineStart Go 语言 import 多行起始位置的模板表达式
-var TEGoLineImportMultiLineStart TemplateExpression = `^import\s+\(`
+// TEGoLineImportMultiLineAliasPackage Go 语言 import 多行内包名与路径的表达式
+var TEGoLineImportMultiLineAliasPackage TemplateExpression = `^\s*TK_GoKeywordImportAlias`
 
-var TEGoLineScopeEnd
+// // TEGoLineImportOneLine Go 语言 import 单行的模板表达式
+// var TEGoLineImportOneLine TemplateExpression = `^(import\s+)?(?P<ALIAS>\w+\s+)??TK_DoubleQuotesContent`

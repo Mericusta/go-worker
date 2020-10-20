@@ -24,15 +24,17 @@ func init() {
 		global.CmdTemplater: TECommandTemplater,
 	}
 	TemplateExpressionMap = map[global.TemplateEnum]TemplateExpression{
-		global.OptionParentValueTemplate:        TEOptionParentValue,
-		global.OptionOutputValueTemplate:        TEOptionOutputValue,
-		global.OptionIgnoreValueTemplate:        TEOptionIgnoreValue,
-		global.GoKeywordImportValueTemplate:     TEGoKeywordImportValue,
-		global.GoKeywordImportAliasTemplate:     TEGoKeywordImportAlias,
-		global.GoFunctionDefinitionTemplate:     TEGoFunctionDefinition,
-		global.GoFunctionCallTemplate:           TEGoFunctionCall,
-		global.GoTypeConvertTemplate:            TEGoTypeConvert,
-		global.GoVariableDeclarationTemplate:    TEGoVariableDeclaration,
-		global.GoVariableInitializationTemplate: TEGoVariableInitialization,
+		global.OptionParentValueTemplate:          TEOptionParentValue,
+		global.OptionOutputValueTemplate:          TEOptionOutputValue,
+		global.OptionIgnoreValueTemplate:          TEOptionIgnoreValue,
+		global.GoKeywordImportValueTemplate:       TEGoKeywordImportValue,
+		global.GoKeywordImportAliasTemplate:       TEGoKeywordImportAlias,
+		global.GoFunctionDefinitionTemplate:       TEGoFunctionDefinition,
+		global.GoFunctionCallTemplate:             TEGoFunctionCall,
+		global.GoTypeConvertTemplate:              TEGoTypeConvert,
+		global.GoVariableDeclarationTemplate:      TEGoVariableDeclaration,
+		global.GoVariableInitializationTemplate:   TEGoVariableInitialization,
+		global.GoFileSplitterScopePackageTemplate: TEGoFileSplitterScopePackage,
+		global.GoFileSplitterScopeImportTemplate:  TEGoFileSplitterScopeImport,
 	}
 }

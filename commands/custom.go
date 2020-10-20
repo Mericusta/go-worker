@@ -1251,10 +1251,12 @@ func (s goFileLineState) String() string {
 		return "Space"
 	case lineStateComment:
 		return "Comment"
-	case lineStatePackage:
-		return "Package"
-	case lineStateImport:
-		return "Import"
+	case lineStatePackageScope:
+		return "Package Scope"
+	case lineStateImportScope:
+		return "Import Scope"
+	case lineStateImportOneLine:
+		return "Import One-Line"
 	}
 	return ""
 }
@@ -1263,15 +1265,41 @@ const (
 	lineStateNone    = 1 << iota // 0000 0000
 	lineStateSpace               // 0000 0001
 	lineStateComment             // 0000 0010
-	lineStateTODO1
+	lineStateInScope             // 0000 0100
 	lineStateTODO2
 	lineStateTODO3
 	lineStateTODO4
 	lineStateTODO5
 	lineStateTODO6
-	lineStatePackage // 0000 0001 0000 0000
-	lineStateImport  // 0000 0010 0000 0000
+	lineStatePackageScope  // 0000 0001 0000 0000
+	lineStateImportScope   // 0000 0010 0000 0000
+	lineStateImportOneLine // 0000 0100 0000 0000
 )
+
+// split file content to different scopes
+// scope has some attribute: struct scope
+// scope has its type:
+// - package
+// - import
+// - package variable/constant
+// - struct/interface
+// - function
+
+type scope struct {
+	LineStart int
+	LineEnd   int
+	ScopeType int
+	Content   int
+	Analysis  interface{}
+}
+
+type fileScope struct {
+	Package            *scope
+	Import             *scope
+	PackageVariable    *scope
+	TypeDefinition     *scope
+	FunctionDefinition *scope
+}
 
 // GoFileSplitter go 文件切分示例
 func GoFileSplitter(paramList []string) {
@@ -1280,8 +1308,6 @@ func GoFileSplitter(paramList []string) {
 		return
 	}
 	filename := paramList[0]
-
-	// keywordPackageRegexp, hasKeywordPackageRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEGoKeywordPackageValue]
 
 	if !checkGoSyntaxKeyworkRegexp() {
 		return
@@ -1297,64 +1323,104 @@ func GoFileSplitter(paramList []string) {
 	importScopeTodo := true
 
 	utility2.TestOutput("split file content to line text one by one")
+	lineIndex := 0
 	utility.ReadFileLineOneByOne(filename, func(line string) (next bool) {
+		lineIndex++
 		next = true
 
 		utility2.TestOutput("line = |%v|", line)
 
 		if len(line) == 0 {
-			lineState = lineStateSpace
+			// lineState = lineStateSpace
 			return next
 		}
 
-		// package
-		if packageScopeTodo || regexps.AtomicExpressionEnumRegexpMap[global.AEGoKeywordPackageValue].MatchString(line) {
-			lineState = lineStatePackage
-
-			utility2.TestOutput("line state is: %v", lineState.String())
-			utility2.TestOutput("line is package: |%v|", line)
-
-			packageScopeTodo = false
-
-			// next = false
-			return next
+		if lineIndex > 8 {
+			return false
 		}
 
-		// import
-		if importScopeTodo || regexps.GetRegexpByTemplateEnum(global.GoKeywordImportValueTemplate).MatchString(line) {
-			lineState = lineStateImport
+		// package scope
+		if lineState == lineStatePackageScope || regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopePackageTemplate).MatchString(line) {
+			if packageScopeTodo {
+				lineState = lineStatePackageScope
 
-			utility2.TestOutput("line state is: %v", lineState.String())
-			utility2.TestOutput("line is import: |%v|", line)
+				utility2.TestOutput("line state is: %v", lineState.String())
+				utility2.TestOutput("line = |%v|", line)
 
-			importScopeTodo = false
+				packageScopeTodo = false
+				utility2.TestOutput(ui.CommonNote2)
 
-			next = false
-			return next
-		} else {
-			next = false
-			return next
+				// next = false
+				return next
+			}
+			lineState = lineStateNone
 		}
+
+		// import scope
+		if lineState == lineStateImportScope || regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeImportTemplate).MatchString(line) {
+			if importScopeTodo {
+				lineState = lineStateImportScope
+
+				utility2.TestOutput("line state is: %v", lineState.String())
+				utility2.TestOutput("line = |%v|", line)
+
+				importScopeTodo = false
+
+				// next = false
+				return next
+			}
+			lineState = lineStateNone
+		}
+
+		// if importScopeTodo && lineState == (lineState|lineStateInScope) && regexps.GetRegexpByTemplateEnum(global.GoLineImportMultiLineAliasPackage).MatchString(line) {
+		// 	utility2.TestOutput("line state is: %v", lineState.String())
+		// 	utility2.TestOutput("line is import multi-line content: |%v|", line)
+
+		// 	// importScopeTodo = false
+
+		// 	next = false
+		// 	return next
+		// } else {
+		// 	utility2.TestOutput("Not match line: |%v|", line)
+		// 	importScopeTodo = false
+		// 	next = false
+		// 	return next
+		// }
 
 		return next
 	})
 }
 
 func checkGoSyntaxKeyworkRegexp() bool {
-	if keywordPackageRegexp, hasKeywordPackageRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEGoKeywordPackageValue]; !hasKeywordPackageRegexp || keywordPackageRegexp == nil {
-		ui.OutputErrorInfo(ui.CommonWarn3, global.AEGoKeywordPackageValue)
+	if goFileSplitterScopePackageRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopePackageTemplate); goFileSplitterScopePackageRegexp == nil {
+		ui.OutputErrorInfo(ui.CommonWarn5, global.GoFileSplitterScopePackageTemplate)
 		return false
 	}
 
-	if keywordImportValueRegexp := regexps.GetRegexpByTemplateEnum(global.GoKeywordImportValueTemplate); keywordImportValueRegexp == nil {
-		ui.OutputErrorInfo(ui.CommonWarn5, global.GoKeywordImportValueTemplate)
+	if goFileSplitterScopeImportRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeImportTemplate); goFileSplitterScopeImportRegexp == nil {
+		ui.OutputErrorInfo(ui.CommonWarn5, global.GoFileSplitterScopeImportTemplate)
 		return false
 	}
 
-	if goKeywordImportAliasRegexp := regexps.GetRegexpByTemplateEnum(global.GoKeywordImportAliasTemplate); goKeywordImportAliasRegexp == nil {
-		ui.OutputErrorInfo(ui.CommonWarn5, global.GoKeywordImportAliasTemplate)
-		return false
-	}
+	// if goLineImportMultiLineStartRegexp, hasGoLineImportMultiLineStartRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEGoLineImportMultiLineStart]; !hasGoLineImportMultiLineStartRegexp || goLineImportMultiLineStartRegexp == nil {
+	// 	ui.OutputErrorInfo(ui.CommonWarn3, global.AEGoLineImportMultiLineStart)
+	// 	return false
+	// }
+
+	// if goLineImportMultiLineAliasPackageRegexp := regexps.GetRegexpByTemplateEnum(global.GoLineImportMultiLineAliasPackage); goLineImportMultiLineAliasPackageRegexp == nil {
+	// 	ui.OutputErrorInfo(ui.CommonWarn5, global.GoLineImportMultiLineAliasPackage)
+	// 	return false
+	// }
+
+	// if goLineScopeEndRegexp, hasGoLineScopeEndRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEGoLineScopeEnd]; !hasGoLineScopeEndRegexp || goLineScopeEndRegexp == nil {
+	// 	ui.OutputErrorInfo(ui.CommonWarn3, global.AEGoLineScopeEnd)
+	// 	return false
+	// }
+
+	// if goLineImportOneLineRegexp := regexps.GetRegexpByTemplateEnum(global.GoLineImportOneLine); goLineImportOneLineRegexp == nil {
+	// 	ui.OutputErrorInfo(ui.CommonWarn5, global.GoLineImportOneLine)
+	// 	return false
+	// }
 
 	return true
 }
