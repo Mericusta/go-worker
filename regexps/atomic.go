@@ -69,5 +69,5 @@ var AEFloat AtomicExpression = `^\d+\.\d+$`
 // AEComplex 复数数值的表达式
 var AEComplex AtomicExpression = `^\d+(\.\d+)?\+\d+(\.\d+)?i$`
 
-// AEGoLineScopeEnd Go 语言 scope 结束的表达式
-var AEGoLineScopeEnd AtomicExpression = `^\s*(?P<SCOPE>[\)\}]+)`
+// AEGoFileSplitterScopeEnd Go 语言文件切分器域结束的表达式
+var AEGoFileSplitterScopeEnd AtomicExpression = `^\s*(?P<SCOPE>[\)\}]+)`

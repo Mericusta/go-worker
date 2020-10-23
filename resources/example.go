@@ -32,7 +32,7 @@ func (command *Analyze) Execute() error {
 	projectPath := config.GetCurrentProjectPath()
 	fileType := config.WorkerConfig.ProjectSyntax
 	if fileType == "" {
-		ui.OutputWarnInfo(ui.CommonWarn1)
+		ui.OutputWarnInfo(ui.CommonError14)
 	}
 
 	if command.Params.parentValue != "" {
@@ -147,7 +147,7 @@ func (command *Analyze) parseCommandParams() error {
 	if optionValueRegexp, hasOptionValueRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEAnalyzeOptionValue]; hasOptionValueRegexp {
 		optionValueString = optionValueRegexp.FindString(command.CommandStruct.InputString)
 	} else {
-		ui.OutputWarnInfo(ui.CommonWarn2, "analyze", "file|directory|package")
+		ui.OutputWarnInfo(ui.CommonError15, "analyze", "file|directory|package")
 	}
 	if optionValueString == "" {
 		return fmt.Errorf(ui.CommonError1)
@@ -161,7 +161,7 @@ func (command *Analyze) parseCommandParams() error {
 	if parentValueRegexp := regexps.GetRegexpByTemplateEnum(global.OptionParentValueTemplate); parentValueRegexp != nil {
 		parentValue = parentValueRegexp.FindString(command.CommandStruct.InputString)
 	} else {
-		ui.OutputWarnInfo(ui.CommonWarn2, "analyze", "parent")
+		ui.OutputWarnInfo(ui.CommonError15, "analyze", "parent")
 	}
 	if parentValue != "" {
 		parentValueList := strings.Split(parentValue, " ")
@@ -171,7 +171,7 @@ func (command *Analyze) parseCommandParams() error {
 	if outputValueRegexp := regexps.GetRegexpByTemplateEnum(global.OptionOutputValueTemplate); outputValueRegexp != nil {
 		outputValue = outputValueRegexp.FindString(command.CommandStruct.InputString)
 	} else {
-		ui.OutputWarnInfo(ui.CommonWarn2, "analyze", "output")
+		ui.OutputWarnInfo(ui.CommonError15, "analyze", "output")
 	}
 	if outputValue != "" {
 		outputValueList := strings.Split(outputValue, " ")
@@ -293,7 +293,7 @@ func analyzeGoImportPackage(goFileAnalysis *GoFileAnalysis, fileContentByte []by
 				}
 			}
 		} else {
-			ui.OutputWarnInfo(ui.CommonWarn3, global.GoKeywordImportAliasTemplate)
+			ui.OutputWarnInfo(ui.CommonError16, global.GoKeywordImportAliasTemplate)
 		}
 
 	} else {
@@ -304,7 +304,7 @@ func analyzeGoImportPackage(goFileAnalysis *GoFileAnalysis, fileContentByte []by
 func analyzeGoFunctionDefinition(goFileAnalysis *GoFileAnalysis, fileContentByte []byte) {
 	bracketsContentRegexp, hasBracketsContentRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEBracketsContent]
 	if !hasBracketsContentRegexp {
-		ui.OutputWarnInfo(ui.CommonWarn3, global.AEBracketsContent)
+		ui.OutputWarnInfo(ui.CommonError16, global.AEBracketsContent)
 		return
 	}
 	functionDefinitionRegexp := regexps.GetRegexpByTemplateEnum(global.GoFunctionDefinitionTemplate)
@@ -423,7 +423,7 @@ func analyzeGoFunctionBody(goFileAnalysis *GoFileAnalysis, fileContentByte []byt
 func outputAnalyzeGoFileResult(goFileAnalysis *GoFileAnalysis) string {
 	templateStyleRegexp, hasTemplateStyleRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AETemplateStyle]
 	if !hasTemplateStyleRegexp {
-		ui.OutputWarnInfo(ui.CommonWarn3, global.AETemplateStyle)
+		ui.OutputWarnInfo(ui.CommonError16, global.AETemplateStyle)
 		return ""
 	}
 

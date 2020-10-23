@@ -61,7 +61,7 @@ func (command *Bind) parseCommandParams() error {
 	if optionValueRegexp, hasOptionValueRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEBindOptionValue]; hasOptionValueRegexp {
 		optionValueString = optionValueRegexp.FindString(command.CommandStruct.InputString)
 	} else {
-		ui.OutputWarnInfo(ui.CommonWarn2, "bind", "project|syntax")
+		ui.OutputWarnInfo(ui.CommonError15, "bind", "project|syntax")
 	}
 	if optionValueString == "" {
 		return fmt.Errorf(ui.CommonError1)

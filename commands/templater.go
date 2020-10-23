@@ -24,7 +24,7 @@ func (command *Templater) parseCommandParams() error {
 	// if optionValueRegexp, hasOptionValueRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AERemoveOptionValue]; hasOptionValueRegexp {
 	// 	optionValueString = optionValueRegexp.FindString(command.CommandStruct.InputString)
 	// } else {
-	// 	ui.OutputWarnInfo(ui.CommonWarn2, "remove", "file|type")
+	// 	ui.OutputWarnInfo(ui.CommonError15, "remove", "file|type")
 	// }
 	// if optionValueString == "" {
 	// 	return fmt.Errorf(ui.CommonError1)
@@ -38,7 +38,7 @@ func (command *Templater) parseCommandParams() error {
 	// if parentValueRegexp := regexps.GetRegexpByTemplateEnum(global.OptionParentValueTemplate); parentValueRegexp != nil {
 	// 	parentValue = parentValueRegexp.FindString(command.CommandStruct.InputString)
 	// } else {
-	// 	ui.OutputWarnInfo(ui.CommonWarn2, "remove", "parent")
+	// 	ui.OutputWarnInfo(ui.CommonError15, "remove", "parent")
 	// }
 	// if parentValue != "" {
 	// 	parentValueList := strings.Split(parentValue, " ")
@@ -48,7 +48,7 @@ func (command *Templater) parseCommandParams() error {
 	// if outputValueRegexp := regexps.GetRegexpByTemplateEnum(global.OptionOutputValueTemplate); outputValueRegexp != nil {
 	// 	outputValue = outputValueRegexp.FindString(command.CommandStruct.InputString)
 	// } else {
-	// 	ui.OutputWarnInfo(ui.CommonWarn2, "analyze", "output")
+	// 	ui.OutputWarnInfo(ui.CommonError15, "analyze", "output")
 	// }
 	// if outputValue != "" {
 	// 	outputValueList := strings.Split(outputValue, " ")

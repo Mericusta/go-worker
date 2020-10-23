@@ -37,8 +37,8 @@ const (
 	AEComplex AtomicExpressionEnum = 14
 	// // AEGoLineImportMultiLineStart Go 语言 import 多行起始位置的表达式
 	// AEGoLineImportMultiLineStart AtomicExpressionEnum = 15
-	// AEGoLineScopeEnd Go 语言 scope 结束的表达式
-	AEGoLineScopeEnd AtomicExpressionEnum = 17
+	// AEGoFileSplitterScopeEnd Go 语言文件切分器域结束的表达式
+	AEGoFileSplitterScopeEnd AtomicExpressionEnum = 17
 
 	// AEBindOptionValue bind 指令参数的表达式
 	AEBindOptionValue AtomicExpressionEnum = 101

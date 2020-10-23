@@ -1,29 +1,37 @@
+// This is template example file
+
 package templateexample
 
 import (
 	f "fmt"
 
+	_ "math"
+
 	"github.com/go-worker/resources/template"
 )
+
+// package template
 
 var var1 ExampleStruct
 var var2 string = "asd"
 var var3 int = 1
 
 // common interface
+
+type EmptyInterface interface{}
 type ExampleInterface interface {
 	Example()
 }
 
 // common struct
+
+type OneLineStruct struct{ v int }
 type ExampleStruct struct {
 	v interface{} // This is a struct member
 }
 
 // common struct define template function
-func (es ExampleStruct) Set(t1 template.TypeName) {
-	es.v = t1
-}
+func (es ExampleStruct) Set(t1 template.TypeName) { es.v = t1 } // return T
 
 // common struct define template function
 func (es ExampleStruct) Get() template.TypeName {

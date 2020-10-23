@@ -1178,12 +1178,12 @@ func checkTypeAtomicExpression() {
 	}
 	for toCheckTypeAtomicExpressionEnum := range atomicExpressionEnumGoValueTypeMap {
 		if _, hasRegexp := regexps.AtomicExpressionEnumRegexpMap[toCheckTypeAtomicExpressionEnum]; !hasRegexp {
-			ui.OutputWarnInfo(ui.CommonWarn3, toCheckTypeAtomicExpressionEnum)
+			ui.OutputWarnInfo(ui.CommonError16, toCheckTypeAtomicExpressionEnum)
 		}
 	}
 
 	if goTypeConvertRegexp = regexps.GetRegexpByTemplateEnum(global.GoTypeConvertTemplate); goTypeConvertRegexp == nil {
-		ui.OutputWarnInfo(ui.CommonWarn5, global.GoTypeConvertTemplate)
+		ui.OutputWarnInfo(ui.CommonError18, global.GoTypeConvertTemplate)
 	}
 
 	valueTypeStringMap = map[string]goValueType{
@@ -1253,27 +1253,42 @@ func (s goFileLineState) String() string {
 		return "Comment"
 	case lineStatePackageScope:
 		return "Package Scope"
-	case lineStateImportScope:
-		return "Import Scope"
-	case lineStateImportOneLine:
-		return "Import One-Line"
+	case lineStateMultiLineImportScope:
+		return "Multi-Line Import Scope"
+	case lineStateSingleLineImportScope:
+		return "Single-Line Import Scope"
+	case lineStatePackageVariableScope:
+		return "Package Variable Scope"
+	case lineStateInterfaceScope:
+		return "Interface Scope"
+	case lineStateStructScope:
+		return "Struct Scope"
+	case lineStateFunctionScope:
+		return "Function Scope"
+	case lineStateMemberFunctionScope:
+		return "Member Function Scope"
 	}
 	return ""
 }
 
 const (
-	lineStateNone    = 1 << iota // 0000 0000
-	lineStateSpace               // 0000 0001
-	lineStateComment             // 0000 0010
-	lineStateInScope             // 0000 0100
+	lineStateNone    goFileLineState = 1 << iota // 0000 0000
+	lineStateSpace                               // 0000 0001
+	lineStateComment                             // 0000 0010
+	lineStateInScope                             // 0000 0100
 	lineStateTODO2
 	lineStateTODO3
 	lineStateTODO4
 	lineStateTODO5
 	lineStateTODO6
-	lineStatePackageScope  // 0000 0001 0000 0000
-	lineStateImportScope   // 0000 0010 0000 0000
-	lineStateImportOneLine // 0000 0100 0000 0000
+	lineStatePackageScope          // 0000 0001 0000 0000
+	lineStateMultiLineImportScope  // 0000 0010 0000 0000
+	lineStateSingleLineImportScope // 0000 0100 0000 0000
+	lineStatePackageVariableScope  // 0000 1000 0000 0000
+	lineStateInterfaceScope        // 0001 0000 0000 0000
+	lineStateStructScope           // 0010 0000 0000 0000
+	lineStateFunctionScope         // 0100 0000 0000 0000
+	lineStateMemberFunctionScope   // 1000 0000 0000 0000
 )
 
 // split file content to different scopes
@@ -1285,21 +1300,45 @@ const (
 // - struct/interface
 // - function
 
+type goFileScopeType int
+
+const (
+	scopePackage goFileScopeType = iota + 1
+	scopeMultiLineImport
+	scopeSignleLineImport
+	scopePackageVariable
+	scopeInterface
+	scopeStruct
+	scopeFunction
+	scopeMemberFunction
+)
+
 type scope struct {
 	LineStart int
 	LineEnd   int
-	ScopeType int
-	Content   int
+	ScopeType goFileScopeType
+	Content   string
 	Analysis  interface{}
 }
 
 type fileScope struct {
-	Package            *scope
-	Import             *scope
-	PackageVariable    *scope
-	TypeDefinition     *scope
-	FunctionDefinition *scope
+	Package                  *scope
+	MultiLineImport          *scope
+	SingleLineImport         []*scope
+	PackageVariable          []*scope
+	InterfaceDefinition      map[string]*scope
+	StructDefinition         map[string]*scope
+	FunctionDefinition       map[string]*scope
+	MemberFunctionDefinition map[string]map[string]*scope
 }
+
+var singleLineImportSubMatchNameIndexMap map[string]int
+var multiLineImportContentSubMatchNameIndexMap map[string]int
+var packageVariableSubMatchNameIndexMap map[string]int
+var interfaceSubMatchNameIndexMap map[string]int
+var structSubMatchNameIndexMap map[string]int
+var functionSubMatchNameIndexMap map[string]int
+var memberFunctionSubMatchNameIndexMap map[string]int
 
 // GoFileSplitter go 文件切分示例
 func GoFileSplitter(paramList []string) {
@@ -1313,114 +1352,555 @@ func GoFileSplitter(paramList []string) {
 		return
 	}
 
-	// fileAnalysis := &goFileAnalysis{
-	// 	FilePath: filename,
-	// }
+	fs := &fileScope{
+		SingleLineImport:         make([]*scope, 0),
+		PackageVariable:          make([]*scope, 0),
+		InterfaceDefinition:      make(map[string]*scope),
+		StructDefinition:         make(map[string]*scope),
+		FunctionDefinition:       make(map[string]*scope),
+		MemberFunctionDefinition: make(map[string]map[string]*scope),
+	}
 
 	var lineState goFileLineState = lineStateNone
-
-	packageScopeTodo := true
-	importScopeTodo := true
+	var keyInterface interface{}
 
 	utility2.TestOutput("split file content to line text one by one")
 	lineIndex := 0
-	utility.ReadFileLineOneByOne(filename, func(line string) (next bool) {
+	utility.ReadFileLineOneByOne(filename, func(line string) bool {
 		lineIndex++
-		next = true
-
-		utility2.TestOutput("line = |%v|", line)
 
 		if len(line) == 0 {
-			// lineState = lineStateSpace
-			return next
+			return true
 		}
 
-		if lineIndex > 8 {
-			return false
-		}
-
-		// package scope
-		if lineState == lineStatePackageScope || regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopePackageTemplate).MatchString(line) {
-			if packageScopeTodo {
-				lineState = lineStatePackageScope
-
-				utility2.TestOutput("line state is: %v", lineState.String())
-				utility2.TestOutput("line = |%v|", line)
-
-				packageScopeTodo = false
-				utility2.TestOutput(ui.CommonNote2)
-
-				// next = false
-				return next
-			}
-			lineState = lineStateNone
-		}
-
-		// import scope
-		if lineState == lineStateImportScope || regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeImportTemplate).MatchString(line) {
-			if importScopeTodo {
-				lineState = lineStateImportScope
-
-				utility2.TestOutput("line state is: %v", lineState.String())
-				utility2.TestOutput("line = |%v|", line)
-
-				importScopeTodo = false
-
-				// next = false
-				return next
-			}
-			lineState = lineStateNone
-		}
-
-		// if importScopeTodo && lineState == (lineState|lineStateInScope) && regexps.GetRegexpByTemplateEnum(global.GoLineImportMultiLineAliasPackage).MatchString(line) {
-		// 	utility2.TestOutput("line state is: %v", lineState.String())
-		// 	utility2.TestOutput("line is import multi-line content: |%v|", line)
-
-		// 	// importScopeTodo = false
-
-		// 	next = false
-		// 	return next
-		// } else {
-		// 	utility2.TestOutput("Not match line: |%v|", line)
-		// 	importScopeTodo = false
-		// 	next = false
-		// 	return next
+		// if lineIndex > 95 {
+		// 	return false
 		// }
 
-		return next
+		utility2.TestOutput("No.%v line content = |%v|", lineIndex, line)
+
+		if lineState == lineStateNone {
+			lineState = getLineState(line)
+		}
+		utility2.TestOutput("line state is: %v", lineState.String())
+
+		switch lineState {
+		case lineStatePackageScope:
+			lineState = packageScope(line, lineIndex, fs, lineStatePackageScope, lineStateNone)
+		case lineStateMultiLineImportScope:
+			lineState = multiLineImportScope(line, lineIndex, fs, lineStateMultiLineImportScope, lineStateNone)
+		case lineStateSingleLineImportScope:
+			lineState = signleLineImportScope(line, lineIndex, fs, lineStateSingleLineImportScope, lineStateNone)
+		case lineStatePackageVariableScope:
+			lineState = packageVariableScope(line, lineIndex, fs, lineStatePackageVariableScope, lineStateNone)
+		case lineStateInterfaceScope:
+			lineState, keyInterface = interfaceScope(line, lineIndex, fs, keyInterface, lineStateInterfaceScope, lineStateNone)
+		case lineStateStructScope:
+			lineState, keyInterface = structScope(line, lineIndex, fs, keyInterface, lineStateStructScope, lineStateNone)
+		case lineStateFunctionScope:
+			lineState, keyInterface = functionScope(line, lineIndex, fs, keyInterface, lineStateFunctionScope, lineStateNone)
+		case lineStateMemberFunctionScope:
+			lineState, keyInterface = memberFunctionScope(line, lineIndex, fs, keyInterface, lineStateMemberFunctionScope, lineStateNone)
+		case lineStateNone:
+		default:
+			utility2.TestOutput("unknown line state %v", lineState)
+		}
+
+		utility2.TestOutput(ui.CommonNote2)
+
+		return true
 	})
+
+	if fs.Package != nil {
+		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("package scope = |%v|", fs.Package.Content)
+	}
+	if fs.MultiLineImport != nil {
+		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("multi-line import scope = |%v|", fs.MultiLineImport.Content)
+	}
+	if fs.SingleLineImport != nil {
+		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("single-line import scope:")
+		for _, scopeData := range fs.SingleLineImport {
+			utility2.TestOutput("|%v|", scopeData.Content)
+		}
+	}
+	if fs.PackageVariable != nil {
+		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("package variable scope:")
+		for _, scopeData := range fs.PackageVariable {
+			utility2.TestOutput("|%v|", scopeData.Content)
+		}
+	}
+	if fs.InterfaceDefinition != nil {
+		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("interface scope:")
+		for _, scopeData := range fs.InterfaceDefinition {
+			utility2.TestOutput("|%v|", scopeData.Content)
+		}
+	}
+	if fs.StructDefinition != nil {
+		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("struct scope:")
+		for _, scopeData := range fs.StructDefinition {
+			utility2.TestOutput("|%v|", scopeData.Content)
+		}
+	}
+	if fs.FunctionDefinition != nil {
+		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("function scope:")
+		for _, scopeData := range fs.FunctionDefinition {
+			utility2.TestOutput("|%v|", scopeData.Content)
+		}
+	}
+	if fs.MemberFunctionDefinition != nil {
+		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("member function scope:")
+		for _, functionMap := range fs.MemberFunctionDefinition {
+			for _, scopeData := range functionMap {
+				utility2.TestOutput("|%v|", scopeData.Content)
+			}
+		}
+	}
+}
+
+func getLineState(line string) goFileLineState {
+	utility2.TestOutput("get line state by |%v|", line)
+	if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopePackageTemplate).MatchString(line) {
+		return lineStatePackageScope
+	} else if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeMultiLineImportStartTemplate).MatchString(line) {
+		return lineStateMultiLineImportScope
+	} else if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeSingleLineImportTemplate).MatchString(line) {
+		return lineStateSingleLineImportScope
+	} else if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopePackageVariableTemplate).MatchString(line) {
+		return lineStatePackageVariableScope
+	} else if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeInterfaceTemplate).MatchString(line) {
+		return lineStateInterfaceScope
+	} else if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeStructTemplate).MatchString(line) {
+		return lineStateStructScope
+	} else if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeFunctionTemplate).MatchString(line) {
+		return lineStateFunctionScope
+	} else if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeMemberFunctionTemplate).MatchString(line) {
+		return lineStateMemberFunctionScope
+	}
+	return lineStateNone
+}
+
+func packageScope(line string, lineIndex int, fs *fileScope, continueState, endState goFileLineState) goFileLineState {
+	if fs.Package == nil {
+		fs.Package = &scope{
+			LineStart: lineIndex,
+			LineEnd:   lineIndex,
+			ScopeType: scopePackage,
+			Content:   line,
+		}
+	}
+	return endState
+}
+
+func multiLineImportScope(line string, lineIndex int, fs *fileScope, continueState, endState goFileLineState) goFileLineState {
+	// scope begin
+	if fs.MultiLineImport == nil {
+		fs.MultiLineImport = &scope{
+			LineStart: lineIndex,
+			LineEnd:   lineIndex,
+			ScopeType: scopeMultiLineImport,
+			Content:   line,
+		}
+		return continueState
+	}
+
+	// scope content
+	fs.MultiLineImport.Content = fmt.Sprintf("%v\n%v", fs.MultiLineImport.Content, line)
+
+	// scope end
+	if regexps.AtomicExpressionEnumRegexpMap[global.AEGoFileSplitterScopeEnd].MatchString(line) {
+		fs.MultiLineImport.LineEnd = lineIndex
+		return endState
+	}
+
+	return continueState
+}
+
+func signleLineImportScope(line string, lineIndex int, fs *fileScope, continueState, endState goFileLineState) goFileLineState {
+	fs.SingleLineImport = append(fs.SingleLineImport, &scope{
+		LineStart: lineIndex,
+		LineEnd:   lineIndex,
+		ScopeType: scopeSignleLineImport,
+		Content:   line,
+	})
+
+	return endState
+}
+
+func packageVariableScope(line string, lineIndex int, fs *fileScope, continueState, endState goFileLineState) goFileLineState {
+	fs.PackageVariable = append(fs.PackageVariable, &scope{
+		LineStart: lineIndex,
+		LineEnd:   lineIndex,
+		ScopeType: scopePackageVariable,
+		Content:   line,
+	})
+
+	return endState
+}
+
+func interfaceScope(line string, lineIndex int, fs *fileScope, keyInterface interface{}, continueState, endState goFileLineState) (goFileLineState, interface{}) {
+	var key string
+	if keyInterface != nil {
+		var ok bool
+		key, ok = keyInterface.(string)
+		if !ok {
+			ui.OutputErrorInfo(ui.CommonError19, "keyInterface", "string")
+			return endState, nil
+		}
+	}
+
+	// scope begin
+	if len(key) == 0 {
+		var interfaceKey string
+		var scopeEnd string
+		for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeInterfaceTemplate).FindAllStringSubmatch(line, -1) {
+			if interfaceNameIndex, hasIndex := interfaceSubMatchNameIndexMap["NAME"]; hasIndex {
+				interfaceKey = strings.TrimSpace(subMatchList[interfaceNameIndex])
+			}
+			if scopeEndIndex, hasIndex := interfaceSubMatchNameIndexMap["SCOPE_END"]; hasIndex {
+				scopeEnd = strings.TrimSpace(subMatchList[scopeEndIndex])
+			}
+		}
+		fs.InterfaceDefinition[interfaceKey] = &scope{
+			LineStart: lineIndex,
+			LineEnd:   lineIndex,
+			ScopeType: scopeInterface,
+			Content:   line,
+		}
+		// empty interface
+		if len(scopeEnd) != 0 {
+			utility2.TestOutput("%v is empty interface, %v", interfaceKey, scopeEnd)
+			return endState, nil
+		}
+		return continueState, interfaceKey
+	}
+
+	// scope content
+	fs.InterfaceDefinition[key].Content = fmt.Sprintf("%v\n%v", fs.InterfaceDefinition[key].Content, line)
+
+	// scope end
+	if regexps.AtomicExpressionEnumRegexpMap[global.AEGoFileSplitterScopeEnd].MatchString(line) {
+		fs.InterfaceDefinition[key].LineEnd = lineIndex
+		return endState, nil
+	}
+
+	return continueState, key
+}
+
+func structScope(line string, lineIndex int, fs *fileScope, keyInterface interface{}, continueState, endState goFileLineState) (goFileLineState, interface{}) {
+	var key string
+	if keyInterface != nil {
+		var ok bool
+		key, ok = keyInterface.(string)
+		if !ok {
+			ui.OutputErrorInfo(ui.CommonError19, "keyInterface", "string")
+			return endState, nil
+		}
+	}
+
+	// scope begin
+	if len(key) == 0 {
+		var structKey string
+		var scopeEnd string
+		for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeStructTemplate).FindAllStringSubmatch(line, -1) {
+			if structNameIndex, hasIndex := structSubMatchNameIndexMap["NAME"]; hasIndex {
+				structKey = strings.TrimSpace(subMatchList[structNameIndex])
+			}
+			if scopeEndIndex, hasIndex := structSubMatchNameIndexMap["SCOPE_END"]; hasIndex {
+				scopeEnd = strings.TrimSpace(subMatchList[scopeEndIndex])
+			}
+		}
+		fs.StructDefinition[structKey] = &scope{
+			LineStart: lineIndex,
+			LineEnd:   lineIndex,
+			ScopeType: scopeStruct,
+			Content:   line,
+		}
+		// one line struct
+		if len(scopeEnd) != 0 {
+			utility2.TestOutput("%v is one line struct, %v", structKey, scopeEnd)
+			return endState, nil
+		}
+		return continueState, structKey
+	}
+
+	// scope content
+	fs.StructDefinition[key].Content = fmt.Sprintf("%v\n%v", fs.StructDefinition[key].Content, line)
+
+	// scope end
+	if regexps.AtomicExpressionEnumRegexpMap[global.AEGoFileSplitterScopeEnd].MatchString(line) {
+		fs.StructDefinition[key].LineEnd = lineIndex
+		return endState, nil
+	}
+
+	return continueState, key
+}
+
+func functionScope(line string, lineIndex int, fs *fileScope, keyInterface interface{}, continueState, endState goFileLineState) (goFileLineState, interface{}) {
+	var key string
+	if keyInterface != nil {
+		var ok bool
+		key, ok = keyInterface.(string)
+		if !ok {
+			ui.OutputErrorInfo(ui.CommonError19, "keyInterface", "string")
+			return endState, nil
+		}
+	}
+
+	// scope begin
+	if len(key) == 0 {
+		var functionKey string
+		var content string
+		var scopeEnd string
+		for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeFunctionTemplate).FindAllStringSubmatch(line, -1) {
+			if functionNameIndex, hasIndex := functionSubMatchNameIndexMap["NAME"]; hasIndex {
+				functionKey = strings.TrimSpace(subMatchList[functionNameIndex])
+			}
+			if contentIndex, hasIndex := functionSubMatchNameIndexMap["CONTENT"]; hasIndex {
+				content = strings.TrimSpace(subMatchList[contentIndex])
+			}
+			if scopeEndIndex, hasIndex := functionSubMatchNameIndexMap["SCOPE_END"]; hasIndex {
+				scopeEnd = strings.TrimSpace(subMatchList[scopeEndIndex])
+			}
+		}
+		utility2.TestOutput("functionKey = %v", functionKey)
+		utility2.TestOutput("content = %v", content)
+		utility2.TestOutput("scopeEnd = %v", scopeEnd)
+
+		fs.FunctionDefinition[functionKey] = &scope{
+			LineStart: lineIndex,
+			LineEnd:   lineIndex,
+			ScopeType: scopeStruct,
+			Content:   line,
+		}
+		// one line function
+		if len(scopeEnd) != 0 {
+			utility2.TestOutput("%v is one line function, %v", functionKey, scopeEnd)
+			return endState, nil
+		}
+
+		return continueState, functionKey
+	}
+
+	// scope content
+	fs.FunctionDefinition[key].Content = fmt.Sprintf("%v\n%v", fs.FunctionDefinition[key].Content, line)
+
+	// scope end
+	if regexps.AtomicExpressionEnumRegexpMap[global.AEGoFileSplitterScopeEnd].MatchString(line) {
+		fs.FunctionDefinition[key].LineEnd = lineIndex
+		utility2.TestOutput("%v is function %v scope end line", lineIndex, key)
+		return endState, nil
+	}
+
+	return continueState, key
+}
+
+type memberFunctionKey struct {
+	Class string
+	Name  string
+}
+
+func memberFunctionScope(line string, lineIndex int, fs *fileScope, keyInterface interface{}, continueState, endState goFileLineState) (goFileLineState, interface{}) {
+	var key *memberFunctionKey
+	if keyInterface != nil {
+		var ok bool
+		key, ok = keyInterface.(*memberFunctionKey)
+		if !ok {
+			ui.OutputErrorInfo(ui.CommonError19, "keyInterface", "*memberFunctionKey")
+			utility2.TestOutput("key = %+v", key)
+			return endState, nil
+		}
+	}
+
+	// scope begin
+	if key == nil {
+		var functionStructString string
+		var functionKeyName string
+		var content string
+		var scopeEnd string
+		for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeMemberFunctionTemplate).FindAllStringSubmatch(line, -1) {
+			if functionStructIndex, hasIndex := memberFunctionSubMatchNameIndexMap["MEMBER"]; hasIndex {
+				functionStructString = strings.TrimSpace(subMatchList[functionStructIndex])
+			}
+			if functionNameIndex, hasIndex := memberFunctionSubMatchNameIndexMap["NAME"]; hasIndex {
+				functionKeyName = strings.TrimSpace(subMatchList[functionNameIndex])
+			}
+			if contentIndex, hasIndex := memberFunctionSubMatchNameIndexMap["CONTENT"]; hasIndex {
+				content = strings.TrimSpace(subMatchList[contentIndex])
+			}
+			if scopeEndIndex, hasIndex := memberFunctionSubMatchNameIndexMap["SCOPE_END"]; hasIndex {
+				scopeEnd = strings.TrimSpace(subMatchList[scopeEndIndex])
+			}
+		}
+		utility2.TestOutput("functionStructString = %v", functionStructString)
+		utility2.TestOutput("functionKeyName = %v", functionKeyName)
+		utility2.TestOutput("content = %v", content)
+		utility2.TestOutput("scopeEnd = %v", scopeEnd)
+
+		var functionClassValue string
+		var functionClassValueType string
+		var functionKeyClass string
+		if len(functionStructString) != 0 {
+			memberString := regexps.AtomicExpressionEnumRegexpMap[global.AEBracketsContent].ReplaceAllString(functionStructString, "$CONTENT")
+			memberStringList := strings.Split(strings.TrimSpace(memberString), " ")
+			if len(memberStringList) == 2 {
+				functionClassValue = memberStringList[0]
+				functionClassValueType = memberStringList[1]
+				functionKeyClass = utility.TraitStructName(functionClassValueType)
+				utility2.TestOutput("functionClassValue = %v", functionClassValue)
+				utility2.TestOutput("functionClassValueType = %v", functionClassValueType)
+				utility2.TestOutput("functionKeyClass = %v", functionKeyClass)
+			} else {
+				ui.OutputWarnInfo(ui.CMDAnalyzeGoFunctionDefinitionSyntaxError)
+			}
+		}
+
+		if _, hasClass := fs.MemberFunctionDefinition[functionKeyClass]; !hasClass {
+			fs.MemberFunctionDefinition[functionKeyClass] = make(map[string]*scope)
+		}
+		fs.MemberFunctionDefinition[functionKeyClass][functionKeyName] = &scope{
+			LineStart: lineIndex,
+			LineEnd:   lineIndex,
+			ScopeType: scopeStruct,
+			Content:   line,
+		}
+		// empty struct
+		if len(scopeEnd) != 0 {
+			utility2.TestOutput("%v.%v is one line function, %v", functionKeyClass, functionKeyName, scopeEnd)
+			return endState, nil
+		}
+
+		return continueState, &memberFunctionKey{Class: functionKeyClass, Name: functionKeyName}
+	}
+
+	// scope content
+	fs.MemberFunctionDefinition[key.Class][key.Name].Content = fmt.Sprintf("%v\n%v", fs.MemberFunctionDefinition[key.Class][key.Name].Content, line)
+
+	// scope end
+	if regexps.AtomicExpressionEnumRegexpMap[global.AEGoFileSplitterScopeEnd].MatchString(line) {
+		fs.MemberFunctionDefinition[key.Class][key.Name].LineEnd = lineIndex
+		utility2.TestOutput("%v is function %v.%v scope end line", lineIndex, key.Class, key.Name)
+		return endState, nil
+	}
+
+	return continueState, key
+}
+
+func getImportPackageAliasPathFromLine(line string, findRegexp *regexp.Regexp, subMatchNameIndexMap map[string]int) (string, string) {
+	var importPackageAlias string
+	var importPackagePath string
+	for _, importSubmatchList := range findRegexp.FindAllStringSubmatch(line, -1) {
+		if aliasIndex, hasAliasIndex := subMatchNameIndexMap["ALIAS"]; hasAliasIndex {
+			importPackageAlias = strings.TrimSpace(importSubmatchList[aliasIndex])
+		}
+		if aliasIndex, hasAliasIndex := subMatchNameIndexMap["CONTENT"]; hasAliasIndex {
+			importPackagePath = strings.TrimSpace(importSubmatchList[aliasIndex])
+		}
+		if len(importPackageAlias) == 0 {
+			packagePathList := strings.Split(strings.Trim(importPackagePath, "\""), "/")
+			importPackageAlias = packagePathList[len(packagePathList)-1]
+		}
+	}
+	return importPackageAlias, importPackagePath
 }
 
 func checkGoSyntaxKeyworkRegexp() bool {
 	if goFileSplitterScopePackageRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopePackageTemplate); goFileSplitterScopePackageRegexp == nil {
-		ui.OutputErrorInfo(ui.CommonWarn5, global.GoFileSplitterScopePackageTemplate)
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopePackageTemplate)
 		return false
 	}
 
-	if goFileSplitterScopeImportRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeImportTemplate); goFileSplitterScopeImportRegexp == nil {
-		ui.OutputErrorInfo(ui.CommonWarn5, global.GoFileSplitterScopeImportTemplate)
+	if goFileSplitterScopeMultiLineImportStartRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeMultiLineImportStartTemplate); goFileSplitterScopeMultiLineImportStartRegexp == nil {
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopeMultiLineImportStartTemplate)
 		return false
 	}
 
-	// if goLineImportMultiLineStartRegexp, hasGoLineImportMultiLineStartRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEGoLineImportMultiLineStart]; !hasGoLineImportMultiLineStartRegexp || goLineImportMultiLineStartRegexp == nil {
-	// 	ui.OutputErrorInfo(ui.CommonWarn3, global.AEGoLineImportMultiLineStart)
-	// 	return false
-	// }
+	if goFileSplitterScopeMultiLineImportContentRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeMultiLineImportContentTemplate); goFileSplitterScopeMultiLineImportContentRegexp != nil {
+		multiLineImportContentSubMatchNameIndexMap = make(map[string]int)
+		for index, subMatchName := range goFileSplitterScopeMultiLineImportContentRegexp.SubexpNames() {
+			multiLineImportContentSubMatchNameIndexMap[subMatchName] = index
+		}
+	} else {
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopeMultiLineImportContentTemplate)
+		return false
+	}
 
-	// if goLineImportMultiLineAliasPackageRegexp := regexps.GetRegexpByTemplateEnum(global.GoLineImportMultiLineAliasPackage); goLineImportMultiLineAliasPackageRegexp == nil {
-	// 	ui.OutputErrorInfo(ui.CommonWarn5, global.GoLineImportMultiLineAliasPackage)
-	// 	return false
-	// }
+	if goFileSplitterScopeSingleLineImportRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeSingleLineImportTemplate); goFileSplitterScopeSingleLineImportRegexp != nil {
+		singleLineImportSubMatchNameIndexMap = make(map[string]int)
+		for index, subMatchName := range goFileSplitterScopeSingleLineImportRegexp.SubexpNames() {
+			singleLineImportSubMatchNameIndexMap[subMatchName] = index
+		}
+	} else {
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopeSingleLineImportTemplate)
+		return false
+	}
 
-	// if goLineScopeEndRegexp, hasGoLineScopeEndRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEGoLineScopeEnd]; !hasGoLineScopeEndRegexp || goLineScopeEndRegexp == nil {
-	// 	ui.OutputErrorInfo(ui.CommonWarn3, global.AEGoLineScopeEnd)
-	// 	return false
-	// }
+	if goFileSplitterScopeEnd, has := regexps.AtomicExpressionEnumRegexpMap[global.AEGoFileSplitterScopeEnd]; !has || goFileSplitterScopeEnd == nil {
+		ui.OutputErrorInfo(ui.CommonError16, global.AEGoFileSplitterScopeEnd)
+		return false
+	}
 
-	// if goLineImportOneLineRegexp := regexps.GetRegexpByTemplateEnum(global.GoLineImportOneLine); goLineImportOneLineRegexp == nil {
-	// 	ui.OutputErrorInfo(ui.CommonWarn5, global.GoLineImportOneLine)
-	// 	return false
-	// }
+	if goFileSplitterScopePackageVariableRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopePackageVariableTemplate); goFileSplitterScopePackageVariableRegexp != nil {
+		packageVariableSubMatchNameIndexMap = make(map[string]int)
+		for index, subMatchName := range goFileSplitterScopePackageVariableRegexp.SubexpNames() {
+			packageVariableSubMatchNameIndexMap[subMatchName] = index
+		}
+	} else {
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopePackageVariableTemplate)
+		return false
+	}
+
+	if goFileSplitterScopeInterfaceRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeInterfaceTemplate); goFileSplitterScopeInterfaceRegexp != nil {
+		interfaceSubMatchNameIndexMap = make(map[string]int)
+		for index, subMatchName := range goFileSplitterScopeInterfaceRegexp.SubexpNames() {
+			interfaceSubMatchNameIndexMap[subMatchName] = index
+		}
+	} else {
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopeInterfaceTemplate)
+		return false
+	}
+
+	if goFileSplitterScopeStructRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeStructTemplate); goFileSplitterScopeStructRegexp != nil {
+		structSubMatchNameIndexMap = make(map[string]int)
+		for index, subMatchName := range goFileSplitterScopeStructRegexp.SubexpNames() {
+			structSubMatchNameIndexMap[subMatchName] = index
+		}
+	} else {
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopeStructTemplate)
+		return false
+	}
+
+	if goFileSplitterScopeFunctionRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeFunctionTemplate); goFileSplitterScopeFunctionRegexp != nil {
+		functionSubMatchNameIndexMap = make(map[string]int)
+		for index, subMatchName := range goFileSplitterScopeFunctionRegexp.SubexpNames() {
+			functionSubMatchNameIndexMap[subMatchName] = index
+		}
+	} else {
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopeFunctionTemplate)
+		return false
+	}
+
+	if goFileSplitterScopeMemberFunctionRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeMemberFunctionTemplate); goFileSplitterScopeMemberFunctionRegexp != nil {
+		memberFunctionSubMatchNameIndexMap = make(map[string]int)
+		for index, subMatchName := range goFileSplitterScopeMemberFunctionRegexp.SubexpNames() {
+			memberFunctionSubMatchNameIndexMap[subMatchName] = index
+		}
+	} else {
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopeMemberFunctionTemplate)
+		return false
+	}
+
+	if bracketsContentRegexp, hasBracketsContentRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEBracketsContent]; !hasBracketsContentRegexp || bracketsContentRegexp == nil {
+		ui.OutputErrorInfo(ui.CommonError16, global.AEBracketsContent)
+		return false
+	}
 
 	return true
 }

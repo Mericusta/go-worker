@@ -10,7 +10,7 @@ import (
 func TrimSpaceLine(content string) string {
 	spaceLineRegexp, hasSpaceLineRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AESpaceLine]
 	if !hasSpaceLineRegexp {
-		ui.OutputWarnInfo(ui.CommonWarn3, global.AESpaceLine)
+		ui.OutputWarnInfo(ui.CommonError16, global.AESpaceLine)
 		return ""
 	}
 	replaceContent := spaceLineRegexp.ReplaceAllString(content, "\n")

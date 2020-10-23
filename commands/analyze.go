@@ -34,7 +34,7 @@ func (command *Analyze) Execute() error {
 	// projectPath := config.GetCurrentProjectPath()
 	// fileType := config.WorkerConfig.ProjectSyntax
 	// if fileType == "" {
-	// 	ui.OutputWarnInfo(ui.CommonWarn1)
+	// 	ui.OutputWarnInfo(ui.CommonError14)
 	// }
 
 	// if command.Params.parentValue != "" {
@@ -121,7 +121,7 @@ func (command *Analyze) parseCommandParams() error {
 	// if optionValueRegexp, hasOptionValueRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEAnalyzeOptionValue]; hasOptionValueRegexp {
 	// 	optionValueString = optionValueRegexp.FindString(command.CommandStruct.InputString)
 	// } else {
-	// 	ui.OutputWarnInfo(ui.CommonWarn2, "analyze", "file|directory|package")
+	// 	ui.OutputWarnInfo(ui.CommonError15, "analyze", "file|directory|package")
 	// }
 	// if optionValueString == "" {
 	// 	return fmt.Errorf(ui.CommonError1)
@@ -135,7 +135,7 @@ func (command *Analyze) parseCommandParams() error {
 	// if parentValueRegexp := regexps.GetRegexpByTemplateEnum(global.OptionParentValueTemplate); parentValueRegexp != nil {
 	// 	parentValue = parentValueRegexp.FindString(command.CommandStruct.InputString)
 	// } else {
-	// 	ui.OutputWarnInfo(ui.CommonWarn2, "analyze", "parent")
+	// 	ui.OutputWarnInfo(ui.CommonError15, "analyze", "parent")
 	// }
 	// if parentValue != "" {
 	// 	parentValueList := strings.Split(parentValue, " ")
@@ -148,13 +148,13 @@ func (command *Analyze) parseCommandParams() error {
 		analyzePath = pathRegexp.ReplaceAllString(command.CommandStruct.InputString, "$PATH")
 		command.Params.sourceValue = analyzePath
 	} else {
-		ui.OutputWarnInfo(ui.CommonWarn3, global.AEPath)
+		ui.OutputWarnInfo(ui.CommonError16, global.AEPath)
 	}
 	outputValue := ""
 	if outputValueRegexp := regexps.GetRegexpByTemplateEnum(global.OptionOutputValueTemplate); outputValueRegexp != nil {
 		outputValue = outputValueRegexp.FindString(command.CommandStruct.InputString)
 	} else {
-		ui.OutputWarnInfo(ui.CommonWarn2, "analyze", "output")
+		ui.OutputWarnInfo(ui.CommonError15, "analyze", "output")
 	}
 	utility2.TestOutput("outputValue = %v", outputValue)
 	if outputValue != "" {
@@ -538,7 +538,7 @@ func analyzeGoImportPackage(goFileAnalysis *goFileAnalysis, fileContentByte []by
 				}
 			}
 		} else {
-			ui.OutputWarnInfo(ui.CommonWarn3, global.GoKeywordImportAliasTemplate)
+			ui.OutputWarnInfo(ui.CommonError16, global.GoKeywordImportAliasTemplate)
 		}
 
 	} else {
@@ -549,7 +549,7 @@ func analyzeGoImportPackage(goFileAnalysis *goFileAnalysis, fileContentByte []by
 func analyzeGoFunctionDefinition(goFileAnalysis *goFileAnalysis, fileContentByte []byte) {
 	bracketsContentRegexp, hasBracketsContentRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEBracketsContent]
 	if !hasBracketsContentRegexp {
-		ui.OutputWarnInfo(ui.CommonWarn3, global.AEBracketsContent)
+		ui.OutputWarnInfo(ui.CommonError16, global.AEBracketsContent)
 		return
 	}
 	functionDefinitionRegexp := regexps.GetRegexpByTemplateEnum(global.GoFunctionDefinitionTemplate)
@@ -646,11 +646,11 @@ func analyzeGoFunctionBody(goFileAnalysis *goFileAnalysis, fileContentByte []byt
 		return
 	}
 
-	variableDeclarationRegexp := regexps.GetRegexpByTemplateEnum(global.GoVariableDeclarationTemplate)
-	if variableDeclarationRegexp == nil {
-		ui.OutputWarnInfo(ui.CMDAnalyzeGoKeywordRegexpNotExist, global.GoVariableDeclarationTemplate)
-		return
-	}
+	// variableDeclarationRegexp := regexps.GetRegexpByTemplateEnum(global.GoVariableDeclarationTemplate)
+	// if variableDeclarationRegexp == nil {
+	// 	ui.OutputWarnInfo(ui.CMDAnalyzeGoKeywordRegexpNotExist, global.GoVariableDeclarationTemplate)
+	// 	return
+	// }
 
 	variableInitializationRegexp := regexps.GetRegexpByTemplateEnum(global.GoVariableInitializationTemplate)
 	if variableInitializationRegexp == nil {
@@ -689,19 +689,19 @@ func analyzeGoFunctionBody(goFileAnalysis *goFileAnalysis, fileContentByte []byt
 
 		// variable
 
-		variableDeclarationIndexList := variableDeclarationRegexp.FindAll(goFunctionAnalysis.BodyContent, -1)
-		for _, variableDeclaration := range variableDeclarationIndexList {
-			utility2.TestOutput("variableDeclaration = %v", string(variableDeclaration))
-			variableName := variableDeclarationRegexp.ReplaceAllString(string(variableDeclaration), "$NAME")
-			variableType := variableDeclarationRegexp.ReplaceAllString(string(variableDeclaration), "$TYPE")
-			utility2.TestOutput("variableName = %v", variableName)
-			utility2.TestOutput("variableType = %v", variableType)
-			goFunctionAnalysis.VariableMap[variableName] = &GoFunctionVariable{
-				Index: len(goFunctionAnalysis.VariableMap),
-				Name:  variableName,
-				Type:  variableType,
-			}
-		}
+		// variableDeclarationIndexList := variableDeclarationRegexp.FindAll(goFunctionAnalysis.BodyContent, -1)
+		// for _, variableDeclaration := range variableDeclarationIndexList {
+		// 	utility2.TestOutput("variableDeclaration = %v", string(variableDeclaration))
+		// 	variableName := variableDeclarationRegexp.ReplaceAllString(string(variableDeclaration), "$NAME")
+		// 	variableType := variableDeclarationRegexp.ReplaceAllString(string(variableDeclaration), "$TYPE")
+		// 	utility2.TestOutput("variableName = %v", variableName)
+		// 	utility2.TestOutput("variableType = %v", variableType)
+		// 	goFunctionAnalysis.VariableMap[variableName] = &GoFunctionVariable{
+		// 		Index: len(goFunctionAnalysis.VariableMap),
+		// 		Name:  variableName,
+		// 		Type:  variableType,
+		// 	}
+		// }
 
 		utility2.TestOutput(ui.CommonNote2)
 
@@ -829,7 +829,7 @@ func analyzeGoFunctionBody(goFileAnalysis *goFileAnalysis, fileContentByte []byt
 func outputAnalyzeGoFileResult(goFileAnalysis *goFileAnalysis) string {
 	templateStyleRegexp, hasTemplateStyleRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AETemplateStyle]
 	if !hasTemplateStyleRegexp {
-		ui.OutputWarnInfo(ui.CommonWarn3, global.AETemplateStyle)
+		ui.OutputWarnInfo(ui.CommonError16, global.AETemplateStyle)
 		return ""
 	}
 

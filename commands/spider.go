@@ -29,7 +29,7 @@ func (command *Spider) parseCommandParams() error {
 	// if optionValueRegexp := regexps.GetRegexpByTemplateEnum(global.OptionWebAddressValueTemplate); optionValueRegexp != nil {
 	// 	optionValue = optionValueRegexp.FindString(command.CommandStruct.InputString)
 	// } else {
-	// 	ui.OutputWarnInfo(ui.CommonWarn2, "spider", "website|page")
+	// 	ui.OutputWarnInfo(ui.CommonError15, "spider", "website|page")
 	// }
 	// if optionValue != "" {
 	// 	return fmt.Errorf(ui.CommonError1)

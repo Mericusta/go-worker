@@ -28,7 +28,7 @@ func (command *Create) Execute() error {
 	projectPath := config.GetCurrentProjectPath()
 	fileType := config.WorkerConfig.ProjectSyntax
 	if fileType == "" {
-		ui.OutputWarnInfo(ui.CommonWarn1)
+		ui.OutputWarnInfo(ui.CommonError14)
 	}
 
 	if command.Params.parentValue != "" {
@@ -77,7 +77,7 @@ func (command *Create) parseCommandParams() error {
 	if optionValueRegexp, hasOptionValueRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AECreateOptionValue]; hasOptionValueRegexp {
 		optionValueString = optionValueRegexp.FindString(command.CommandStruct.InputString)
 	} else {
-		ui.OutputWarnInfo(ui.CommonWarn2, "create", "package|file")
+		ui.OutputWarnInfo(ui.CommonError15, "create", "package|file")
 	}
 	if optionValueString == "" {
 		return fmt.Errorf(ui.CommonError1)
@@ -91,7 +91,7 @@ func (command *Create) parseCommandParams() error {
 	if parentValueRegexp := regexps.GetRegexpByTemplateEnum(global.OptionParentValueTemplate); parentValueRegexp != nil {
 		parentValue = parentValueRegexp.FindString(command.CommandStruct.InputString)
 	} else {
-		ui.OutputWarnInfo(ui.CommonWarn2, "create", "parent")
+		ui.OutputWarnInfo(ui.CommonError15, "create", "parent")
 	}
 	if parentValue != "" {
 		parentValueList := strings.Split(parentValue, " ")

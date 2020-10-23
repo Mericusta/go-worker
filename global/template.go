@@ -22,15 +22,27 @@ const (
 	OptionIgnoreValueTemplate TemplateEnum = 7
 	// GoTypeConvertTemplate go 内建类型转换的模板
 	GoTypeConvertTemplate TemplateEnum = 8
-	// GoVariableDeclarationTemplate go variable 声明的模板
-	GoVariableDeclarationTemplate TemplateEnum = 9
 	// GoVariableInitializationTemplate go variable 初始化的模板
 	GoVariableInitializationTemplate TemplateEnum = 10
 
 	// GoFileSplitterScopePackageTemplate Go 语言文件切分器 package 域的模板表达式
 	GoFileSplitterScopePackageTemplate TemplateEnum = 11
-	// GoFileSplitterScopeImportTemplate Go 语言文件切分器 import 域的模板表达式
-	GoFileSplitterScopeImportTemplate TemplateEnum = 12
+	// GoFileSplitterScopeMultiLineImportStartTemplate Go 语言文件切分器多行 import 域的起始的模板表达式
+	GoFileSplitterScopeMultiLineImportStartTemplate TemplateEnum = 12
+	// GoFileSplitterScopeMultiLineImportContentTemplate Go 语言文件切分器多行 import 域的内容的模板表达式
+	GoFileSplitterScopeMultiLineImportContentTemplate TemplateEnum = 13
+	// GoFileSplitterScopeSingleLineImportTemplate Go 语言文件切分器单行 import 域的模板表达式
+	GoFileSplitterScopeSingleLineImportTemplate TemplateEnum = 14
+	// GoFileSplitterScopePackageVariableTemplate Go 语言文件切分器包变量域的模板表达式
+	GoFileSplitterScopePackageVariableTemplate TemplateEnum = 15
+	// GoFileSplitterScopeInterfaceTemplate Go 语言文件切分器接口域的模板表达式
+	GoFileSplitterScopeInterfaceTemplate TemplateEnum = 16
+	// GoFileSplitterScopeStructTemplate Go 语言文件切分器结构体域的模板表达式
+	GoFileSplitterScopeStructTemplate TemplateEnum = 17
+	// GoFileSplitterScopeFunctionTemplate Go 语言文件切分器函数域的模板表达式
+	GoFileSplitterScopeFunctionTemplate TemplateEnum = 18
+	// GoFileSplitterScopeMemberFunctionTemplate Go 语言文件切分器成员函数的模板表达式
+	GoFileSplitterScopeMemberFunctionTemplate TemplateEnum = 19
 
 	// // GoFileSplitterScopeImportTemplate Go 语言 import 多行内包名与路径的表达式
 	// GoFileSplitterScopeImportTemplate TemplateEnum = 12

@@ -31,7 +31,7 @@ func (command *Convert) Execute() error {
 	projectPath := config.GetCurrentProjectPath()
 	fileType := config.GetSpecificSyntaxFileSuffix(global.SyntaxCSV)
 	if fileType == "" {
-		ui.OutputWarnInfo(ui.CommonWarn1)
+		ui.OutputWarnInfo(ui.CommonError14)
 	}
 
 	filePath := filepath.Join(projectPath, fmt.Sprintf("%v.%v", command.Params.sourceValue, fileType))
@@ -117,7 +117,7 @@ func (command *Convert) parseCommandParams() error {
 	if optionValueRegexp, hasOptionValueRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEConvertOptionValue]; hasOptionValueRegexp {
 		optionValueString = optionValueRegexp.FindString(command.CommandStruct.InputString)
 	} else {
-		ui.OutputWarnInfo(ui.CommonWarn2, "convert", "csv")
+		ui.OutputWarnInfo(ui.CommonError15, "convert", "csv")
 	}
 	if optionValueString == "" {
 		return fmt.Errorf(ui.CommonError1)
@@ -131,7 +131,7 @@ func (command *Convert) parseCommandParams() error {
 	if parentValueRegexp := regexps.GetRegexpByTemplateEnum(global.OptionParentValueTemplate); parentValueRegexp != nil {
 		parentValue = parentValueRegexp.FindString(command.CommandStruct.InputString)
 	} else {
-		ui.OutputWarnInfo(ui.CommonWarn2, "convert", "parent")
+		ui.OutputWarnInfo(ui.CommonError15, "convert", "parent")
 	}
 	if parentValue != "" {
 		parentValueList := strings.Split(parentValue, " ")
@@ -141,7 +141,7 @@ func (command *Convert) parseCommandParams() error {
 	if optionValueRegexp, hasOptionValueRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEConvertACOptionValue]; hasOptionValueRegexp {
 		targetOptionValue = optionValueRegexp.FindString(command.CommandStruct.InputString)
 	} else {
-		ui.OutputWarnInfo(ui.CommonWarn2, "convert", "append|create")
+		ui.OutputWarnInfo(ui.CommonError15, "convert", "append|create")
 	}
 	if targetOptionValue != "" {
 		targetOptionValueList := strings.Split(targetOptionValue, " ")

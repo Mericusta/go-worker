@@ -29,7 +29,7 @@ func (command *Remove) Execute() error {
 	projectPath := config.GetCurrentProjectPath()
 	fileType := config.WorkerConfig.ProjectSyntax
 	if fileType == "" {
-		ui.OutputWarnInfo(ui.CommonWarn1)
+		ui.OutputWarnInfo(ui.CommonError14)
 	}
 
 	if command.Params.optionValue == "" {
@@ -52,7 +52,7 @@ func (command *Remove) Execute() error {
 		if utility.IsExist(toRemoveFilePath) {
 			toRemoveFileList = append(toRemoveFileList, toRemoveFilePath)
 		} else {
-			ui.OutputWarnInfo(ui.CommonWarn4, toRemoveFilePath)
+			ui.OutputWarnInfo(ui.CommonError17, toRemoveFilePath)
 		}
 	case "type":
 		toRemoveFileList = utility.TraverseDirectorySpecificFile(projectPath, command.Params.optionValue)
@@ -84,7 +84,7 @@ func (command *Remove) parseCommandParams() error {
 	if optionValueRegexp, hasOptionValueRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AERemoveOptionValue]; hasOptionValueRegexp {
 		optionValueString = optionValueRegexp.FindString(command.CommandStruct.InputString)
 	} else {
-		ui.OutputWarnInfo(ui.CommonWarn2, "remove", "file|type")
+		ui.OutputWarnInfo(ui.CommonError15, "remove", "file|type")
 	}
 	if optionValueString == "" {
 		return fmt.Errorf(ui.CommonError1)
@@ -98,7 +98,7 @@ func (command *Remove) parseCommandParams() error {
 	if parentValueRegexp := regexps.GetRegexpByTemplateEnum(global.OptionParentValueTemplate); parentValueRegexp != nil {
 		parentValue = parentValueRegexp.FindString(command.CommandStruct.InputString)
 	} else {
-		ui.OutputWarnInfo(ui.CommonWarn2, "remove", "parent")
+		ui.OutputWarnInfo(ui.CommonError15, "remove", "parent")
 	}
 	if parentValue != "" {
 		parentValueList := strings.Split(parentValue, " ")
@@ -108,7 +108,7 @@ func (command *Remove) parseCommandParams() error {
 	if ignoreValueRegexp := regexps.GetRegexpByTemplateEnum(global.OptionIgnoreValueTemplate); ignoreValueRegexp != nil {
 		ignoreValue = ignoreValueRegexp.FindString(command.CommandStruct.InputString)
 	} else {
-		ui.OutputWarnInfo(ui.CommonWarn2, "remove", "ignore")
+		ui.OutputWarnInfo(ui.CommonError15, "remove", "ignore")
 	}
 	if ignoreValue != "" {
 		ignoreValueList := strings.Split(ignoreValue, " ")

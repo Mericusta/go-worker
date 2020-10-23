@@ -84,7 +84,7 @@ func registAtomicExpression() {
 		global.AEFloat:                 AEFloat,
 		global.AEComplex:               AEComplex,
 		// global.AEGoLineImportMultiLineStart: AEGoLineImportMultiLineStart,
-		global.AEGoLineScopeEnd: AEGoLineScopeEnd,
+		global.AEGoFileSplitterScopeEnd: AEGoFileSplitterScopeEnd,
 	}
 }
 
