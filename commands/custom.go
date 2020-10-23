@@ -1439,78 +1439,78 @@ func GoFileSplitter(paramList []string) {
 	})
 
 	if fs.Package != nil {
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("package scope = |%v|", fs.Package.Content)
+		ui.OutputNoteInfo(ui.CommonNote2)
+		ui.OutputNoteInfo("package scope = |%v|", fs.Package.Content)
 	}
 	if fs.MultiLineImport != nil {
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("multi-line import scope = |%v|", fs.MultiLineImport.Content)
+		ui.OutputNoteInfo(ui.CommonNote2)
+		ui.OutputNoteInfo("multi-line import scope = |%v|", fs.MultiLineImport.Content)
 	}
 	if fs.SingleLineImport != nil {
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("single-line import scope:")
+		ui.OutputNoteInfo(ui.CommonNote2)
+		ui.OutputNoteInfo("single-line import scope:")
 		for _, scopeData := range fs.SingleLineImport {
-			utility2.TestOutput("|%v|", scopeData.Content)
+			ui.OutputNoteInfo("|%v|", scopeData.Content)
 		}
 	}
 	if fs.PackageVariable != nil {
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("package variable scope:")
+		ui.OutputNoteInfo(ui.CommonNote2)
+		ui.OutputNoteInfo("package variable scope:")
 		for _, scopeData := range fs.PackageVariable {
-			utility2.TestOutput("|%v|", scopeData.Content)
+			ui.OutputNoteInfo("|%v|", scopeData.Content)
 		}
 	}
 	if fs.InterfaceDefinition != nil {
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("interface scope:")
+		ui.OutputNoteInfo(ui.CommonNote2)
+		ui.OutputNoteInfo("interface scope:")
 		for _, scopeData := range fs.InterfaceDefinition {
-			utility2.TestOutput("|%v|", scopeData.Content)
+			ui.OutputNoteInfo("|%v|", scopeData.Content)
 		}
 	}
 	if fs.StructDefinition != nil {
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("struct scope:")
+		ui.OutputNoteInfo(ui.CommonNote2)
+		ui.OutputNoteInfo("struct scope:")
 		for _, scopeData := range fs.StructDefinition {
-			utility2.TestOutput("|%v|", scopeData.Content)
+			ui.OutputNoteInfo("|%v|", scopeData.Content)
 		}
 	}
 	if fs.FunctionDefinition != nil {
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("function scope:")
+		ui.OutputNoteInfo(ui.CommonNote2)
+		ui.OutputNoteInfo("function scope:")
 		for _, scopeData := range fs.FunctionDefinition {
-			utility2.TestOutput("|%v|", scopeData.Content)
+			ui.OutputNoteInfo("|%v|", scopeData.Content)
 		}
 	}
 	if fs.MemberFunctionDefinition != nil {
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("member function scope:")
+		ui.OutputNoteInfo(ui.CommonNote2)
+		ui.OutputNoteInfo("member function scope:")
 		for _, functionMap := range fs.MemberFunctionDefinition {
 			for _, scopeData := range functionMap {
-				utility2.TestOutput("|%v|", scopeData.Content)
+				ui.OutputNoteInfo("|%v|", scopeData.Content)
 			}
 		}
 	}
 	if fs.TypeRename != nil {
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("type rename scope:")
+		ui.OutputNoteInfo(ui.CommonNote2)
+		ui.OutputNoteInfo("type rename scope:")
 		for _, renameMap := range fs.TypeRename {
 			for _, scopeData := range renameMap {
-				utility2.TestOutput("|%v|", scopeData.Content)
+				ui.OutputNoteInfo("|%v|", scopeData.Content)
 			}
 		}
 	}
 	if fs.MultiLineConst != nil {
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("multi-line const scope:")
+		ui.OutputNoteInfo(ui.CommonNote2)
+		ui.OutputNoteInfo("multi-line const scope:")
 		for _, scopeData := range fs.MultiLineConst {
-			utility2.TestOutput("|%v|", scopeData.Content)
+			ui.OutputNoteInfo("|%v|", scopeData.Content)
 		}
 	}
 	if fs.SingleLineConst != nil {
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("const value scope:")
+		ui.OutputNoteInfo(ui.CommonNote2)
+		ui.OutputNoteInfo("const value scope:")
 		for _, scopeData := range fs.SingleLineConst {
-			utility2.TestOutput("|%v|", scopeData.Content)
+			ui.OutputNoteInfo("|%v|", scopeData.Content)
 		}
 	}
 }
