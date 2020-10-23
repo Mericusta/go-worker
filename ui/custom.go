@@ -14,3 +14,6 @@ var CMDCustomExecutorOutOfRangeError string = "Custom executor %v occurs out of 
 
 // CMDCustomExecutorConfigDataError 待执行的自定义项目出现配置数值错误
 var CMDCustomExecutorConfigDataError string = "Custom executor %v occurs config data error: %v"
+
+// CMDCustomExecutorRunError 自定义指令 %v 执行错误：%v
+var CMDCustomExecutorRunError string = "Custom executor %v run occurs error: %v"

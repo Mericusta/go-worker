@@ -1267,6 +1267,12 @@ func (s goFileLineState) String() string {
 		return "Function Scope"
 	case lineStateMemberFunctionScope:
 		return "Member Function Scope"
+	case lineStateTypeRenameScope:
+		return "Type Rename Scope"
+	case lineStateMultiLineConstScope:
+		return "Multi-Line Const Scope"
+	case lineStateSingleLineConstScope:
+		return "Single-Line Const Scope"
 	}
 	return ""
 }
@@ -1281,14 +1287,17 @@ const (
 	lineStateTODO4
 	lineStateTODO5
 	lineStateTODO6
-	lineStatePackageScope          // 0000 0001 0000 0000
-	lineStateMultiLineImportScope  // 0000 0010 0000 0000
-	lineStateSingleLineImportScope // 0000 0100 0000 0000
-	lineStatePackageVariableScope  // 0000 1000 0000 0000
-	lineStateInterfaceScope        // 0001 0000 0000 0000
-	lineStateStructScope           // 0010 0000 0000 0000
-	lineStateFunctionScope         // 0100 0000 0000 0000
-	lineStateMemberFunctionScope   // 1000 0000 0000 0000
+	lineStatePackageScope          // 0000 0000 0000 0000 0000 0001 0000 0000
+	lineStateMultiLineImportScope  // 0000 0000 0000 0000 0000 0010 0000 0000
+	lineStateSingleLineImportScope // 0000 0000 0000 0000 0000 0100 0000 0000
+	lineStatePackageVariableScope  // 0000 0000 0000 0000 0000 1000 0000 0000
+	lineStateInterfaceScope        // 0000 0000 0000 0000 0001 0000 0000 0000
+	lineStateStructScope           // 0000 0000 0000 0000 0010 0000 0000 0000
+	lineStateFunctionScope         // 0000 0000 0000 0000 0100 0000 0000 0000
+	lineStateMemberFunctionScope   // 0000 0000 0000 0000 1000 0000 0000 0000
+	lineStateTypeRenameScope       // 0000 0000 0000 0001 0000 0000 0000 0000
+	lineStateMultiLineConstScope   // 0000 0000 0000 0010 0000 0000 0000 0000
+	lineStateSingleLineConstScope  // 0000 0000 0000 0100 0000 0000 0000 0000
 )
 
 // split file content to different scopes
@@ -1311,6 +1320,9 @@ const (
 	scopeStruct
 	scopeFunction
 	scopeMemberFunction
+	scopeTypeRename
+	scopeMultiLineConst
+	scopeSingleLineConst
 )
 
 type scope struct {
@@ -1330,6 +1342,9 @@ type fileScope struct {
 	StructDefinition         map[string]*scope
 	FunctionDefinition       map[string]*scope
 	MemberFunctionDefinition map[string]map[string]*scope
+	TypeRename               map[string]map[string]*scope
+	MultiLineConst           []*scope
+	SingleLineConst          map[string]*scope
 }
 
 var singleLineImportSubMatchNameIndexMap map[string]int
@@ -1339,6 +1354,9 @@ var interfaceSubMatchNameIndexMap map[string]int
 var structSubMatchNameIndexMap map[string]int
 var functionSubMatchNameIndexMap map[string]int
 var memberFunctionSubMatchNameIndexMap map[string]int
+var typeRenameSubMatchNameIndexMap map[string]int
+var multiLineConstSubMatchNameIndexMap map[string]int
+var singleLineConstSubMatchNameIndexMap map[string]int
 
 // GoFileSplitter go 文件切分示例
 func GoFileSplitter(paramList []string) {
@@ -1359,6 +1377,9 @@ func GoFileSplitter(paramList []string) {
 		StructDefinition:         make(map[string]*scope),
 		FunctionDefinition:       make(map[string]*scope),
 		MemberFunctionDefinition: make(map[string]map[string]*scope),
+		TypeRename:               make(map[string]map[string]*scope),
+		MultiLineConst:           make([]*scope, 0),
+		SingleLineConst:          make(map[string]*scope),
 	}
 
 	var lineState goFileLineState = lineStateNone
@@ -1401,6 +1422,12 @@ func GoFileSplitter(paramList []string) {
 			lineState, keyInterface = functionScope(line, lineIndex, fs, keyInterface, lineStateFunctionScope, lineStateNone)
 		case lineStateMemberFunctionScope:
 			lineState, keyInterface = memberFunctionScope(line, lineIndex, fs, keyInterface, lineStateMemberFunctionScope, lineStateNone)
+		case lineStateTypeRenameScope:
+			lineState = typeRenameScope(line, lineIndex, fs, lineStateTypeRenameScope, lineStateNone)
+		case lineStateMultiLineConstScope:
+			lineState, keyInterface = multiLineConstScope(line, lineIndex, fs, keyInterface, lineStateMultiLineConstScope, lineStateNone)
+		case lineStateSingleLineConstScope:
+			lineState = singleLineConstScope(line, lineIndex, fs, lineStateSingleLineConstScope, lineStateNone)
 		case lineStateNone:
 		default:
 			utility2.TestOutput("unknown line state %v", lineState)
@@ -1463,6 +1490,29 @@ func GoFileSplitter(paramList []string) {
 			}
 		}
 	}
+	if fs.TypeRename != nil {
+		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("type rename scope:")
+		for _, renameMap := range fs.TypeRename {
+			for _, scopeData := range renameMap {
+				utility2.TestOutput("|%v|", scopeData.Content)
+			}
+		}
+	}
+	if fs.MultiLineConst != nil {
+		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("multi-line const scope:")
+		for _, scopeData := range fs.MultiLineConst {
+			utility2.TestOutput("|%v|", scopeData.Content)
+		}
+	}
+	if fs.SingleLineConst != nil {
+		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("const value scope:")
+		for _, scopeData := range fs.SingleLineConst {
+			utility2.TestOutput("|%v|", scopeData.Content)
+		}
+	}
 }
 
 func getLineState(line string) goFileLineState {
@@ -1483,6 +1533,12 @@ func getLineState(line string) goFileLineState {
 		return lineStateFunctionScope
 	} else if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeMemberFunctionTemplate).MatchString(line) {
 		return lineStateMemberFunctionScope
+	} else if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeTypeRenameTemplate).MatchString(line) {
+		return lineStateTypeRenameScope
+	} else if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeMultiLineConstStartTemplate).MatchString(line) {
+		return lineStateMultiLineConstScope
+	} else if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeSingleLineConstTemplate).MatchString(line) {
+		return lineStateSingleLineConstScope
 	}
 	return lineStateNone
 }
@@ -1530,7 +1586,6 @@ func signleLineImportScope(line string, lineIndex int, fs *fileScope, continueSt
 		ScopeType: scopeSignleLineImport,
 		Content:   line,
 	})
-
 	return endState
 }
 
@@ -1541,7 +1596,6 @@ func packageVariableScope(line string, lineIndex int, fs *fileScope, continueSta
 		ScopeType: scopePackageVariable,
 		Content:   line,
 	})
-
 	return endState
 }
 
@@ -1677,7 +1731,7 @@ func functionScope(line string, lineIndex int, fs *fileScope, keyInterface inter
 		fs.FunctionDefinition[functionKey] = &scope{
 			LineStart: lineIndex,
 			LineEnd:   lineIndex,
-			ScopeType: scopeStruct,
+			ScopeType: scopeFunction,
 			Content:   line,
 		}
 		// one line function
@@ -1768,7 +1822,7 @@ func memberFunctionScope(line string, lineIndex int, fs *fileScope, keyInterface
 		fs.MemberFunctionDefinition[functionKeyClass][functionKeyName] = &scope{
 			LineStart: lineIndex,
 			LineEnd:   lineIndex,
-			ScopeType: scopeStruct,
+			ScopeType: scopeMemberFunction,
 			Content:   line,
 		}
 		// empty struct
@@ -1791,6 +1845,103 @@ func memberFunctionScope(line string, lineIndex int, fs *fileScope, keyInterface
 	}
 
 	return continueState, key
+}
+
+func typeRenameScope(line string, lineIndex int, fs *fileScope, continueState, endState goFileLineState) goFileLineState {
+	var typeName string
+	var renameFrom string
+	var renameType string
+	for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeTypeRenameTemplate).FindAllStringSubmatch(line, -1) {
+		if typeNameIndex, hasIndex := typeRenameSubMatchNameIndexMap["NAME"]; hasIndex {
+			typeName = strings.TrimSpace(subMatchList[typeNameIndex])
+		}
+		if renameFromIndex, hasIndex := typeRenameSubMatchNameIndexMap["FROM"]; hasIndex {
+			renameFrom = strings.TrimSpace(subMatchList[renameFromIndex])
+		}
+		if renameTypeIndex, hasIndex := typeRenameSubMatchNameIndexMap["TYPE"]; hasIndex {
+			renameType = strings.TrimSpace(subMatchList[renameTypeIndex])
+		}
+	}
+	utility2.TestOutput("typeName = %v", typeName)
+	utility2.TestOutput("renameFrom = %v", renameFrom)
+	utility2.TestOutput("renameType = %v", renameType)
+	if _, hasFrom := fs.TypeRename[renameFrom]; !hasFrom {
+		fs.TypeRename[renameFrom] = make(map[string]*scope)
+	}
+	fs.TypeRename[renameFrom][typeName] = &scope{
+		LineStart: lineIndex,
+		LineEnd:   lineIndex,
+		ScopeType: scopeTypeRename,
+		Content:   line,
+	}
+	return endState
+}
+
+func multiLineConstScope(line string, lineIndex int, fs *fileScope, keyInterface interface{}, continueState, endState goFileLineState) (goFileLineState, interface{}) {
+	var key int
+	if keyInterface != nil {
+		var ok bool
+		key, ok = keyInterface.(int)
+		if !ok {
+			ui.OutputErrorInfo(ui.CommonError19, "keyInterface", "*multiLineConstKey")
+			utility2.TestOutput("key = %+v", key)
+			return endState, nil
+		}
+	}
+
+	// scope begin
+	if keyInterface == nil {
+		fs.MultiLineConst = append(fs.MultiLineConst, &scope{
+			LineStart: lineIndex,
+			LineEnd:   lineIndex,
+			ScopeType: scopeSingleLineConst,
+			Content:   line,
+		})
+		return continueState, len(fs.MultiLineConst) - 1
+	}
+
+	if key >= len(fs.MultiLineConst) {
+		ui.OutputErrorInfo(ui.CMDCustomExecutorRunError, 7, fmt.Sprintf("multi-line scope syntax error at line: %v", lineIndex))
+		return lineStateNone, nil
+	}
+
+	// scope content
+	fs.MultiLineConst[key].Content = fmt.Sprintf("%v\n%v", fs.MultiLineConst[key].Content, line)
+
+	// scope end
+	if regexps.AtomicExpressionEnumRegexpMap[global.AEGoFileSplitterScopeEnd].MatchString(line) {
+		fs.MultiLineConst[key].LineEnd = lineIndex
+		return endState, nil
+	}
+
+	return continueState, len(fs.MultiLineConst) - 1
+}
+
+func singleLineConstScope(line string, lineIndex int, fs *fileScope, continueState, endState goFileLineState) goFileLineState {
+	var constName string
+	var constType string
+	var constValue string
+	for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeSingleLineConstTemplate).FindAllStringSubmatch(line, -1) {
+		if constNameIndex, hasIndex := singleLineConstSubMatchNameIndexMap["NAME"]; hasIndex {
+			constName = strings.TrimSpace(subMatchList[constNameIndex])
+		}
+		if constTypeIndex, hasIndex := singleLineConstSubMatchNameIndexMap["TYPE"]; hasIndex {
+			constType = strings.TrimSpace(subMatchList[constTypeIndex])
+		}
+		if constValueIndex, hasIndex := singleLineConstSubMatchNameIndexMap["VALUE"]; hasIndex {
+			constValue = strings.TrimSpace(subMatchList[constValueIndex])
+		}
+	}
+	utility2.TestOutput("constName = %v", constName)
+	utility2.TestOutput("constType = %v", constType)
+	utility2.TestOutput("constValue = %v", constValue)
+	fs.SingleLineConst[constName] = &scope{
+		LineStart: lineIndex,
+		LineEnd:   lineIndex,
+		ScopeType: scopeSingleLineConst,
+		Content:   line,
+	}
+	return endState
 }
 
 func getImportPackageAliasPathFromLine(line string, findRegexp *regexp.Regexp, subMatchNameIndexMap map[string]int) (string, string) {
@@ -1894,6 +2045,41 @@ func checkGoSyntaxKeyworkRegexp() bool {
 		}
 	} else {
 		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopeMemberFunctionTemplate)
+		return false
+	}
+
+	if goFileSplitterScopeTypeRenameRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeTypeRenameTemplate); goFileSplitterScopeTypeRenameRegexp != nil {
+		typeRenameSubMatchNameIndexMap = make(map[string]int)
+		for index, subMatchName := range goFileSplitterScopeTypeRenameRegexp.SubexpNames() {
+			typeRenameSubMatchNameIndexMap[subMatchName] = index
+		}
+	} else {
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopeTypeRenameTemplate)
+		return false
+	}
+
+	if goFileSplitterScopeMultiLineConstStartRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeMultiLineConstStartTemplate); goFileSplitterScopeMultiLineConstStartRegexp == nil {
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopeMultiLineConstStartTemplate)
+		return false
+	}
+
+	if goFileSplitterScopeMultiLineConstContentRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeMultiLineConstContentTemplate); goFileSplitterScopeMultiLineConstContentRegexp != nil {
+		multiLineConstSubMatchNameIndexMap = make(map[string]int)
+		for index, subMatchName := range goFileSplitterScopeMultiLineConstContentRegexp.SubexpNames() {
+			multiLineConstSubMatchNameIndexMap[subMatchName] = index
+		}
+	} else {
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopeMultiLineConstContentTemplate)
+		return false
+	}
+
+	if goFileSplitterScopeSingleLineConstRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeSingleLineConstTemplate); goFileSplitterScopeSingleLineConstRegexp != nil {
+		singleLineConstSubMatchNameIndexMap = make(map[string]int)
+		for index, subMatchName := range goFileSplitterScopeSingleLineConstRegexp.SubexpNames() {
+			singleLineConstSubMatchNameIndexMap[subMatchName] = index
+		}
+	} else {
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopeSingleLineConstTemplate)
 		return false
 	}
 

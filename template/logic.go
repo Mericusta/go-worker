@@ -51,5 +51,17 @@ var TEGoFileSplitterScopeStruct TemplateExpression = `^type\s+(?P<NAME>TK_IDENTI
 // TEGoFileSplitterScopeFunction Go 语言文件切分器函数域的模板表达式
 var TEGoFileSplitterScopeFunction TemplateExpression = `^func\s+(?P<NAME>\w+)\s*(?P<PARAM>\(.*?\)){1}\s*(?P<RETURN>\(.*?\)|[\.\*\w]+)?\s*\{(?P<CONTENT>[^\}]*)*(?P<SCOPE_END>\})?(?P<COMMENT>\s*//.*)?`
 
-// TEGoFileSplitterScopeMemberFunction Go 语言文件切分器成员函数的模板表达式
+// TEGoFileSplitterScopeMemberFunction Go 语言文件切分器成员函数域的模板表达式
 var TEGoFileSplitterScopeMemberFunction TemplateExpression = `^func\s*(?P<MEMBER>\(.*?\))?\s*(?P<NAME>\w+)\s*(?P<PARAM>\(.*?\)){1}\s*(?P<RETURN>\(.*?\)|[\.\*\w]+)?\s*\{(?P<CONTENT>[^\}]*)*(?P<SCOPE_END>\})?(?P<COMMENT>\s*//.*)?`
+
+// TEGoFileSplitterScopeTypeRename Go 语言文件切分器类型重命名域的模板表达式
+var TEGoFileSplitterScopeTypeRename TemplateExpression = `^type\s+(?P<NAME>TK_IDENTIFIER)\s+((?P<FROM>TK_IDENTIFIER)\.)?(?P<TYPE>TK_IDENTIFIER)`
+
+// TEGoFileSplitterScopeMultiLineConstStart Go 语言文件切分器多行 const 域的起始的模板表达式
+var TEGoFileSplitterScopeMultiLineConstStart TemplateExpression = `^const\s*\(`
+
+// TEGoFileSplitterScopeMultiLineConstContent Go 语言文件切分器多行 const 域的内容的模板表达式
+var TEGoFileSplitterScopeMultiLineConstContent TemplateExpression = `^\s*(?P<NAME>TK_IDENTIFIER)\s*(?P<TYPE>TK_IDENTIFIER)?.*`
+
+// TEGoFileSplitterScopeSingleLineConst Go 语言文件切分器单行 const 域的模板表达式
+var TEGoFileSplitterScopeSingleLineConst TemplateExpression = `^const\s+(?P<NAME>TK_IDENTIFIER)\s*(?P<TYPE>TK_IDENTIFIER)?\s*=(?P<VALUE>.*)`

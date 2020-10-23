@@ -41,8 +41,16 @@ const (
 	GoFileSplitterScopeStructTemplate TemplateEnum = 17
 	// GoFileSplitterScopeFunctionTemplate Go 语言文件切分器函数域的模板表达式
 	GoFileSplitterScopeFunctionTemplate TemplateEnum = 18
-	// GoFileSplitterScopeMemberFunctionTemplate Go 语言文件切分器成员函数的模板表达式
+	// GoFileSplitterScopeMemberFunctionTemplate Go 语言文件切分器成员函数域的模板表达式
 	GoFileSplitterScopeMemberFunctionTemplate TemplateEnum = 19
+	// GoFileSplitterScopeTypeRenameTemplate Go 语言文件切分器类型重命名域的模板表达式
+	GoFileSplitterScopeTypeRenameTemplate TemplateEnum = 20
+	// GoFileSplitterScopeMultiLineConstStartTemplate Go 语言文件切分器多行 const 域的起始的模板表达式
+	GoFileSplitterScopeMultiLineConstStartTemplate TemplateEnum = 21
+	// GoFileSplitterScopeMultiLineConstContentTemplate Go 语言文件切分器多行 const 域的内容的模板表达式
+	GoFileSplitterScopeMultiLineConstContentTemplate TemplateEnum = 22
+	// GoFileSplitterScopeSingleLineConstTemplate Go 语言文件切分器单行 const 域的模板表达式
+	GoFileSplitterScopeSingleLineConstTemplate TemplateEnum = 23
 
 	// // GoFileSplitterScopeImportTemplate Go 语言 import 多行内包名与路径的表达式
 	// GoFileSplitterScopeImportTemplate TemplateEnum = 12
