@@ -52,10 +52,8 @@ const (
 	// GoFileSplitterScopeSingleLineConstTemplate Go 语言文件切分器单行 const 域的模板表达式
 	GoFileSplitterScopeSingleLineConstTemplate TemplateEnum = 23
 
-	// // GoFileSplitterScopeImportTemplate Go 语言 import 多行内包名与路径的表达式
-	// GoFileSplitterScopeImportTemplate TemplateEnum = 12
-	// // GoLineImportOneLine Go 语言 import 单行的模板表达式
-	// GoLineImportOneLine TemplateEnum = 13
+	// GoFileAnalyzerScopePackageTemplate Go 语言文件分析器 package 域的模板表达式
+	GoFileAnalyzerScopePackageTemplate TemplateEnum = 31
 
 	// 外部模板
 

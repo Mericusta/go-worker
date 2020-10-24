@@ -30,6 +30,9 @@ var TEGoVariableInitialization TemplateExpression = `(?P<LIST>[^\n]*?)\s*:=\s*(?
 // TEGoFileSplitterScopePackage Go 语言文件切分器 package 域的模板表达式
 var TEGoFileSplitterScopePackage TemplateExpression = `^package\s+(?P<NAME>TK_IDENTIFIER)`
 
+// TEGoFileAnalyzerScopePackage Go 语言文件分析器 package 域的模板表达式
+var TEGoFileAnalyzerScopePackage TemplateExpression = TEGoFileSplitterScopePackage
+
 // TEGoFileSplitterScopeMultiLineImportStart Go 语言文件切分器多行 import 域的起始的模板表达式
 var TEGoFileSplitterScopeMultiLineImportStart TemplateExpression = `^import\s*\(`
 
