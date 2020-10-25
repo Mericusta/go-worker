@@ -39,6 +39,9 @@ var TEGoFileSplitterScopeMultiLineImportStart TemplateExpression = `^import\s*\(
 // TEGoFileSplitterScopeMultiLineImportContent Go 语言文件切分器多行 import 域的内容的模板表达式
 var TEGoFileSplitterScopeMultiLineImportContent TemplateExpression = `^\s*TK_GoKeywordImportAlias`
 
+// TEGoFileAnalyzerScopeImportContent Go 语言文件分析器 import 域的内容的模板表达式
+var TEGoFileAnalyzerScopeImportContent TemplateExpression = `^\s*TK_GoKeywordImportAlias`
+
 // TEGoFileSplitterScopeSingleLineImport Go 语言文件切分器单行 import 域的模板表达式
 var TEGoFileSplitterScopeSingleLineImport TemplateExpression = `^import\s+TK_GoKeywordImportAlias`
 
