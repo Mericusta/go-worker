@@ -1235,7 +1235,7 @@ func goValueTypeDeduction(valueString string) goValueType {
 
 // ----------------------------------------------------------------
 
-// custom execute 7 resources/template_example.template.go
+// custom execute 7 resources/template_example.template.go true
 
 // Command Example: custom execute 7 resources/template_example.template.go
 // Command Expression:
@@ -1540,7 +1540,7 @@ func SplitGoFile(filename string, output bool) *GoPackageScope {
 }
 
 func getLineState(line string) goFileLineState {
-	// utility2.TestOutput("get line state by |%v|", line)
+	utility2.TestOutput("get line state by |%v|", line)
 	if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopePackageTemplate).MatchString(line) {
 		return lineStatePackageScope
 	} else if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeMultiLineImportStartTemplate).MatchString(line) {
@@ -1634,10 +1634,13 @@ func interfaceScope(line string, lineIndex int, gps *GoPackageScope, keyInterfac
 		}
 	}
 
+	utility2.TestOutput("key = %v", key)
+
 	// scope begin
 	if len(key) == 0 {
 		var interfaceKey string
 		var scopeEnd string
+		utility2.TestOutput("goSplitterInterfaceSubMatchNameIndexMap = %v", goSplitterInterfaceSubMatchNameIndexMap)
 		for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeInterfaceTemplate).FindAllStringSubmatch(line, -1) {
 			if index, hasIndex := goSplitterInterfaceSubMatchNameIndexMap["NAME"]; hasIndex {
 				interfaceKey = strings.TrimSpace(subMatchList[index])
@@ -1646,16 +1649,19 @@ func interfaceScope(line string, lineIndex int, gps *GoPackageScope, keyInterfac
 				scopeEnd = strings.TrimSpace(subMatchList[index])
 			}
 		}
+
 		gps.InterfaceDefinition[interfaceKey] = &scope{
 			LineStart: lineIndex,
 			LineEnd:   lineIndex,
 			ScopeType: scopeInterface,
 			Content:   line,
 		}
-		// empty interface
+		// one line interface
 		if len(scopeEnd) != 0 {
+			utility2.TestOutput("interface %v is one line interface", interfaceKey)
 			return endState, nil
 		}
+		utility2.TestOutput("interface line = %v", line)
 		return continueState, interfaceKey
 	}
 

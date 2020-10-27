@@ -169,7 +169,7 @@ var goAnalyzerPackageSubMatchNameIndexMap map[string]int
 // var goAnalyzerSingleLineImportSubMatchNameIndexMap map[string]int
 var goAnalyzerImportContentSubMatchNameIndexMap map[string]int
 var goAnalyzerPackageVariableSubMatchNameIndexMap map[string]int
-var goAnalyzerInterfaceSubMatchNameIndexMap map[string]int
+var goAnalyzerInterfaceContentSubMatchNameIndexMap map[string]int
 var goAnalyzerStructSubMatchNameIndexMap map[string]int
 var goAnalyzerFunctionSubMatchNameIndexMap map[string]int
 var goAnalyzerMemberFunctionSubMatchNameIndexMap map[string]int
@@ -249,9 +249,8 @@ type GoFunctionCallAnalysis struct {
 
 // GoFunctionVariable go 函数内变量
 type GoFunctionVariable struct {
+	GoVariableAnalysis
 	Index int
-	Name  string
-	Type  string
 }
 
 // checkGoAnalyzerRegexp 检查 go 项目分析器的所有模板/原子表达式
@@ -307,13 +306,13 @@ func checkGoAnalyzerRegexp() bool {
 		ok = false
 	}
 
-	if goFileSplitterScopeInterfaceRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeInterfaceTemplate); goFileSplitterScopeInterfaceRegexp != nil {
-		goSplitterInterfaceSubMatchNameIndexMap = make(map[string]int)
-		for index, subMatchName := range goFileSplitterScopeInterfaceRegexp.SubexpNames() {
-			goSplitterInterfaceSubMatchNameIndexMap[subMatchName] = index
+	if goFileAnalyzerScopeInterfaceContentRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopeInterfaceContentTemplate); goFileAnalyzerScopeInterfaceContentRegexp != nil {
+		goAnalyzerInterfaceContentSubMatchNameIndexMap = make(map[string]int)
+		for index, subMatchName := range goFileAnalyzerScopeInterfaceContentRegexp.SubexpNames() {
+			goAnalyzerInterfaceContentSubMatchNameIndexMap[subMatchName] = index
 		}
 	} else {
-		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopeInterfaceTemplate)
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileAnalyzerScopeInterfaceContentTemplate)
 		ok = false
 	}
 
@@ -396,6 +395,10 @@ func checkGoAnalyzerRegexp() bool {
 // @param toAnalyzePathList 项目下所有待分析的文件的列表
 // @return
 func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error) {
+	if !checkGoSplitterRegexp() {
+		return nil, nil
+	}
+
 	if !checkGoAnalyzerRegexp() {
 		return nil, nil
 	}
@@ -479,42 +482,79 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 		}
 		goAnalysis.PackageAnalysisMap[packagePath].Scope[toAnalyzeFilePath] = splitFileResult
 
-		// 4.1.3.1.6.1.3
-		if _, hasFile := goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis[toAnalyzeFilePath]; !hasFile {
-			goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis[toAnalyzeFilePath] = make(map[string]*GoImportAnalysis)
-		}
+		// // 4.1.3.1.6.1.3
+		// if _, hasFile := goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis[toAnalyzeFilePath]; !hasFile {
+		// 	goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis[toAnalyzeFilePath] = make(map[string]*GoImportAnalysis)
+		// }
 
-		for _, scopeData := range splitFileResult.SingleLineImport {
-			if goImportAnalysis := analyzeGoScopeSingleLineImport(scopeData.Content); goImportAnalysis != nil {
-				goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis[toAnalyzeFilePath][goImportAnalysis.Alias] = goImportAnalysis
+		// for _, scopeData := range splitFileResult.SingleLineImport {
+		// 	if goImportAnalysis := analyzeGoScopeSingleLineImport(scopeData.Content); goImportAnalysis != nil {
+		// 		goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis[toAnalyzeFilePath][goImportAnalysis.Alias] = goImportAnalysis
+		// 	}
+		// }
+
+		// goImportAnalysisList := analyzeGoScopeMultiLineImport(splitFileResult.MultiLineImport.Content)
+		// for _, goImportAnalysis := range goImportAnalysisList {
+		// 	goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis[toAnalyzeFilePath][goImportAnalysis.Alias] = goImportAnalysis
+		// }
+
+		// utility2.TestOutput(ui.CommonNote2)
+		// utility2.TestOutput("Output package import analysis:")
+		// for filePath, importAnlysisMap := range goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis {
+		// 	utility2.TestOutput("filePath = %v", filePath)
+		// 	for alias, analysis := range importAnlysisMap {
+		// 		utility2.TestOutput("alias = %v, importPath = %v", alias, analysis.Path)
+		// 	}
+		// }
+
+		// // 4.1.3.1.6.1.4
+		// for _, packageVariableScope := range splitFileResult.PackageVariable {
+		// 	if goPackageVariableAnalysis := analyzeGoPackageVariable(packageVariableScope.Content); goPackageVariableAnalysis != nil {
+		// 		goAnalysis.PackageAnalysisMap[packagePath].VariableAnalysisMap[goPackageVariableAnalysis.Name] = goPackageVariableAnalysis
+		// 	}
+		// }
+
+		// utility2.TestOutput(ui.CommonNote2)
+		// utility2.TestOutput("Output package variable analysis:")
+		// for name, analysis := range goAnalysis.PackageAnalysisMap[packagePath].VariableAnalysisMap {
+		// 	utility2.TestOutput("name = %v, type = %v, type from = %v", name, analysis.Type, analysis.TypeFrom)
+		// }
+
+		// 4.1.3.1.6.1.5
+		for interfaceName, interfaceScope := range splitFileResult.InterfaceDefinition {
+			if goInterfaceAnalysis := analyzeGoPackageInterface(interfaceScope.Content); goInterfaceAnalysis != nil {
+				goInterfaceAnalysis.Name = interfaceName
+				goAnalysis.PackageAnalysisMap[packagePath].InterfaceAnalysis[interfaceName] = goInterfaceAnalysis
 			}
-		}
-
-		goImportAnalysisList := analyzeGoScopeMultiLineImport(splitFileResult.MultiLineImport.Content)
-		for _, goImportAnalysis := range goImportAnalysisList {
-			goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis[toAnalyzeFilePath][goImportAnalysis.Alias] = goImportAnalysis
 		}
 
 		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("Output package import analysis:")
-		for filePath, importAnlysisMap := range goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis {
-			utility2.TestOutput("filePath = %v", filePath)
-			for alias, analysis := range importAnlysisMap {
-				utility2.TestOutput("alias = %v, importPath = %v", alias, analysis.Path)
+		utility2.TestOutput("Output package interface analysis:")
+		for interfaceName, interfaceAnalysis := range goAnalysis.PackageAnalysisMap[packagePath].InterfaceAnalysis {
+			utility2.TestOutput("interface %v function list:", interfaceName)
+			for functionName, functionAnalysis := range interfaceAnalysis.Function {
+				utility2.TestOutput("function: %v", functionName)
+				utility2.TestOutput("- param list:")
+				for paramName, paramAnalysis := range functionAnalysis.ParamsMap {
+					var paramTypeString string
+					if len(paramAnalysis.TypeFrom) != 0 {
+						paramTypeString = fmt.Sprintf("%v.%v", paramAnalysis.TypeFrom, paramAnalysis.Type)
+					} else {
+						paramTypeString = paramAnalysis.Type
+					}
+					utility2.TestOutput("\t- Index: %v, Name: %v, Type: %v", paramAnalysis.Index, paramName, paramTypeString)
+				}
+				utility2.TestOutput("- return list:")
+				for returnIndex, returnAnalysis := range functionAnalysis.ReturnMap {
+					var returnTypeString string
+					if len(returnAnalysis.TypeFrom) != 0 {
+						returnTypeString = fmt.Sprintf("%v.%v", returnAnalysis.TypeFrom, returnAnalysis.Type)
+					} else {
+						returnTypeString = returnAnalysis.Type
+					}
+					utility2.TestOutput("\t- Index: %v, Name: %v, Type: %v", returnIndex, returnAnalysis.Name, returnTypeString)
+				}
 			}
-		}
-
-		// 4.1.3.1.6.1.4
-		for _, packageVariableScope := range splitFileResult.PackageVariable {
-			if goPackageVariableAnalysis := analyzeGoPackageVariable(packageVariableScope.Content); goPackageVariableAnalysis != nil {
-				goAnalysis.PackageAnalysisMap[packagePath].VariableAnalysisMap[goPackageVariableAnalysis.Name] = goPackageVariableAnalysis
-			}
-		}
-
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("Output package variable analysis:")
-		for name, analysis := range goAnalysis.PackageAnalysisMap[packagePath].VariableAnalysisMap {
-			utility2.TestOutput("name = %v, type = %v, type from = %v", name, analysis.Type, analysis.TypeFrom)
 		}
 
 		// if analyzeGoScopeImportError != nil {
@@ -742,6 +782,7 @@ func removeGoFileCommentLine(fileContentByte []byte) []byte {
 // analyzeGoScopePackage
 // @param content 待分析 package 域的内容
 // @param fileABS 待分析文件的绝对路径
+// @return
 func analyzeGoScopePackage(content, fileABS string) (packageName string, packagePath string, analyzeError error) {
 	for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopePackageTemplate).FindAllStringSubmatch(content, -1) {
 		if index, hasIndex := goAnalyzerPackageSubMatchNameIndexMap["NAME"]; hasIndex {
@@ -759,12 +800,14 @@ func analyzeGoScopePackage(content, fileABS string) (packageName string, package
 
 // analyzeGoScopeSingleLineImport
 // @param content 待分析单行 import 域的内容
+// @return
 func analyzeGoScopeSingleLineImport(content string) *GoImportAnalysis {
 	return analyzeGoScopeImportContent(strings.Replace(content, "import", "", 1))
 }
 
 // analyzeGoScopeMultiLineImport
 // @param content 待分析多行 import 域的内容
+// @return
 func analyzeGoScopeMultiLineImport(content string) []*GoImportAnalysis {
 	goImportAnalysisList := make([]*GoImportAnalysis, 0)
 	for _, lineContent := range strings.Split(content, "\n") {
@@ -777,6 +820,7 @@ func analyzeGoScopeMultiLineImport(content string) []*GoImportAnalysis {
 
 // analyzeGoScopeImport
 // @param content 待分析 import 域的内容
+// @return
 func analyzeGoScopeImportContent(content string) *GoImportAnalysis {
 	goImportAnalysis := &GoImportAnalysis{}
 	for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopeImportContentTemplate).FindAllStringSubmatch(content, -1) {
@@ -798,6 +842,7 @@ func analyzeGoScopeImportContent(content string) *GoImportAnalysis {
 
 // analyzeGoPackageVariable
 // @param content 待分析 variable 域的内容
+// @return
 func analyzeGoPackageVariable(content string) *GoVariableAnalysis {
 	goPackageVariableAnalysis := &GoVariableAnalysis{}
 	for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopePackageVariableTemplate).FindAllStringSubmatch(content, -1) {
@@ -805,13 +850,7 @@ func analyzeGoPackageVariable(content string) *GoVariableAnalysis {
 			goPackageVariableAnalysis.Name = strings.TrimSpace(subMatchList[index])
 		}
 		if index, hasIndex := goAnalyzerPackageVariableSubMatchNameIndexMap["TYPE"]; hasIndex {
-			goPackageVariableTypeStringList := strings.Split(strings.TrimSpace(subMatchList[index]), string(global.PunctuationMarkPoint))
-			if len(goPackageVariableTypeStringList) == 1 {
-				goPackageVariableAnalysis.Type = goPackageVariableTypeStringList[0]
-			} else if len(goPackageVariableTypeStringList) == 2 {
-				goPackageVariableAnalysis.TypeFrom = goPackageVariableTypeStringList[0]
-				goPackageVariableAnalysis.Type = goPackageVariableTypeStringList[1]
-			}
+			goPackageVariableAnalysis.Type, goPackageVariableAnalysis.TypeFrom = analyzeGoVariableType(strings.TrimSpace(subMatchList[index]))
 		}
 	}
 	if len(goPackageVariableAnalysis.Name) == 0 || len(goPackageVariableAnalysis.Type) == 0 {
@@ -820,51 +859,120 @@ func analyzeGoPackageVariable(content string) *GoVariableAnalysis {
 	return goPackageVariableAnalysis
 }
 
-// func analyzeGoImportPackage(goFileAnalysis *goFileAnalysis, fileContentByte []byte) {
-// 	if keywordImportValueRegexp := regexps.GetRegexpByTemplateEnum(global.GoKeywordImportValueTemplate); keywordImportValueRegexp != nil {
-// 		if goKeywordImportAliasRegexp := regexps.GetRegexpByTemplateEnum(global.GoKeywordImportAliasTemplate); goKeywordImportAliasRegexp != nil {
-// 			keywordImportValueSubMatchNameIndexMap := make(map[string]int)
-// 			for index, subMatchName := range keywordImportValueRegexp.SubexpNames() {
-// 				keywordImportValueSubMatchNameIndexMap[subMatchName] = index
-// 			}
-// 			goKeywordImportAliasSubMatchNameIndexMap := make(map[string]int)
-// 			for index, subMatchName := range goKeywordImportAliasRegexp.SubexpNames() {
-// 				goKeywordImportAliasSubMatchNameIndexMap[subMatchName] = index
-// 			}
-// 			for _, keywordImportValueSubmatchList := range keywordImportValueRegexp.FindAllSubmatch(fileContentByte, -1) {
-// 				packageName := make([]byte, 0)
-// 				if aliasIndex, hasAliasIndex := keywordImportValueSubMatchNameIndexMap["ALIAS"]; hasAliasIndex {
-// 					packageName = keywordImportValueSubmatchList[aliasIndex]
-// 				}
-// 				if keywordImportValueSubMatchIndex, hasKeywordImportValueSubMatchIndex := keywordImportValueSubMatchNameIndexMap["VALUE"]; hasKeywordImportValueSubMatchIndex {
-// 					keywordImportValueSubmatchValue := keywordImportValueSubmatchList[keywordImportValueSubMatchIndex]
-// 					// 处理多行形式下的包引用
-// 					for _, goKeywordImportAliasSubMatchList := range goKeywordImportAliasRegexp.FindAllSubmatch(keywordImportValueSubmatchValue, -1) {
-// 						if goKeywordImportAliasSubMatchIndex, hasGoKeywordImportAliasSubMatchIndex := goKeywordImportAliasSubMatchNameIndexMap["ALIAS"]; hasGoKeywordImportAliasSubMatchIndex {
-// 							packageName = goKeywordImportAliasSubMatchList[goKeywordImportAliasSubMatchIndex]
-// 						}
-// 						packagePath := make([]byte, 0)
-// 						if goKeywordImportAliasSubMatchIndex, hasGoKeywordImportAliasSubMatchIndex := goKeywordImportAliasSubMatchNameIndexMap["CONTENT"]; hasGoKeywordImportAliasSubMatchIndex && len(goKeywordImportAliasSubMatchList) > goKeywordImportAliasSubMatchIndex {
-// 							packagePath = goKeywordImportAliasSubMatchList[goKeywordImportAliasSubMatchIndex]
-// 						}
-// 						if len(packageName) == 0 {
-// 							packagePathList := strings.Split(strings.Trim(string(packagePath), "\""), "/")
-// 							packageName = []byte(packagePathList[len(packagePathList)-1])
-// 						}
-// 						goFileAnalysis.ImportAliasMap[strings.TrimSpace(string(packageName))] = strings.Trim(string(packagePath), "\"")
-// 						// clear package name
-// 						packageName = make([]byte, 0)
-// 					}
-// 				}
-// 			}
-// 		} else {
-// 			ui.OutputWarnInfo(ui.CommonError16, global.GoKeywordImportAliasTemplate)
-// 		}
+// analyzeGoPackageInterface
+// @param content 待分析 interface 域的内容
+// @return
+func analyzeGoPackageInterface(content string) *GoInterfaceAnalysis {
+	goInterfaceAnalysis := &GoInterfaceAnalysis{
+		Function: make(map[string]*GoFunctionAnalysis),
+	}
+	for _, lineContent := range strings.Split(content, "\n") {
+		var functionName string
+		var functionParamListString string
+		var functionReturnListString string
+		for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopeInterfaceContentTemplate).FindAllStringSubmatch(lineContent, -1) {
+			if index, hasIndex := goAnalyzerInterfaceContentSubMatchNameIndexMap["NAME"]; hasIndex {
+				functionName = strings.TrimSpace(subMatchList[index])
+			}
+			if index, hasIndex := goAnalyzerInterfaceContentSubMatchNameIndexMap["PARAM"]; hasIndex {
+				functionParamListString = strings.TrimSpace(subMatchList[index])
+			}
+			if index, hasIndex := goAnalyzerInterfaceContentSubMatchNameIndexMap["RETURN"]; hasIndex {
+				functionReturnListString = strings.TrimSpace(subMatchList[index])
+			}
+		}
+		utility2.TestOutput("lineContent = %v", lineContent)
+		if len(functionName) == 0 {
+			continue
+		}
+		functionParamMap := analyzeGoFunctionDefinitionParamList(functionParamListString)
+		functionReturnMap := analyzeGoFunctionDefinitionReturnList(functionReturnListString)
+		goInterfaceAnalysis.Function[functionName] = &GoFunctionAnalysis{
+			Name:      functionName,
+			ParamsMap: functionParamMap,
+			ReturnMap: functionReturnMap,
+		}
+	}
+	return goInterfaceAnalysis
+}
 
-// 	} else {
-// 		ui.OutputWarnInfo(ui.CMDAnalyzeGoKeywordRegexpNotExist, "import")
-// 	}
-// }
+// analyzeGoFunctionDefinitionParamList
+// @param paramListString 待分析的函数参数表
+// @return
+func analyzeGoFunctionDefinitionParamList(paramListString string) map[string]*GoFunctionVariable {
+	paramMap := make(map[string]*GoFunctionVariable)
+	unknownTypeParamList := make([]*GoFunctionVariable, 0)
+	for index, paramString := range strings.Split(paramListString, ",") {
+		paramStringList := strings.Split(strings.TrimSpace(paramString), " ")
+		if len(paramStringList) == 1 {
+			unknownTypeParamList = append(unknownTypeParamList, &GoFunctionVariable{
+				GoVariableAnalysis: GoVariableAnalysis{
+					Name: paramStringList[0],
+				},
+				Index: index,
+			})
+		} else {
+			paramType, paramTypeFrom := analyzeGoVariableType(strings.TrimSpace(paramStringList[1]))
+			paramMap[paramStringList[0]] = &GoFunctionVariable{
+				GoVariableAnalysis: GoVariableAnalysis{
+					Name:     paramStringList[0],
+					Type:     paramType,
+					TypeFrom: paramTypeFrom,
+				},
+				Index: index,
+			}
+			if len(unknownTypeParamList) != 0 {
+				for _, unknownTypeParam := range unknownTypeParamList {
+					unknownTypeParam.GoVariableAnalysis.Type = paramType
+					unknownTypeParam.GoVariableAnalysis.TypeFrom = paramTypeFrom
+					paramMap[unknownTypeParam.Name] = unknownTypeParam
+				}
+				unknownTypeParamList = make([]*GoFunctionVariable, 0)
+			}
+		}
+	}
+	return paramMap
+}
+
+// analyzeGoFunctionDefinitionReturnList
+// @param returnListString 待分析的返回值列表
+// @return
+func analyzeGoFunctionDefinitionReturnList(returnListString string) map[string]*GoFunctionVariable {
+	returnMap := make(map[string]*GoFunctionVariable)
+	for index, returnString := range strings.Split(returnListString, ",") {
+		returnStringList := strings.Split(strings.TrimSpace(returnString), " ")
+		var returnTypeString string
+		goFunctionVariable := &GoFunctionVariable{
+			GoVariableAnalysis: GoVariableAnalysis{},
+			Index:              index,
+		}
+		if len(returnStringList) == 1 {
+			returnTypeString = returnStringList[0]
+			returnMap[fmt.Sprintf("%v", len(returnMap))] = goFunctionVariable
+		} else if len(returnStringList) == 2 {
+			returnTypeString = returnStringList[1]
+			goFunctionVariable.GoVariableAnalysis.Name = returnStringList[0]
+			returnMap[returnStringList[0]] = goFunctionVariable
+		}
+		goFunctionVariable.GoVariableAnalysis.Type, goFunctionVariable.GoVariableAnalysis.TypeFrom = analyzeGoVariableType(strings.TrimSpace(returnTypeString))
+	}
+	return returnMap
+}
+
+// analyzeGoVariableType
+// @param variableTypeString 待分析变量的类型字符串
+func analyzeGoVariableType(variableTypeString string) (string, string) {
+	var typeName string
+	var typeFrom string
+	goVariableTypeStringList := strings.Split(variableTypeString, string(global.PunctuationMarkPoint))
+	if len(goVariableTypeStringList) == 1 {
+		typeName = goVariableTypeStringList[0]
+	} else if len(goVariableTypeStringList) == 2 {
+		typeFrom = goVariableTypeStringList[0]
+		typeName = goVariableTypeStringList[1]
+	}
+	return typeName, typeFrom
+}
 
 // func analyzeGoFunctionDefinition(goFileAnalysis *goFileAnalysis, fileContentByte []byte) {
 // 	bracketsContentRegexp, hasBracketsContentRegexp := regexps.AtomicExpressionEnumRegexpMap[global.AEBracketsContent]

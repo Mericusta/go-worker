@@ -17,6 +17,8 @@ var e2 template.TypeName
 // common interface
 
 type EmptyInterface interface{}
+type OneLineInterface interface{ OneLineFunction() template.TypeName }
+type AnotherOneLineInterface interface{ AnotherOneLineFunction() interface{} }
 type ExampleInterface interface {
 	Example()
 }

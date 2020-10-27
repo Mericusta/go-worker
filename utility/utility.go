@@ -253,3 +253,54 @@ func ReadContentLineOneByOne(reader io.Reader, f func(string) bool) error {
 
 	return nil
 }
+
+// PunctuationContent 成对标点符号的内容节点
+type PunctuationContent struct {
+	Content                   string
+	SubPunctuationContentList []*PunctuationContent
+}
+
+// RecursiveTraitPunctuationContent 成对标点符号的内容提取
+func RecursiveTraitPunctuationContent(content string, leftPunctuationMark, rightPunctuationMark rune) *PunctuationContent {
+	if len(content) == 0 {
+		return nil
+	}
+
+	punctuationContent := &PunctuationContent{
+		Content: content,
+	}
+
+	for {
+		leftPunctuationMarkIndex := strings.IndexRune(content, leftPunctuationMark)
+		offset := 1
+		if leftPunctuationMarkIndex == -1 {
+			offset = 2
+		} else if leftPunctuationMarkIndex == len(content)-1 {
+			break
+		}
+		afterLeftPunctuationMarkContentIndex := leftPunctuationMarkIndex + offset
+
+		leftCount := 1
+		rightCount := 0
+		rightPunctuationMarkIndex := strings.IndexFunc(content[afterLeftPunctuationMarkContentIndex:], func(r rune) bool {
+			if r == leftPunctuationMark {
+				leftCount++
+			} else if r == rightPunctuationMark {
+				rightCount++
+			}
+			return leftCount == rightCount
+		})
+		if rightPunctuationMarkIndex == -1 {
+			break
+		}
+
+		subPunctuationContent := RecursiveTraitPunctuationContent(content[afterLeftPunctuationMarkContentIndex:afterLeftPunctuationMarkContentIndex+rightPunctuationMarkIndex], leftPunctuationMark, rightPunctuationMark)
+		if subPunctuationContent != nil {
+			punctuationContent.SubPunctuationContentList = append(punctuationContent.SubPunctuationContentList, subPunctuationContent)
+		}
+
+		content = content[afterLeftPunctuationMarkContentIndex+rightPunctuationMarkIndex:]
+	}
+
+	return punctuationContent
+}
