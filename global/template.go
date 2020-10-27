@@ -56,6 +56,8 @@ const (
 	GoFileAnalyzerScopePackageTemplate TemplateEnum = 31
 	// GoFileAnalyzerScopeImportContentTemplate Go 语言文件分析器 import 域的内容的模板表达式
 	GoFileAnalyzerScopeImportContentTemplate TemplateEnum = 32
+	// GoFileAnalyzerScopePackageVariableTemplate Go 语言文件分析器包变量域的模板表达式
+	GoFileAnalyzerScopePackageVariableTemplate TemplateEnum = 33
 
 	// 外部模板
 

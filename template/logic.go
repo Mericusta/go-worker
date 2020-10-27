@@ -48,6 +48,9 @@ var TEGoFileSplitterScopeSingleLineImport TemplateExpression = `^import\s+TK_GoK
 // TEGoFileSplitterScopePackageVariable Go 语言文件切分器包变量域的模板表达式
 var TEGoFileSplitterScopePackageVariable TemplateExpression = `^var\s+(?P<NAME>TK_IDENTIFIER)\s+(?P<TYPE>TK_IDENTIFIER(\.TK_IDENTIFIER)?)`
 
+// TEGoFileAnalyzerScopePackageVariable Go 语言文件分析器包变量域的模板表达式
+var TEGoFileAnalyzerScopePackageVariable TemplateExpression = TEGoFileSplitterScopePackageVariable
+
 // TEGoFileSplitterScopeInterface Go 语言文件切分器接口域的模板表达式
 var TEGoFileSplitterScopeInterface TemplateExpression = `^type\s+(?P<NAME>TK_IDENTIFIER)\s+interface\s*\{(?P<SCOPE_END>\})?`
 

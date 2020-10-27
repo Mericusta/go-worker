@@ -282,28 +282,28 @@ func checkGoAnalyzerRegexp() bool {
 		ok = false
 	}
 
-	if goFileSplitterScopeSingleLineImportRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeSingleLineImportTemplate); goFileSplitterScopeSingleLineImportRegexp != nil {
-		goSplitterSingleLineImportSubMatchNameIndexMap = make(map[string]int)
-		for index, subMatchName := range goFileSplitterScopeSingleLineImportRegexp.SubexpNames() {
-			goSplitterSingleLineImportSubMatchNameIndexMap[subMatchName] = index
+	// if goFileSplitterScopeSingleLineImportRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeSingleLineImportTemplate); goFileSplitterScopeSingleLineImportRegexp != nil {
+	// 	goSplitterSingleLineImportSubMatchNameIndexMap = make(map[string]int)
+	// 	for index, subMatchName := range goFileSplitterScopeSingleLineImportRegexp.SubexpNames() {
+	// 		goSplitterSingleLineImportSubMatchNameIndexMap[subMatchName] = index
+	// 	}
+	// } else {
+	// 	ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopeSingleLineImportTemplate)
+	// 	ok = false
+	// }
+
+	// if goFileSplitterScopeEnd, has := regexps.AtomicExpressionEnumRegexpMap[global.AEGoFileSplitterScopeEnd]; !has || goFileSplitterScopeEnd == nil {
+	// 	ui.OutputErrorInfo(ui.CommonError16, global.AEGoFileSplitterScopeEnd)
+	// 	ok = false
+	// }
+
+	if goFileAnalyzerScopePackageVariableRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopePackageVariableTemplate); goFileAnalyzerScopePackageVariableRegexp != nil {
+		goAnalyzerPackageVariableSubMatchNameIndexMap = make(map[string]int)
+		for index, subMatchName := range goFileAnalyzerScopePackageVariableRegexp.SubexpNames() {
+			goAnalyzerPackageVariableSubMatchNameIndexMap[subMatchName] = index
 		}
 	} else {
-		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopeSingleLineImportTemplate)
-		ok = false
-	}
-
-	if goFileSplitterScopeEnd, has := regexps.AtomicExpressionEnumRegexpMap[global.AEGoFileSplitterScopeEnd]; !has || goFileSplitterScopeEnd == nil {
-		ui.OutputErrorInfo(ui.CommonError16, global.AEGoFileSplitterScopeEnd)
-		ok = false
-	}
-
-	if goFileSplitterScopePackageVariableRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopePackageVariableTemplate); goFileSplitterScopePackageVariableRegexp != nil {
-		goSplitterPackageVariableSubMatchNameIndexMap = make(map[string]int)
-		for index, subMatchName := range goFileSplitterScopePackageVariableRegexp.SubexpNames() {
-			goSplitterPackageVariableSubMatchNameIndexMap[subMatchName] = index
-		}
-	} else {
-		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopePackageVariableTemplate)
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileAnalyzerScopePackageVariableTemplate)
 		ok = false
 	}
 
@@ -485,8 +485,9 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 		}
 
 		for _, scopeData := range splitFileResult.SingleLineImport {
-			goImportAnalysis := analyzeGoScopeSingleLineImport(scopeData.Content)
-			goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis[toAnalyzeFilePath][goImportAnalysis.Alias] = goImportAnalysis
+			if goImportAnalysis := analyzeGoScopeSingleLineImport(scopeData.Content); goImportAnalysis != nil {
+				goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis[toAnalyzeFilePath][goImportAnalysis.Alias] = goImportAnalysis
+			}
 		}
 
 		goImportAnalysisList := analyzeGoScopeMultiLineImport(splitFileResult.MultiLineImport.Content)
@@ -495,14 +496,27 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 		}
 
 		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("Output package import analysis:")
 		for filePath, importAnlysisMap := range goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis {
 			utility2.TestOutput("filePath = %v", filePath)
-			for importAlias, importAnalysis := range importAnlysisMap {
-				utility2.TestOutput("importAlias = %v, importPath = %v", importAlias, importAnalysis.Path)
+			for alias, analysis := range importAnlysisMap {
+				utility2.TestOutput("alias = %v, importPath = %v", alias, analysis.Path)
 			}
 		}
 
-		// 4.1.3.1.6.1.3
+		// 4.1.3.1.6.1.4
+		for _, packageVariableScope := range splitFileResult.PackageVariable {
+			if goPackageVariableAnalysis := analyzeGoPackageVariable(packageVariableScope.Content); goPackageVariableAnalysis != nil {
+				goAnalysis.PackageAnalysisMap[packagePath].VariableAnalysisMap[goPackageVariableAnalysis.Name] = goPackageVariableAnalysis
+			}
+		}
+
+		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("Output package variable analysis:")
+		for name, analysis := range goAnalysis.PackageAnalysisMap[packagePath].VariableAnalysisMap {
+			utility2.TestOutput("name = %v, type = %v, type from = %v", name, analysis.Type, analysis.TypeFrom)
+		}
+
 		// if analyzeGoScopeImportError != nil {
 		// 	return nil, analyzeGoScopeImportError
 		// }
@@ -780,6 +794,30 @@ func analyzeGoScopeImportContent(content string) *GoImportAnalysis {
 		goImportAnalysis.Alias = path.Base(goImportAnalysis.Path)
 	}
 	return goImportAnalysis
+}
+
+// analyzeGoPackageVariable
+// @param content 待分析 variable 域的内容
+func analyzeGoPackageVariable(content string) *GoVariableAnalysis {
+	goPackageVariableAnalysis := &GoVariableAnalysis{}
+	for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopePackageVariableTemplate).FindAllStringSubmatch(content, -1) {
+		if index, hasIndex := goAnalyzerPackageVariableSubMatchNameIndexMap["NAME"]; hasIndex {
+			goPackageVariableAnalysis.Name = strings.TrimSpace(subMatchList[index])
+		}
+		if index, hasIndex := goAnalyzerPackageVariableSubMatchNameIndexMap["TYPE"]; hasIndex {
+			goPackageVariableTypeStringList := strings.Split(strings.TrimSpace(subMatchList[index]), string(global.PunctuationMarkPoint))
+			if len(goPackageVariableTypeStringList) == 1 {
+				goPackageVariableAnalysis.Type = goPackageVariableTypeStringList[0]
+			} else if len(goPackageVariableTypeStringList) == 2 {
+				goPackageVariableAnalysis.TypeFrom = goPackageVariableTypeStringList[0]
+				goPackageVariableAnalysis.Type = goPackageVariableTypeStringList[1]
+			}
+		}
+	}
+	if len(goPackageVariableAnalysis.Name) == 0 || len(goPackageVariableAnalysis.Type) == 0 {
+		return nil
+	}
+	return goPackageVariableAnalysis
 }
 
 // func analyzeGoImportPackage(goFileAnalysis *goFileAnalysis, fileContentByte []byte) {

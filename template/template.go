@@ -48,5 +48,6 @@ func init() {
 		global.GoFileSplitterScopeSingleLineConstTemplate:        TEGoFileSplitterScopeSingleLineConst,
 		global.GoFileAnalyzerScopePackageTemplate:                TEGoFileAnalyzerScopePackage,
 		global.GoFileAnalyzerScopeImportContentTemplate:          TEGoFileAnalyzerScopeImportContent,
+		global.GoFileAnalyzerScopePackageVariableTemplate:        TEGoFileAnalyzerScopePackageVariable,
 	}
 }

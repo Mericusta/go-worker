@@ -10,6 +10,10 @@ import (
 	"github.com/go-worker/resources/template"
 )
 
+var e0 int = 1
+var e1 EmptyInterface
+var e2 template.TypeName
+
 // common interface
 
 type EmptyInterface interface{}
