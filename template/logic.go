@@ -54,11 +54,14 @@ var TEGoFileAnalyzerScopePackageVariable TemplateExpression = TEGoFileSplitterSc
 // TEGoFileSplitterScopeInterface Go 语言文件切分器接口域的模板表达式
 var TEGoFileSplitterScopeInterface TemplateExpression = `^type\s+(?P<NAME>TK_IDENTIFIER)\s+interface\s*\{(.*(?P<SCOPE_END>\}))?`
 
-// TEGoFileAnalyzerScopeInterfaceContent Go 语言文件分析器接口域的内容的模板表达式
-var TEGoFileAnalyzerScopeInterfaceContent TemplateExpression = `\s*(?P<NAME>TK_IDENTIFIER)(\((?P<PARAM>.*?)\)){1}\s*(?P<RETURN>\(.*?\)|[\.\*\w]+)?`
+// TEGoFileAnalyzerScopeInterfaceFunction Go 语言文件分析器接口域的函数的模板表达式
+var TEGoFileAnalyzerScopeInterfaceFunction TemplateExpression = `\s*(?P<NAME>TK_IDENTIFIER)(\((?P<PARAM>.*?)\)){1}\s*(?P<RETURN>\(.*?\)|[\.\*\w]+)?`
 
 // TEGoFileSplitterScopeStruct Go 语言文件切分器结构体域的模板表达式
 var TEGoFileSplitterScopeStruct TemplateExpression = `^type\s+(?P<NAME>TK_IDENTIFIER)\s+struct\s*\{(?P<CONTENT>[^\}]*)*(?P<SCOPE_END>\})?`
+
+// TEGoFileAnalyzerScopeStructVariable Go 语言文件分析器结构体域的变量的模板表达式
+var TEGoFileAnalyzerScopeStructVariable TemplateExpression = `\s*(?P<NAME>TK_IDENTIFIER)(\s+(?P<TYPE>.*))?`
 
 // TEGoFileSplitterScopeFunction Go 语言文件切分器函数域的模板表达式
 var TEGoFileSplitterScopeFunction TemplateExpression = `^func\s+(?P<NAME>\w+)\s*(?P<PARAM>\(.*?\)){1}\s*(?P<RETURN>\(.*?\)|[\.\*\w]+)?\s*\{(?P<CONTENT>[^\}]*)*(?P<SCOPE_END>\})?(?P<COMMENT>\s*//.*)?`

@@ -1335,6 +1335,10 @@ type scope struct {
 	Content   string
 }
 
+func (s scope) isOneLineScope() bool {
+	return s.LineStart == s.LineEnd
+}
+
 // GoPackageScope go 包切分结果
 type GoPackageScope struct {
 	Package                  *scope

@@ -27,7 +27,9 @@ type ExampleInterface interface {
 
 type OneLineStruct struct{ v int }
 type ExampleStruct struct {
+	OneLineStruct
 	v interface{} // This is a struct member
+	f func(int, int) int
 }
 
 // common struct define template function
