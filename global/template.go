@@ -62,6 +62,8 @@ const (
 	GoFileAnalyzerScopeInterfaceFunctionTemplate TemplateEnum = 34
 	// GoFileAnalyzerScopeStructVariableTemplate Go 语言文件分析器结构体域的变量的模板表达式
 	GoFileAnalyzerScopeStructVariableTemplate TemplateEnum = 35
+	// GoFileAnalyzerScopeFunctionTemplate Go 语言文件分析器函数域的模板表达式
+	GoFileAnalyzerScopeFunctionTemplate TemplateEnum = 36
 
 	// 外部模板
 

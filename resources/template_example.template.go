@@ -87,12 +87,24 @@ func (ts TemplateStruct) TExample(t1 template.TypeName, t2 template.TypeName) {
 	f.Println("This is TExample from TemplateStruct")
 }
 
+func (ts template.TypeName) TExample() {
+
+}
+
 // ----------------------------------------------------------------
 
 // define template function
-func TemplateOperatorPlus(t1 template.TypeName, t2 template.TypeName) (t3 template.TypeName, t4 template.TypeName) {
+func TemplateOperatorADD(t1 template.TypeName, t2 template.TypeName) (t3 template.TypeName, t4 template.TypeName) {
 	// Go 中没有运算符重载，所以使用该 templateAdd 的的 template.TypeName 只能被推导为内建支持 + 运算符的类型
 	return t1, t2
+}
+
+func TemplateOperatorSUB(t1 template.TypeName, t2 template.TypeName) template.TypeName {
+	return t2
+}
+
+func TemplateOperatorCustom(t1 template.TypeName, t2 template.TypeName, f func(template.TypeName, template.TypeName) template.TypeName) template.TypeName {
+	return f(t1, t2)
 }
 
 // // 不支持匿名函数推导
@@ -104,19 +116,19 @@ func TemplateOperatorPlus(t1 template.TypeName, t2 template.TypeName) (t3 templa
 
 func templateCaller() {
 	// T -> func(int, int) int
-	v1, _ := TemplateOperatorPlus(1, 2)
+	v1, _ := TemplateOperatorADD(1, 2)
 
 	// T -> func(int, float64) float64 -> implicit type conversion
-	_, v2 := TemplateOperatorPlus(1, 2.0)
+	_, v2 := TemplateOperatorADD(1, 2.0)
 
 	// T -> func(string, string) string -> maybe STL Vector
-	TemplateOperatorPlus("1", "2")
+	TemplateOperatorADD("1", "2")
 
 	// T -> func([]int, []int) []int -> maybe STL Vector
-	TemplateOperatorPlus([]int{1}, []int{2})
+	TemplateOperatorADD([]int{1}, []int{2})
 
 	// T -> func(ExampleStruct, ExampleStruct) ExampleStruct
-	es, _ := TemplateOperatorPlus(ExampleStruct{v: 1}, ExampleStruct{v: v1})
+	es, _ := TemplateOperatorADD(ExampleStruct{v: 1}, ExampleStruct{v: v1})
 
 	// T -> func(String)
 	es.Set(v2)
@@ -131,7 +143,7 @@ func templateCaller() {
 	es.TExample()
 
 	// T -> func(*ExampleStruct, *ExampleStruct) *ExampleStruct
-	TemplateOperatorPlus(&ExampleStruct{v: 1}, &ExampleStruct{v: 2})
+	TemplateOperatorADD(&ExampleStruct{v: 1}, &ExampleStruct{v: 2})
 
 	var ts TemplateStruct
 
@@ -157,7 +169,7 @@ func templateCaller() {
 	ts.TExample(v4, v4)
 
 	// no call
-	v5 := TemplateOperatorPlus
+	v5 := TemplateOperatorADD
 
 	// T -> func(int, float32) float32 -> explicit specify type to float32
 	v5(float32(1), float32(2.0))

@@ -338,13 +338,13 @@ func checkGoAnalyzerRegexp() bool {
 	// 	ok = false
 	// }
 
-	if goFileSplitterScopeFunctionRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeFunctionTemplate); goFileSplitterScopeFunctionRegexp != nil {
-		goSplitterFunctionSubMatchNameIndexMap = make(map[string]int)
-		for index, subMatchName := range goFileSplitterScopeFunctionRegexp.SubexpNames() {
-			goSplitterFunctionSubMatchNameIndexMap[subMatchName] = index
+	if goFileAnalyzerScopeFunctionRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopeFunctionTemplate); goFileAnalyzerScopeFunctionRegexp != nil {
+		goAnalyzerFunctionSubMatchNameIndexMap = make(map[string]int)
+		for index, subMatchName := range goFileAnalyzerScopeFunctionRegexp.SubexpNames() {
+			goAnalyzerFunctionSubMatchNameIndexMap[subMatchName] = index
 		}
 	} else {
-		ui.OutputErrorInfo(ui.CommonError18, global.GoFileSplitterScopeFunctionTemplate)
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileAnalyzerScopeFunctionTemplate)
 		ok = false
 	}
 
@@ -536,7 +536,7 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 
 		// 4.1.3.1.6.1.5
 		for interfaceName, interfaceScope := range splitFileResult.InterfaceDefinition {
-			if goInterfaceAnalysis := analyzeGoScopePackageInterface(interfaceScope.Content); goInterfaceAnalysis != nil {
+			if goInterfaceAnalysis := analyzeGoScopeInterface(interfaceScope.Content); goInterfaceAnalysis != nil {
 				goInterfaceAnalysis.Name = interfaceName
 				goAnalysis.PackageAnalysisMap[packagePath].InterfaceAnalysis[interfaceName] = goInterfaceAnalysis
 			}
@@ -574,7 +574,7 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 
 		// 4.1.3.1.6.1.6
 		for structName, structScope := range splitFileResult.StructDefinition {
-			if goStructAnalysis := analyzeGoScopePackageStruct(structScope); goStructAnalysis != nil {
+			if goStructAnalysis := analyzeGoScopeStruct(structScope); goStructAnalysis != nil {
 				goStructAnalysis.Name = structName
 				goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis[structName] = goStructAnalysis
 			}
@@ -594,43 +594,25 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 		}
 		utility2.TestOutput(ui.CommonNote2)
 
-		// if analyzeGoScopeImportError != nil {
-		// 	return nil, analyzeGoScopeImportError
-		// }
-		// if _, hasFile := goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis[toAnalyzeFilePath]; !hasFile {
-		// 	goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis[toAnalyzeFilePath] = make(map[string]*GoImportAnalysis)
-		// }
-		// goImportAnalysis.
+		// 1.1.3.1.6.1.7
+		for functionName, functionScope := range splitFileResult.FunctionDefinition {
+			if functionAnalysis := analyzeGoScopeFunction(functionScope); functionAnalysis != nil {
+				goAnalysis.PackageAnalysisMap[packagePath].FunctionAnalysisMap[functionName] = functionAnalysis
+			}
+		}
 
-		// if _, hasPackageAnalysis := goAnalysis.PackageAnalysisMap[fileAnalysis.PackagePath]; !hasPackageAnalysis {
-		// 	// goPackageAnalysis = &GoPackageAnalysis{
-		// 	// No: func() int {
-		// 	// 	if fileAnalysis.PackageName == "main" {
-		// 	// 		return mainPackageNo
-		// 	// 	}
-		// 	// 	packageNo++
-		// 	// 	return packageNo
-		// 	// }(),
-		// 	// FileNoList:                  make([]int, 0),
-		// 	// ImportPackageAnalysisNoList: make([]int, 0),
-		// 	// FunctionAnalysisMap: make(map[string]*GoFunctionAnalysis),
-		// 	// }
-		// 	// packagePathAnalysisMap[fileAnalysis.PackagePath] = goPackageAnalysis
-		// 	// goAnalysis.PackageNoAnalysisMap[goPackageAnalysis.No] = goPackageAnalysis
-		// 	goAnalysis.PackageAnalysisMap[fileAnalysis.PackagePath] = &GoPackageAnalysis{
-		// 		FunctionAnalysisMap: make(map[string]*GoFunctionAnalysis),
-		// 	}
-		// }
-		// packagePathAnalysisMap[fileAnalysis.PackagePath].FileNoList = append(packagePathAnalysisMap[fileAnalysis.PackagePath].FileNoList, fileAnalysis.No)
-		// goAnalysis.FileNoAnalysisMap[fileAnalysis.No] = fileAnalysis
-		// fileNo++
-
-		// for functionName, functionAnalysis := range fileAnalysis.FunctionMap {
-		// 	if _, hasFunction := goAnalysis.PackageAnalysisMap[fileAnalysis.PackagePath].FunctionAnalysisMap[functionName]; hasFunction {
-		// 		ui.OutputWarnInfo(ui.CMDAnalyzeGoDuplicateFunctionInPackage, functionName, fileAnalysis.PackagePath)
-		// 	}
-		// 	goAnalysis.PackageAnalysisMap[fileAnalysis.PackagePath].FunctionAnalysisMap[functionName] = functionAnalysis
-		// }
+		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("Output package function analysis:")
+		for functionName, functionAnalysis := range goAnalysis.PackageAnalysisMap[packagePath].FunctionAnalysisMap {
+			utility2.TestOutput("function %v", functionName)
+			for paramName, functionVariableAnalysis := range functionAnalysis.ParamsMap {
+				utility2.TestOutput("- param index: %v, name: %v, type: %v.%v", functionVariableAnalysis.Index, paramName, functionVariableAnalysis.TypeFrom, functionVariableAnalysis.Type)
+			}
+			for _, functionVariableAnalysis := range functionAnalysis.ReturnMap {
+				utility2.TestOutput("- return index: %v, name: %v, type: %v.%v", functionVariableAnalysis.Index, functionVariableAnalysis.Name, functionVariableAnalysis.TypeFrom, functionVariableAnalysis.Type)
+			}
+		}
+		utility2.TestOutput(ui.CommonNote2)
 	}
 
 	// 4.1.3.1.6.2
@@ -896,10 +878,10 @@ func analyzeGoScopePackageVariable(content string) *GoVariableAnalysis {
 	return goPackageVariableAnalysis
 }
 
-// analyzeGoScopePackageInterface
+// analyzeGoScopeInterface
 // @param content 待分析 interface 域的内容
 // @return
-func analyzeGoScopePackageInterface(content string) *GoInterfaceAnalysis {
+func analyzeGoScopeInterface(content string) *GoInterfaceAnalysis {
 	goInterfaceAnalysis := &GoInterfaceAnalysis{
 		Function: make(map[string]*GoFunctionAnalysis),
 	}
@@ -932,10 +914,10 @@ func analyzeGoScopePackageInterface(content string) *GoInterfaceAnalysis {
 	return goInterfaceAnalysis
 }
 
-// analyzeGoScopePackageStruct
-// @param content 待分析 struct 域的内容
+// analyzeGoScopeStruct
+// @param structScope 待分析的 struct 域
 // @return
-func analyzeGoScopePackageStruct(structScope *scope) *GoStructAnalysis {
+func analyzeGoScopeStruct(structScope *scope) *GoStructAnalysis {
 	goStructAnalysis := &GoStructAnalysis{
 		Base:           make(map[string]*GoVariableAnalysis),
 		MemberVariable: make(map[string]*GoVariableAnalysis),
@@ -945,7 +927,7 @@ func analyzeGoScopePackageStruct(structScope *scope) *GoStructAnalysis {
 	if structScope.isOneLineScope() {
 		rootNode := utility3.TraitPunctuationMarksContent(structScope.Content, global.PunctuationMarkCurlyBraces)
 		if rootNode == nil || len(rootNode.SubPunctuationContentList) == 0 {
-			return goStructAnalysis
+			return nil
 		}
 		structContent := strings.TrimSpace(rootNode.SubPunctuationContentList[0].Content)
 		goVariableAnalysis := &GoVariableAnalysis{}
@@ -990,9 +972,60 @@ func analyzeGoScopePackageStruct(structScope *scope) *GoStructAnalysis {
 	return goStructAnalysis
 }
 
+// analyzeGoScopeFunction
+// @param functionScope 待分析的 function 域
+// @return
+func analyzeGoScopeFunction(functionScope *scope) *GoFunctionAnalysis {
+	goFunctionAnalysis := &GoFunctionAnalysis{}
+
+	var functionThis string
+	var functionName string
+	var functionParamListString string
+	var functionReturnListString string
+	var functionReturnTypeString string
+	utility2.TestOutput("functionScope.Content = \n|%v|", functionScope.Content)
+	for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopeFunctionTemplate).FindAllStringSubmatch(functionScope.Content, -1) {
+		if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["THIS"]; hasIndex {
+			functionThis = strings.TrimSpace(subMatchList[index])
+		}
+		if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["NAME"]; hasIndex {
+			functionName = strings.TrimSpace(subMatchList[index])
+		}
+		if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["PARAM"]; hasIndex {
+			functionParamListString = strings.TrimSpace(subMatchList[index])
+		}
+		if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["RETURN_LIST"]; hasIndex {
+			functionReturnListString = strings.TrimSpace(subMatchList[index])
+		}
+		if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["RETURN_TYPE"]; hasIndex {
+			functionReturnTypeString = strings.TrimSpace(subMatchList[index])
+		}
+	}
+	utility2.TestOutput("functionName = |%v|", functionName)
+	utility2.TestOutput("functionThis = |%v|", functionThis)
+	utility2.TestOutput("functionParamListString = |%v|", functionParamListString)
+	utility2.TestOutput("functionReturnListString = |%v|", functionReturnListString)
+	utility2.TestOutput("functionReturnTypeString = |%v|", functionReturnTypeString)
+	if len(functionName) == 0 {
+		return nil
+	}
+	goFunctionAnalysis.ParamsMap = analyzeGoFunctionDefinitionParamList(functionParamListString)
+	returnMap := make(map[string]*GoFunctionVariable)
+	if len(functionReturnListString) != 0 {
+		returnMap = analyzeGoFunctionDefinitionReturnList(functionReturnListString)
+	} else if len(functionReturnTypeString) != 0 {
+		returnMap["0"] = &GoFunctionVariable{}
+		returnMap["0"].Index = 0
+		returnMap["0"].GoVariableAnalysis.Type, returnMap["0"].GoVariableAnalysis.TypeFrom = analyzeGoVariableType(functionReturnTypeString)
+	}
+	goFunctionAnalysis.ReturnMap = returnMap
+	return goFunctionAnalysis
+}
+
 // analyzeGoFunctionDefinitionParamList
 // @param paramListString 待分析的函数参数表
 // @return
+// TODO: if param is func
 func analyzeGoFunctionDefinitionParamList(paramListString string) map[string]*GoFunctionVariable {
 	paramMap := make(map[string]*GoFunctionVariable)
 	unknownTypeParamList := make([]*GoFunctionVariable, 0)
@@ -1031,6 +1064,7 @@ func analyzeGoFunctionDefinitionParamList(paramListString string) map[string]*Go
 // analyzeGoFunctionDefinitionReturnList
 // @param returnListString 待分析的返回值列表
 // @return
+// TODO: if return value is func
 func analyzeGoFunctionDefinitionReturnList(returnListString string) map[string]*GoFunctionVariable {
 	returnMap := make(map[string]*GoFunctionVariable)
 	for index, returnString := range strings.Split(returnListString, ",") {

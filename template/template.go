@@ -51,5 +51,6 @@ func init() {
 		global.GoFileAnalyzerScopePackageVariableTemplate:        TEGoFileAnalyzerScopePackageVariable,
 		global.GoFileAnalyzerScopeInterfaceFunctionTemplate:      TEGoFileAnalyzerScopeInterfaceFunction,
 		global.GoFileAnalyzerScopeStructVariableTemplate:         TEGoFileAnalyzerScopeStructVariable,
+		global.GoFileAnalyzerScopeFunctionTemplate:               TEGoFileAnalyzerScopeFunction,
 	}
 }
