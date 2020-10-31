@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // IsExist 检查文件或文件夹是否存在
@@ -303,4 +304,105 @@ func RecursiveTraitPunctuationContent(content string, leftPunctuationMark, right
 	}
 
 	return punctuationContent
+}
+
+// NewPunctuationContent 成对标点符号的内容节点
+type NewPunctuationContent struct {
+	Content                   string
+	LeftPunctuation           rune
+	RightPunctuation          rune
+	SubPunctuationContentList []*NewPunctuationContent
+	SubPunctuationIndexMap    map[int][]int
+}
+
+var punctuationMarkMap map[rune]rune = map[rune]rune{
+	'(': ')', ')': '(',
+	'{': '}', '}': '{',
+	'[': ']', ']': '[',
+}
+
+func getAnotherPunctuationMark(r rune) rune {
+	if markRune, hasMark := punctuationMarkMap[r]; hasMark {
+		return markRune
+	}
+	return ' '
+}
+
+// RecursiveTraitMultiPunctuationMarksContent 混合成对标点符号的内容分类提取
+func RecursiveTraitMultiPunctuationMarksContent(content string, leftPunctuationMark, rightPunctuationMark rune, toSearchLeftPunctuationMarkList []rune, maxDeep, deep int) *NewPunctuationContent {
+	punctuationContent := &NewPunctuationContent{
+		Content:                content,
+		LeftPunctuation:        leftPunctuationMark,
+		RightPunctuation:       rightPunctuationMark,
+		SubPunctuationIndexMap: make(map[int][]int),
+	}
+
+	passLeftLength := 0
+	for len(content) != 0 && deep != maxDeep {
+		var leftPunctuationMark rune
+		var rightPunctuationMark rune
+		leftPunctuationMarkIndex := len(content) - 1
+
+		for _, toSearchLeftPunctuationMark := range toSearchLeftPunctuationMarkList {
+			toSearchLeftPunctuationMarkIndex := strings.IndexRune(content, toSearchLeftPunctuationMark)
+			if toSearchLeftPunctuationMarkIndex != -1 && toSearchLeftPunctuationMarkIndex < leftPunctuationMarkIndex {
+				leftPunctuationMarkIndex = toSearchLeftPunctuationMarkIndex
+				leftPunctuationMark = toSearchLeftPunctuationMark
+			}
+		}
+
+		rightPunctuationMark = getAnotherPunctuationMark(leftPunctuationMark)
+		if leftPunctuationMark == 0 || rightPunctuationMark == 0 || leftPunctuationMarkIndex == len(content)-1 {
+			break
+		}
+
+		afterLeftPunctuationMarkContentIndex := leftPunctuationMarkIndex + 1
+
+		leftCount := 1
+		rightCount := 0
+		rightPunctuationMarkIndex := strings.IndexFunc(content[afterLeftPunctuationMarkContentIndex:], func(r rune) bool {
+			if r == leftPunctuationMark {
+				leftCount++
+			} else if r == rightPunctuationMark {
+				rightCount++
+			}
+			return leftCount == rightCount
+		})
+		if rightPunctuationMarkIndex == -1 {
+			break
+		}
+		rightPunctuationMarkIndex = leftPunctuationMarkIndex + rightPunctuationMarkIndex + 1
+
+		subPunctuationContent := RecursiveTraitMultiPunctuationMarksContent(content[leftPunctuationMarkIndex+1:rightPunctuationMarkIndex], leftPunctuationMark, rightPunctuationMark, toSearchLeftPunctuationMarkList, maxDeep, deep+1)
+		if subPunctuationContent != nil {
+			punctuationContent.SubPunctuationIndexMap[len(punctuationContent.SubPunctuationContentList)] = []int{passLeftLength + leftPunctuationMarkIndex, passLeftLength + rightPunctuationMarkIndex}
+			punctuationContent.SubPunctuationContentList = append(punctuationContent.SubPunctuationContentList, subPunctuationContent)
+		}
+
+		content = content[rightPunctuationMarkIndex+1:]
+		passLeftLength += rightPunctuationMarkIndex + 1
+	}
+
+	return punctuationContent
+}
+
+// ReplaceToUniqueString 替换内容为唯一字符串（Unix 纳秒时间戳）
+func ReplaceToUniqueString(content string, toReplaceString string) (string, string) {
+	if len(content) < len(toReplaceString) {
+		return content, ""
+	}
+	tryTime := len(content) - len(toReplaceString)
+	for tryTime != 0 {
+		replaceString := fmt.Sprintf("%v", time.Now().UnixNano())
+		if strings.Contains(content, replaceString) {
+			tryTime--
+			continue
+		}
+		replacedContent := strings.ReplaceAll(content, toReplaceString, replaceString)
+		if !strings.Contains(replacedContent, replaceString) {
+			break
+		}
+		return replacedContent, replaceString
+	}
+	return content, ""
 }

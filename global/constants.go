@@ -1,8 +1,6 @@
 package global
 
 // 内部常量
-
-// UI 常量
 var (
 	LogMarkTest  = "TEST"
 	LogMarkNote  = "Note"
@@ -42,20 +40,23 @@ var (
 	AnalyzeRPPackageLevel               = "RP_PACKAGE_LEVEL"
 	AnalyzeRPPackageList                = "RP_PACKAGE_LIST"
 
-	PunctuationMarkLeftQuote        = '"'
-	PunctuationMarkRightQuote       = '"'
-	PunctuationMarkLeftBracket      = '('
-	PunctuationMarkRightBracket     = ')'
-	PunctuationMarkLeftCurlyBraces  = '{'
-	PunctuationMarkRightCurlyBraces = '}'
-	PunctuationMarkPoint            = '.'
+	PunctuationMarkLeftQuote        rune = '"'
+	PunctuationMarkRightQuote       rune = '"'
+	PunctuationMarkLeftBracket      rune = '('
+	PunctuationMarkRightBracket     rune = ')'
+	PunctuationMarkLeftCurlyBraces  rune = '{'
+	PunctuationMarkRightCurlyBraces rune = '}'
+	PunctuationMarkPoint            rune = '.'
+	ASCIISpace                      rune = ' '
+
+	GoKeywordEmptyInterface = "interface{}"
 )
 
 // 逻辑常量
 const (
-	PunctuationMarkQuote       = 1
-	PunctuationMarkBracket     = 2
-	PunctuationMarkCurlyBraces = 3
+	PunctuationMarkQuote        = 1
+	PunctuationMarkBracket      = 2
+	PunctuationMarkCurlyBracket = 3
 )
 
 // 配置常量

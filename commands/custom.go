@@ -35,6 +35,7 @@ func init() {
 		5: ProofOfArrayOrdered,
 		6: GoCommandToolTemplater,
 		7: GoFileSplitter,
+		8: GoGrammaTree,
 	}
 }
 
@@ -1427,6 +1428,7 @@ func SplitGoFile(filename string, output bool) *GoPackageScope {
 		}
 		if output {
 			utility2.TestOutput("line state is: %v", lineState.String())
+			utility2.TestOutput("key is: %v", keyInterface)
 		}
 
 		switch lineState {
@@ -1557,7 +1559,7 @@ func getLineState(line string) goFileLineState {
 		return lineStateInterfaceScope
 	} else if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeStructTemplate).MatchString(line) {
 		return lineStateStructScope
-	} else if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeFunctionTemplate).MatchString(line) {
+	} else if isMatchGoScopeFunction(line) {
 		return lineStateFunctionScope
 	} else if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeMemberFunctionTemplate).MatchString(line) {
 		return lineStateMemberFunctionScope
@@ -1569,6 +1571,11 @@ func getLineState(line string) goFileLineState {
 		return lineStateSingleLineConstScope
 	}
 	return lineStateNone
+}
+
+func isMatchGoScopeFunction(content string) bool {
+	replacedContent, _ := utility.ReplaceToUniqueString(content, global.GoKeywordEmptyInterface)
+	return regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeFunctionTemplate).MatchString(replacedContent)
 }
 
 func packageScope(line string, lineIndex int, gps *GoPackageScope, continueState, endState goFileLineState) goFileLineState {
@@ -1740,25 +1747,34 @@ func functionScope(line string, lineIndex int, gps *GoPackageScope, keyInterface
 		}
 	}
 
+	replacedLine, replacedString := utility.ReplaceToUniqueString(line, global.GoKeywordEmptyInterface)
+	utility2.TestOutput("replace %v to %v", global.GoKeywordEmptyInterface, replacedString)
+	utility2.TestOutput("replaced line = %v", replacedLine)
+
 	// scope begin
 	if len(key) == 0 {
 		var functionKey string
-		// var content string
+		var body string
+		var definition string
 		var scopeEnd string
-		for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeFunctionTemplate).FindAllStringSubmatch(line, -1) {
+		for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeFunctionTemplate).FindAllStringSubmatch(replacedLine, -1) {
 			if functionNameIndex, hasIndex := goSplitterFunctionSubMatchNameIndexMap["NAME"]; hasIndex {
 				functionKey = strings.TrimSpace(subMatchList[functionNameIndex])
 			}
-			// if contentIndex, hasIndex := goSplitterFunctionSubMatchNameIndexMap["CONTENT"]; hasIndex {
-			// 	content = strings.TrimSpace(subMatchList[contentIndex])
-			// }
+			if contentIndex, hasIndex := goSplitterFunctionSubMatchNameIndexMap["BODY"]; hasIndex {
+				body = strings.TrimSpace(subMatchList[contentIndex])
+			}
+			if index, hasIndex := goSplitterFunctionSubMatchNameIndexMap["DEFINITION"]; hasIndex {
+				definition = strings.TrimSpace(subMatchList[index])
+			}
 			if scopeEndIndex, hasIndex := goSplitterFunctionSubMatchNameIndexMap["SCOPE_END"]; hasIndex {
 				scopeEnd = strings.TrimSpace(subMatchList[scopeEndIndex])
 			}
 		}
-		// utility2.TestOutput("functionKey = %v", functionKey)
-		// utility2.TestOutput("content = %v", content)
-		// utility2.TestOutput("scopeEnd = %v", scopeEnd)
+		utility2.TestOutput("functionKey = %v", functionKey)
+		utility2.TestOutput("body = %v", body)
+		utility2.TestOutput("definition = %v", definition)
+		utility2.TestOutput("scopeEnd = %v", scopeEnd)
 
 		gps.FunctionDefinition[functionKey] = &scope{
 			LineStart: lineIndex,
@@ -1775,10 +1791,10 @@ func functionScope(line string, lineIndex int, gps *GoPackageScope, keyInterface
 	}
 
 	// scope content
-	gps.FunctionDefinition[key].Content = fmt.Sprintf("%v\n%v", gps.FunctionDefinition[key].Content, line)
+	gps.FunctionDefinition[key].Content = fmt.Sprintf("%v\n%v", gps.FunctionDefinition[key].Content, replacedLine)
 
 	// scope end
-	if regexps.AtomicExpressionEnumRegexpMap[global.AEGoFileSplitterScopeEnd].MatchString(line) {
+	if regexps.AtomicExpressionEnumRegexpMap[global.AEGoFileSplitterScopeEnd].MatchString(replacedLine) {
 		gps.FunctionDefinition[key].LineEnd = lineIndex
 		return endState, nil
 	}
@@ -2127,3 +2143,285 @@ func checkGoSplitterRegexp() bool {
 	ok = true
 	return ok
 }
+
+// ----------------------------------------------------------------
+
+// custom execute 8 resources/template_example.template.go true
+
+// Command Example: custom execute 8 resources/template_example.template.go
+// Command Expression:
+// - custom                                : command const content
+// - execute                               : command const content
+// - 8                                     : specify executor
+// - resources/template_example.template.go: specify a file to split
+
+var (
+	keywordVar      string = "var"
+	keywordFunc     string = "func"
+	keywordReturn   string = "return"
+	keywordStruct   string = "struct"
+	kewordInterface string = "interface"
+)
+
+type grammaState int
+
+const (
+	nonSense                   grammaState = 1 << iota // 0000 0000 0000 0001
+	variableDefinition                                 // 0000 0000 0000 0010
+	functionDefinition                                 // 0000 0000 0000 0100
+	structDefinition                                   // 0000 0000 0000 1000
+	interfaceDefintion                                 // 0000 0000 0001 0000
+	todo00100000                                       // 0000 0000 0010 0000
+	todo01000000                                       // 0000 0000 0100 0000
+	todo10000000                                       // 0000 0000 1000 0000
+	identifier                                         // 0000 0001 0000 0000
+	scopeLeftBracket                                   // 0000 0010 0000 0000
+	scopeRightBracket                                  // 0000 0100 0000 0000
+	scopeLeftCurlyBraces                               // 0000 1000 0000 0000
+	scopeRightRightCurlyBraces                         // 0001 0000 0000 0000
+	scopeLeftQuote                                     // 0010 0000 0000 0000
+	scopeRightQuote                                    // 0100 0000 0000 0000
+	allSense                                           // 1000 0000 0000 0000
+	splitterComma                                      // 0001 0000 0000 0000 0000
+)
+
+// var[keyword] i[identifier] int[type] =[assign] 1[value] -> gramma tree
+// single-line variable definition:
+// - keyword: keyword
+// - identifier:
+// - type:
+// - assign: =
+// - value:
+// variableDefinition
+// - identifier 1 -> name
+// - identifier 2 -> type
+
+// func[keyword] f[identifier]([])
+//
+
+var lengthKeywordStateMap map[int]map[string]grammaState
+
+type grammaNode struct {
+	gramma grammaState
+	next   *grammaNode
+}
+
+type grammaRule struct {
+	gramma        grammaState
+	boundaryState map[rune]map[grammaState]int
+	nextStateMap  map[grammaState]int
+}
+
+func (rule *grammaRule) MatchState(state grammaState) bool {
+	if _, hasAllSense := rule.nextStateMap[allSense]; hasAllSense {
+		return true
+	}
+	_, hasNextState := rule.nextStateMap[state]
+	return hasNextState
+}
+
+var keywordFuncGrammaRule *grammaRule
+
+func initKeywordFuncGrammaRule() {
+	keywordFuncGrammaRule = &grammaRule{
+		gramma: functionDefinition,
+		nextStateMap: map[grammaState]int{
+			identifier: 1,
+		},
+	}
+}
+
+var identifierGrammaRule *grammaRule
+
+func initIdentifierGrammaRule() {
+	identifierGrammaRule = &grammaRule{
+		gramma: identifier,
+		nextStateMap: map[grammaState]int{
+			allSense: -1,
+		},
+	}
+}
+
+var scopeLeftBracketGrammaRule *grammaRule
+
+func initScopeLeftBracketGrammaRule() {
+	scopeLeftBracketGrammaRule = &grammaRule{
+		gramma: scopeLeftBracket,
+		nextStateMap: map[grammaState]int{
+			allSense: -1,
+		},
+	}
+}
+
+type rule struct {
+}
+
+var functionDefinitionGrammaRule interface{}
+
+func initFunctionDefinitionGrammaRule() {
+	functionDefinitionGrammaRule = &grammaRule{
+		gramma: functionDefinition, // means keyword func
+
+	}
+}
+
+func GoGrammaTree(paramList []string) {
+	if len(paramList) < 1 {
+		ui.OutputErrorInfo(ui.CMDCustomExecutorHasNotEnoughParam, 5)
+		return
+	}
+	// filename := paramList[0]
+	// outputString := paramList[1]
+	// var output bool = false
+	// if strings.ToLower(outputString) == "true" {
+	// 	output = true
+	// }
+	initGrammaKeywordLengthMap()
+
+	testContent1 := `
+func TemplateOperatorREM(t1 int, t2 interface{}, t3 struct{ t int }) struct{ v int } {
+	return struct{ v int }{v: 1}
+}
+`
+	// testContent1 := "var i int = 1"
+	utility2.TestOutput("Test Content1: |%v|", testContent1)
+
+	generateGrammaTree(testContent1)
+}
+
+func initGrammaKeywordLengthMap() {
+	keywordStateMap := map[string]grammaState{
+		keywordVar:  variableDefinition,
+		keywordFunc: functionDefinition,
+		// keywordReturn: structDefinition,
+		keywordStruct:   structDefinition,
+		kewordInterface: interfaceDefintion,
+	}
+	lengthKeywordStateMap = make(map[int]map[string]grammaState)
+	for keyword, state := range keywordStateMap {
+		if _, hasLength := lengthKeywordStateMap[len(keyword)]; !hasLength {
+			lengthKeywordStateMap[len(keyword)] = make(map[string]grammaState)
+		}
+		lengthKeywordStateMap[len(keyword)][keyword] = state
+	}
+}
+
+func generateGrammaTree(content string) *grammaNode {
+	var rootNode *grammaNode
+	// var rootNodeRule *grammaRule
+	// var currentNode *grammaNode
+	// var currentNodeRule *grammaRule
+
+	// var grammerScope int
+
+	var currentState grammaState = nonSense
+	var currentRule *grammaRule
+	var builder strings.Builder
+	for _, r := range content {
+		// var newNode *grammaNode
+
+		// 遇到空白字符或边界字符尝试解释已读取的字符串
+		if isSpaceRune(r) || isBoundaryRune(r) {
+			// 根据内容解析状态
+			state := getStateByContent(builder.String())
+
+			// 根据状态获取规则
+			rule := getRuleByState(currentState)
+
+			if currentState == nonSense && currentRule == nil {
+				currentState = state
+				currentRule = rule
+				continue
+			}
+
+			if currentRule.MatchState(state) {
+
+			}
+		}
+
+		_, err := builder.WriteRune(r)
+		if err != nil {
+			ui.OutputErrorInfo("generate gramma tree write rune %v error: %v", r, err)
+			return nil
+		}
+
+		// // 根据内容获取状态
+		// state = getStateByContent(len, builder.String())
+
+		// if rootNode == nil && currentNode == nil && state == anySense {
+		// 	continue
+		// }
+
+		// newNode = getGrammaNodeByState(state)
+		// // 获取到了
+		// if rootNode == nil && currentNode == nil {
+		// 	rootNode = newNode
+		// 	rootNodeRule = getNodeRule(rootNode.gramma)
+
+		// 	currentNode = rootNode
+		// 	currentNodeRule = rootNodeRule
+
+		// 	// 清空 builder
+		// 	builder.Reset()
+		// } else if rootNode != nil && currentNode != nil {
+		// 	if checkIfNewNodeMatchCurrentNodeRules(currentNode, newNode) {
+		// 		currentNode.next = newNode
+		// 		currentNode = newNode
+		// 	}
+		// }
+	}
+
+	return rootNode
+}
+
+func isSpaceRune(r rune) bool {
+	return r == ' ' || r == '\t' || r == '\n'
+}
+
+func isBoundaryRune(r rune) bool {
+	return r == '(' || r == ')' || r == '{' || r == '}'
+}
+
+func isSplitter(r rune) bool {
+	return r == ','
+}
+
+func getStateByContent(content string) grammaState {
+	if keywordStateMap, hasLength := lengthKeywordStateMap[len(content)]; hasLength {
+		if state, hasKeyword := keywordStateMap[content]; hasKeyword {
+			return state
+		}
+	}
+	return identifier
+}
+
+func getRuleByState(state grammaState) *grammaRule {
+	return nil
+}
+
+func explainPrevious(content string) *grammaNode {
+	if len(content) == 0 {
+		return nil
+	}
+	return nil
+}
+
+func getGrammaNodeByState(state grammaState) *grammaNode {
+	switch state {
+	case variableDefinition, functionDefinition:
+		return &grammaNode{gramma: state}
+	}
+	return nil
+}
+
+// func generateVariableDefinitionNode() *grammaNode {
+// 	return &grammaNode{gramma: variableDefinition}
+// }
+
+// func generateFunctionDefinitionNode() *grammaNode
+
+// func checkIfNewNodeMatchCurrentNodeRules(currentNode, newNode *grammaNode) bool {
+// 	currentNodeRule := getNodeRule(currentNode.gramma)
+// 	// if currentNodeRule
+// 	return false
+// }

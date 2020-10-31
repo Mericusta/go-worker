@@ -21,7 +21,7 @@ func GetPunctuationMark(punctuationMark int) (rune, rune) {
 	switch punctuationMark {
 	case global.PunctuationMarkBracket:
 		return global.PunctuationMarkLeftBracket, global.PunctuationMarkRightBracket
-	case global.PunctuationMarkCurlyBraces:
+	case global.PunctuationMarkCurlyBracket:
 		return global.PunctuationMarkLeftCurlyBraces, global.PunctuationMarkRightCurlyBraces
 	default:
 		return global.PunctuationMarkLeftQuote, global.PunctuationMarkRightQuote

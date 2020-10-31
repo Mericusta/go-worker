@@ -389,7 +389,7 @@ func analyzeGoFunctionBody(goFileAnalysis *GoFileAnalysis, fileContentByte []byt
 			}
 			goFunctionAnalysis := goFileAnalysis.FunctionMap[goFileAnalysis.functionList[index]]
 
-			definitionLength := utility2.CalculatePunctuationMarksContentLength(string(fileContentByte[functionDefinitionIndex[1]+1:]), global.PunctuationMarkCurlyBraces)
+			definitionLength := utility2.CalculatePunctuationMarksContentLength(string(fileContentByte[functionDefinitionIndex[1]+1:]), global.PunctuationMarkCurlyBracket)
 			if definitionLength == 0 {
 				ui.OutputWarnInfo(ui.CMDAnalyzeGoFunctionContentSyntaxError)
 				continue

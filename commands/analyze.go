@@ -11,6 +11,7 @@ import (
 	"github.com/go-worker/global"
 	"github.com/go-worker/regexps"
 	"github.com/go-worker/ui"
+	"github.com/go-worker/utility"
 	"github.com/go-worker/utility2"
 	"github.com/go-worker/utility3"
 )
@@ -925,7 +926,7 @@ func analyzeGoScopeStruct(structScope *scope) *GoStructAnalysis {
 	}
 
 	if structScope.isOneLineScope() {
-		rootNode := utility3.TraitPunctuationMarksContent(structScope.Content, global.PunctuationMarkCurlyBraces)
+		rootNode := utility3.TraitPunctuationMarksContent(structScope.Content, global.PunctuationMarkCurlyBracket)
 		if rootNode == nil || len(rootNode.SubPunctuationContentList) == 0 {
 			return nil
 		}
@@ -978,47 +979,86 @@ func analyzeGoScopeStruct(structScope *scope) *GoStructAnalysis {
 func analyzeGoScopeFunction(functionScope *scope) *GoFunctionAnalysis {
 	goFunctionAnalysis := &GoFunctionAnalysis{}
 
-	var functionThis string
-	var functionName string
-	var functionParamListString string
-	var functionReturnListString string
-	var functionReturnTypeString string
+	// rootNode := utility3.TraitPunctuationMarksContent(functionScope.Content,  global.PunctuationMarkBracket)
+
+	utility2.TestOutput(ui.CommonNote2)
 	utility2.TestOutput("functionScope.Content = \n|%v|", functionScope.Content)
-	for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopeFunctionTemplate).FindAllStringSubmatch(functionScope.Content, -1) {
-		if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["THIS"]; hasIndex {
-			functionThis = strings.TrimSpace(subMatchList[index])
-		}
-		if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["NAME"]; hasIndex {
-			functionName = strings.TrimSpace(subMatchList[index])
-		}
-		if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["PARAM"]; hasIndex {
-			functionParamListString = strings.TrimSpace(subMatchList[index])
-		}
-		if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["RETURN_LIST"]; hasIndex {
-			functionReturnListString = strings.TrimSpace(subMatchList[index])
-		}
-		if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["RETURN_TYPE"]; hasIndex {
-			functionReturnTypeString = strings.TrimSpace(subMatchList[index])
-		}
-	}
-	utility2.TestOutput("functionName = |%v|", functionName)
-	utility2.TestOutput("functionThis = |%v|", functionThis)
-	utility2.TestOutput("functionParamListString = |%v|", functionParamListString)
-	utility2.TestOutput("functionReturnListString = |%v|", functionReturnListString)
-	utility2.TestOutput("functionReturnTypeString = |%v|", functionReturnTypeString)
-	if len(functionName) == 0 {
+	replacedContent, replacedString := utility.ReplaceToUniqueString(functionScope.Content, global.GoKeywordEmptyInterface)
+	utility2.TestOutput("replace %v to %v", global.GoKeywordEmptyInterface, replacedString)
+	utility2.TestOutput("replaced content = %v", replacedContent)
+
+	contentRootNode := utility3.TraitMultiPunctuationMarksContent(replacedContent, []int{global.PunctuationMarkBracket, global.PunctuationMarkCurlyBracket}, 1)
+	subNodeCount := len(contentRootNode.SubPunctuationContentList)
+
+	if contentRootNode == nil || len(contentRootNode.SubPunctuationContentList) < 2 {
 		return nil
 	}
-	goFunctionAnalysis.ParamsMap = analyzeGoFunctionDefinitionParamList(functionParamListString)
-	returnMap := make(map[string]*GoFunctionVariable)
-	if len(functionReturnListString) != 0 {
-		returnMap = analyzeGoFunctionDefinitionReturnList(functionReturnListString)
-	} else if len(functionReturnTypeString) != 0 {
-		returnMap["0"] = &GoFunctionVariable{}
-		returnMap["0"].Index = 0
-		returnMap["0"].GoVariableAnalysis.Type, returnMap["0"].GoVariableAnalysis.TypeFrom = analyzeGoVariableType(functionReturnTypeString)
-	}
-	goFunctionAnalysis.ReturnMap = returnMap
+
+	var functionParamListString string
+	var functionReturnListString string
+	var functionBodyString string
+	// var functionReturnTypeString string
+
+	functionParamListString = contentRootNode.SubPunctuationContentList[0].Content
+	utility2.TestOutput("param list = |%v|", functionParamListString)
+	functionBodyString = contentRootNode.SubPunctuationContentList[subNodeCount-1].Content
+	utility2.TestOutput("body content = |%v|", functionBodyString)
+	functionReturnListString = replacedContent[contentRootNode.SubPunctuationIndexMap[0][1]+1 : contentRootNode.SubPunctuationIndexMap[subNodeCount-1][0]]
+	utility2.TestOutput("return list = |%v|", functionReturnListString)
+
+	// if subNodeCount > 2 {
+	// 	var returnListString string
+	// 	for _, otherSubNode := range contentRootNode.SubPunctuationContentList[1 : subNodeCount-1] {
+	// 		returnListString = fmt.Sprintf("%v%v%v%v", returnListString, string(otherSubNode.LeftPunctuation), otherSubNode.Content, string(otherSubNode.RightPunctuation))
+	// 	}
+	// 	utility2.TestOutput("return list = |%v|", returnListString)
+	// }
+
+	// for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopeFunctionTemplate).FindAllStringSubmatch(replacedContent, -1) {
+	// 	if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["THIS"]; hasIndex {
+	// 		functionThis = strings.TrimSpace(subMatchList[index])
+	// 	}
+	// 	if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["NAME"]; hasIndex {
+	// 		functionName = strings.TrimSpace(subMatchList[index])
+	// 	}
+	// 	if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["DEFINITION"]; hasIndex {
+	// 		functionDefinitionString = strings.TrimSpace(subMatchList[index])
+	// 	}
+	// 	if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["BODY"]; hasIndex {
+	// 		functionBodyString = strings.TrimSpace(subMatchList[index])
+	// 	}
+	// 	// if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["PARAM"]; hasIndex {
+	// 	// 	functionParamListString = strings.TrimSpace(subMatchList[index])
+	// 	// }
+	// 	// if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["RETURN_LIST"]; hasIndex {
+	// 	// 	functionReturnListString = strings.TrimSpace(subMatchList[index])
+	// 	// }
+	// 	// if index, hasIndex := goAnalyzerFunctionSubMatchNameIndexMap["RETURN_TYPE"]; hasIndex {
+	// 	// 	functionReturnTypeString = strings.TrimSpace(subMatchList[index])
+	// 	// }
+	// }
+	// utility2.TestOutput("functionName = |%v|", functionName)
+	// utility2.TestOutput("functionThis = |%v|", functionThis)
+	// utility2.TestOutput("functionDefinitionString = |%v|", functionDefinitionString)
+	// utility2.TestOutput("functionBodyString = |%v|", functionBodyString)
+	utility2.TestOutput(ui.CommonNote2)
+	// utility2.TestOutput("functionParamListString = |%v|", functionParamListString)
+	// utility2.TestOutput("functionReturnListString = |%v|", functionReturnListString)
+	// utility2.TestOutput("functionReturnTypeString = |%v|", functionReturnTypeString)
+	// if len(functionName) == 0 {
+	// 	return nil
+	// }
+	// goFunctionAnalysis.ParamsMap = analyzeGoFunctionDefinitionParamList(functionParamListString)
+	// returnMap := make(map[string]*GoFunctionVariable)
+	// if len(functionReturnListString) != 0 {
+	// 	returnMap = analyzeGoFunctionDefinitionReturnList(functionReturnListString)
+	// } else if len(functionReturnTypeString) != 0 {
+	// 	returnMap["0"] = &GoFunctionVariable{}
+	// 	returnMap["0"].Index = 0
+	// 	returnMap["0"].GoVariableAnalysis.Type, returnMap["0"].GoVariableAnalysis.TypeFrom = analyzeGoVariableType(functionReturnTypeString)
+	// }
+	// goFunctionAnalysis.ReturnMap = returnMap
+
 	return goFunctionAnalysis
 }
 
@@ -1230,7 +1270,7 @@ func analyzeGoVariableType(variableTypeString string) (string, string) {
 // 		utility2.TestOutput("index = %v, functionDefinitionStartIndex = %v, goFunctionAnalysis.Name = %v", index, functionDefinitionStartIndex, goFunctionAnalysis.Name)
 
 // 		// passing content: ...}
-// 		definitionLength := utility2.CalculatePunctuationMarksContentLength(string(fileContentByte[functionDefinitionStartIndex[1]:]), global.PunctuationMarkCurlyBraces)
+// 		definitionLength := utility2.CalculatePunctuationMarksContentLength(string(fileContentByte[functionDefinitionStartIndex[1]:]), global.PunctuationMarkCurlyBracket)
 // 		if definitionLength == 0 {
 // 			ui.OutputWarnInfo(ui.CMDAnalyzeGoFunctionContentSyntaxError)
 // 			continue

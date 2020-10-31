@@ -53,3 +53,13 @@ func TraitPunctuationMarksContent(content string, punctuationMark int) *utility.
 	leftPunctuationMark, rightPunctuationMark := utility2.GetPunctuationMark(punctuationMark)
 	return utility.RecursiveTraitPunctuationContent(content, leftPunctuationMark, rightPunctuationMark)
 }
+
+// TraitMultiPunctuationMarksContent 混合成对标点符号的内容分类提取
+func TraitMultiPunctuationMarksContent(content string, punctuationMarkList []int, maxDeep int) *utility.NewPunctuationContent {
+	leftPunctuationMarkList := make([]rune, 0, len(punctuationMarkList))
+	for _, punctuationMark := range punctuationMarkList {
+		leftPunctuationMark, _ := utility2.GetPunctuationMark(punctuationMark)
+		leftPunctuationMarkList = append(leftPunctuationMarkList, leftPunctuationMark)
+	}
+	return utility.RecursiveTraitMultiPunctuationMarksContent(content, 0, 0, leftPunctuationMarkList, maxDeep, 0)
+}

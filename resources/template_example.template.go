@@ -103,6 +103,18 @@ func TemplateOperatorSUB(t1 template.TypeName, t2 template.TypeName) template.Ty
 	return t2
 }
 
+func TemplateOperatorMUL(t1 template.TypeName, t2 interface{}, t3 struct{ t int }) interface{} {
+	return t3
+}
+
+func TemplateOperatorDIV(t1 template.TypeName, t2 interface{}, t3 struct{ t int }) interface{} { return interface{} }
+
+func TemplateOperatorMOD(t1 template.TypeName, t2 interface{}, t3 struct{ t int }) {}
+
+func TemplateOperatorREM(t1 int, t2 interface{}, t3 struct{ t int }) struct{ v int } {
+	return struct{ v int }{v: 1}
+}
+
 func TemplateOperatorCustom(t1 template.TypeName, t2 template.TypeName, f func(template.TypeName, template.TypeName) template.TypeName) template.TypeName {
 	return f(t1, t2)
 }
