@@ -1042,13 +1042,10 @@ func analyzeGoScopeFunction(functionScope *scope) *GoFunctionAnalysis {
 	// utility2.TestOutput("functionDefinitionString = |%v|", functionDefinitionString)
 	// utility2.TestOutput("functionBodyString = |%v|", functionBodyString)
 	utility2.TestOutput(ui.CommonNote2)
-	// utility2.TestOutput("functionParamListString = |%v|", functionParamListString)
-	// utility2.TestOutput("functionReturnListString = |%v|", functionReturnListString)
-	// utility2.TestOutput("functionReturnTypeString = |%v|", functionReturnTypeString)
 	// if len(functionName) == 0 {
 	// 	return nil
 	// }
-	// goFunctionAnalysis.ParamsMap = analyzeGoFunctionDefinitionParamList(functionParamListString)
+	goFunctionAnalysis.ParamsMap = analyzeGoFunctionDefinitionParamList(functionParamListString)
 	// returnMap := make(map[string]*GoFunctionVariable)
 	// if len(functionReturnListString) != 0 {
 	// 	returnMap = analyzeGoFunctionDefinitionReturnList(functionReturnListString)

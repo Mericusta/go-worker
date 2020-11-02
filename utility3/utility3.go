@@ -63,3 +63,71 @@ func TraitMultiPunctuationMarksContent(content string, punctuationMarkList []int
 	}
 	return utility.RecursiveTraitMultiPunctuationMarksContent(content, 0, 0, leftPunctuationMarkList, maxDeep, 0)
 }
+
+// SplitContent 划分内容节点
+type SplitContent struct {
+	ContentList         []string
+	SubSplitContentList []*SplitContent
+}
+
+// RecursiveSplitUnderSameDeepPunctuationMarksContent 相同深度的成对标点符号下的内容划分
+func RecursiveSplitUnderSameDeepPunctuationMarksContent(content string, punctuationMarkList []int, splitter string, maxDeep int) *SplitContent {
+	if punctuationContentNode := TraitMultiPunctuationMarksContent(content, punctuationMarkList, maxDeep); punctuationContentNode != nil {
+		return splitUnderSameDeepPunctuationMarksContent(punctuationContentNode, splitter, maxDeep, 0)
+	}
+	return nil
+}
+
+// RecursiveSplitUnderSameDeepPunctuationMarksContentNode 相同深度的成对标点符号下的内容划分
+func RecursiveSplitUnderSameDeepPunctuationMarksContentNode(punctuationContentNode *utility.NewPunctuationContent, splitter string, maxDeep int) *SplitContent {
+	return splitUnderSameDeepPunctuationMarksContent(punctuationContentNode, splitter, maxDeep, 0)
+}
+
+func splitUnderSameDeepPunctuationMarksContent(punctuationContentNode *utility.NewPunctuationContent, splitter string, maxDeep, deep int) *SplitContent {
+	splitContentNode := &SplitContent{
+		ContentList:         make([]string, 0),
+		SubSplitContentList: make([]*SplitContent, 0),
+	}
+
+	var offset int
+	var leftIndex int
+	cycle := 0
+	maxCycle := len(strings.Split(punctuationContentNode.Content, splitter))
+	for cycle != maxCycle {
+		cycle++
+		length := strings.Index(punctuationContentNode.Content[leftIndex+offset:], splitter)
+		if length == -1 {
+			splitContentNode.ContentList = append(splitContentNode.ContentList, punctuationContentNode.Content[leftIndex:])
+			break
+		}
+		rightIndex := leftIndex + length + offset
+		inner := false
+		for subIndex := 0; subIndex != len(punctuationContentNode.SubPunctuationContentList); subIndex++ {
+			if punctuationContentNode.SubPunctuationIndexMap[subIndex][0] <= rightIndex && rightIndex <= punctuationContentNode.SubPunctuationIndexMap[subIndex][1] {
+				inner = true
+				offset = punctuationContentNode.SubPunctuationIndexMap[subIndex][1] - leftIndex + 1
+				break
+			}
+		}
+		if inner {
+			continue
+		}
+		splitContentNode.ContentList = append(splitContentNode.ContentList, punctuationContentNode.Content[leftIndex:rightIndex])
+		offset = 0
+		leftIndex = rightIndex + len(splitter)
+	}
+
+	if deep == maxDeep {
+		return splitContentNode
+	}
+
+	for _, subPuncutationContentNode := range punctuationContentNode.SubPunctuationContentList {
+		if len(subPuncutationContentNode.Content) != 0 {
+			if subSplitContentNode := splitUnderSameDeepPunctuationMarksContent(subPuncutationContentNode, splitter, maxDeep, deep+1); subSplitContentNode != nil {
+				splitContentNode.SubSplitContentList = append(splitContentNode.SubSplitContentList, subSplitContentNode)
+			}
+		}
+	}
+
+	return splitContentNode
+}
