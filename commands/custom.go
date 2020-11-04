@@ -1682,6 +1682,7 @@ func interfaceScope(line string, lineIndex int, gps *GoPackageScope, keyInterfac
 	// scope end
 	if regexps.AtomicExpressionEnumRegexpMap[global.AEGoFileSplitterScopeEnd].MatchString(line) {
 		gps.InterfaceDefinition[key].LineEnd = lineIndex
+		utility2.TestOutput("interface scope is end at line %v", lineIndex)
 		return endState, nil
 	}
 

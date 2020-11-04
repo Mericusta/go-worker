@@ -71,16 +71,23 @@ type SplitContent struct {
 }
 
 // RecursiveSplitUnderSameDeepPunctuationMarksContent 相同深度的成对标点符号下的内容划分
-func RecursiveSplitUnderSameDeepPunctuationMarksContent(content string, punctuationMarkList []int, splitter string, maxDeep int) *SplitContent {
-	if punctuationContentNode := TraitMultiPunctuationMarksContent(content, punctuationMarkList, maxDeep); punctuationContentNode != nil {
-		return splitUnderSameDeepPunctuationMarksContent(punctuationContentNode, splitter, maxDeep, 0)
+// @content 待分析的字符串
+// @punctuationMarkList 指定成对标点符号
+// @splitter 指定分隔符
+// @return
+func RecursiveSplitUnderSameDeepPunctuationMarksContent(content string, punctuationMarkList []int, splitter string) *SplitContent {
+	if punctuationContentNode := TraitMultiPunctuationMarksContent(content, punctuationMarkList, 1); punctuationContentNode != nil {
+		return splitUnderSameDeepPunctuationMarksContent(punctuationContentNode, splitter, 0, 0)
 	}
 	return nil
 }
 
 // RecursiveSplitUnderSameDeepPunctuationMarksContentNode 相同深度的成对标点符号下的内容划分
-func RecursiveSplitUnderSameDeepPunctuationMarksContentNode(punctuationContentNode *utility.NewPunctuationContent, splitter string, maxDeep int) *SplitContent {
-	return splitUnderSameDeepPunctuationMarksContent(punctuationContentNode, splitter, maxDeep, 0)
+// @punctuationContentNode 成对标点符号的内容根节点，节点深度 >= 2
+// @splitter 指定分隔符
+// @return
+func RecursiveSplitUnderSameDeepPunctuationMarksContentNode(punctuationContentNode *utility.NewPunctuationContent, splitter string) *SplitContent {
+	return splitUnderSameDeepPunctuationMarksContent(punctuationContentNode, splitter, 0, 0)
 }
 
 func splitUnderSameDeepPunctuationMarksContent(punctuationContentNode *utility.NewPunctuationContent, splitter string, maxDeep, deep int) *SplitContent {
@@ -103,9 +110,9 @@ func splitUnderSameDeepPunctuationMarksContent(punctuationContentNode *utility.N
 		rightIndex := leftIndex + length + offset
 		inner := false
 		for subIndex := 0; subIndex != len(punctuationContentNode.SubPunctuationContentList); subIndex++ {
-			if punctuationContentNode.SubPunctuationIndexMap[subIndex][0] <= rightIndex && rightIndex <= punctuationContentNode.SubPunctuationIndexMap[subIndex][1] {
+			if punctuationContentNode.SubPunctuationIndexMap[subIndex].Left <= rightIndex && rightIndex <= punctuationContentNode.SubPunctuationIndexMap[subIndex].Right {
 				inner = true
-				offset = punctuationContentNode.SubPunctuationIndexMap[subIndex][1] - leftIndex + 1
+				offset = punctuationContentNode.SubPunctuationIndexMap[subIndex].Right - leftIndex + 1
 				break
 			}
 		}

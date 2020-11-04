@@ -306,13 +306,19 @@ func RecursiveTraitPunctuationContent(content string, leftPunctuationMark, right
 	return punctuationContent
 }
 
+// PunctuationIndex 成对标点符号的下标数据
+type PunctuationIndex struct {
+	Left  int
+	Right int
+}
+
 // NewPunctuationContent 成对标点符号的内容节点
 type NewPunctuationContent struct {
 	Content                   string
 	LeftPunctuation           rune
 	RightPunctuation          rune
 	SubPunctuationContentList []*NewPunctuationContent
-	SubPunctuationIndexMap    map[int][]int
+	SubPunctuationIndexMap    map[int]*PunctuationIndex
 }
 
 var punctuationMarkMap map[rune]rune = map[rune]rune{
@@ -334,7 +340,7 @@ func RecursiveTraitMultiPunctuationMarksContent(content string, leftPunctuationM
 		Content:                content,
 		LeftPunctuation:        leftPunctuationMark,
 		RightPunctuation:       rightPunctuationMark,
-		SubPunctuationIndexMap: make(map[int][]int),
+		SubPunctuationIndexMap: make(map[int]*PunctuationIndex),
 	}
 
 	passLeftLength := 0
@@ -375,7 +381,10 @@ func RecursiveTraitMultiPunctuationMarksContent(content string, leftPunctuationM
 
 		subPunctuationContent := RecursiveTraitMultiPunctuationMarksContent(content[leftPunctuationMarkIndex+1:rightPunctuationMarkIndex], leftPunctuationMark, rightPunctuationMark, toSearchLeftPunctuationMarkList, maxDeep, deep+1)
 		if subPunctuationContent != nil {
-			punctuationContent.SubPunctuationIndexMap[len(punctuationContent.SubPunctuationContentList)] = []int{passLeftLength + leftPunctuationMarkIndex, passLeftLength + rightPunctuationMarkIndex}
+			punctuationContent.SubPunctuationIndexMap[len(punctuationContent.SubPunctuationContentList)] = &PunctuationIndex{
+				Left:  passLeftLength + leftPunctuationMarkIndex,
+				Right: passLeftLength + rightPunctuationMarkIndex,
+			}
 			punctuationContent.SubPunctuationContentList = append(punctuationContent.SubPunctuationContentList, subPunctuationContent)
 		}
 

@@ -21,6 +21,11 @@ type OneLineInterface interface{ OneLineFunction() template.TypeName }
 type AnotherOneLineInterface interface{ AnotherOneLineFunction() interface{} }
 type ExampleInterface interface {
 	Example()
+	FuncParamExample(
+		v template.TypeName,
+		f func(t template.TypeName, sf func() interface{}) func() interface{},
+	) func() interface{}
+	FuncReturnExample() (int, func() int)
 }
 
 // common struct

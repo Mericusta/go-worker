@@ -70,4 +70,4 @@ var AEFloat AtomicExpression = `^\d+\.\d+$`
 var AEComplex AtomicExpression = `^\d+(\.\d+)?\+\d+(\.\d+)?i$`
 
 // AEGoFileSplitterScopeEnd Go 语言文件切分器域结束的表达式
-var AEGoFileSplitterScopeEnd AtomicExpression = `^\s*(?P<SCOPE>[\)\}]+)`
+var AEGoFileSplitterScopeEnd AtomicExpression = `^(?P<SCOPE>[\)\}]{1})$`

@@ -40,23 +40,37 @@ var (
 	AnalyzeRPPackageLevel               = "RP_PACKAGE_LEVEL"
 	AnalyzeRPPackageList                = "RP_PACKAGE_LIST"
 
-	PunctuationMarkLeftQuote        rune = '"'
-	PunctuationMarkRightQuote       rune = '"'
-	PunctuationMarkLeftBracket      rune = '('
-	PunctuationMarkRightBracket     rune = ')'
-	PunctuationMarkLeftCurlyBraces  rune = '{'
-	PunctuationMarkRightCurlyBraces rune = '}'
-	PunctuationMarkPoint            rune = '.'
-	ASCIISpace                      rune = ' '
+	PunctuationMarkLeftQuote          rune = '"'
+	PunctuationMarkRightQuote         rune = '"'
+	PunctuationMarkLeftBracket        rune = '('
+	PunctuationMarkRightBracket       rune = ')'
+	PunctuationMarkLeftCurlyBracket   rune = '{'
+	PunctuationMarkRightCurlyBracket  rune = '}'
+	PunctuationMarkLeftSquareBracket  rune = '['
+	PunctuationMarkRightSquareBracket rune = ']'
+	PunctuationMarkPoint              rune = '.'
+	ASCIISpace                        rune = ' '
 
-	GoKeywordEmptyInterface = "interface{}"
+	GoKeywordEmptyInterface            = "interface{}"
+	GoKeywordFunc                      = "func"
+	GoKeywordStruct                    = "struct"
+	GoSplitterStringEnter              = "\n"
+	GoSplitterStringComma              = ","
+	GoSplitterStringSpace              = " "
+	GoSplitterStringPoint              = "."
+	GoAnalyzerScopePunctuationMarkList = []int{
+		PunctuationMarkBracket,
+		PunctuationMarkCurlyBracket,
+		PunctuationMarkSquareBracket,
+	}
 )
 
 // 逻辑常量
 const (
-	PunctuationMarkQuote        = 1
-	PunctuationMarkBracket      = 2
-	PunctuationMarkCurlyBracket = 3
+	PunctuationMarkQuote         = 1
+	PunctuationMarkBracket       = 2
+	PunctuationMarkCurlyBracket  = 3
+	PunctuationMarkSquareBracket = 4
 )
 
 // 配置常量

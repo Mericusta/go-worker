@@ -172,6 +172,7 @@ var goAnalyzerPackageSubMatchNameIndexMap map[string]int
 var goAnalyzerImportContentSubMatchNameIndexMap map[string]int
 var goAnalyzerPackageVariableSubMatchNameIndexMap map[string]int
 var goAnalyzerInterfaceFunctionSubMatchNameIndexMap map[string]int
+var goAnalyzerInterfaceSubMatchNameIndexMap map[string]int
 var goAnalyzerStructVariableSubMatchNameIndexMap map[string]int
 var goAnalyzerStructFunctionSubMatchNameIndexMap map[string]int
 var goAnalyzerFunctionSubMatchNameIndexMap map[string]int
@@ -316,6 +317,16 @@ func checkGoAnalyzerRegexp() bool {
 		}
 	} else {
 		ui.OutputErrorInfo(ui.CommonError18, global.GoFileAnalyzerScopeInterfaceFunctionTemplate)
+		ok = false
+	}
+
+	if goFileAnalyzerScopeInterfaceRegexp := regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopeInterfaceTemplate); goFileAnalyzerScopeInterfaceRegexp != nil {
+		goAnalyzerInterfaceSubMatchNameIndexMap = make(map[string]int)
+		for index, subMatchName := range goFileAnalyzerScopeInterfaceRegexp.SubexpNames() {
+			goAnalyzerInterfaceSubMatchNameIndexMap[subMatchName] = index
+		}
+	} else {
+		ui.OutputErrorInfo(ui.CommonError18, global.GoFileAnalyzerScopeInterfaceTemplate)
 		ok = false
 	}
 
@@ -572,6 +583,8 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 			}
 		}
 		utility2.TestOutput(ui.CommonNote2)
+
+		break
 
 		// 4.1.3.1.6.1.6
 		for structName, structScope := range splitFileResult.StructDefinition {
@@ -886,32 +899,136 @@ func analyzeGoScopeInterface(content string) *GoInterfaceAnalysis {
 	goInterfaceAnalysis := &GoInterfaceAnalysis{
 		Function: make(map[string]*GoFunctionAnalysis),
 	}
-	for _, lineContent := range strings.Split(content, "\n") {
-		var functionName string
-		var functionParamListString string
-		var functionReturnListString string
-		for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopeInterfaceFunctionTemplate).FindAllStringSubmatch(lineContent, -1) {
-			if index, hasIndex := goAnalyzerInterfaceFunctionSubMatchNameIndexMap["NAME"]; hasIndex {
-				functionName = strings.TrimSpace(subMatchList[index])
-			}
-			if index, hasIndex := goAnalyzerInterfaceFunctionSubMatchNameIndexMap["PARAM"]; hasIndex {
-				functionParamListString = strings.TrimSpace(subMatchList[index])
-			}
-			if index, hasIndex := goAnalyzerInterfaceFunctionSubMatchNameIndexMap["RETURN"]; hasIndex {
-				functionReturnListString = strings.TrimSpace(subMatchList[index])
-			}
+
+	utility2.TestOutput("interface content = |%v|", content)
+
+	var interfaceName string
+	var interfaceBody string
+	for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopeInterfaceTemplate).FindAllStringSubmatch(content, -1) {
+		if index, hasIndex := goAnalyzerInterfaceSubMatchNameIndexMap["NAME"]; hasIndex {
+			interfaceName = strings.TrimSpace(subMatchList[index])
 		}
-		if len(functionName) == 0 {
-			continue
-		}
-		functionParamMap := analyzeGoFunctionDefinitionParamList(functionParamListString)
-		functionReturnMap := analyzeGoFunctionDefinitionReturnList(functionReturnListString)
-		goInterfaceAnalysis.Function[functionName] = &GoFunctionAnalysis{
-			Name:      functionName,
-			ParamsMap: functionParamMap,
-			ReturnMap: functionReturnMap,
+		if index, hasIndex := goAnalyzerInterfaceSubMatchNameIndexMap["BODY"]; hasIndex {
+			interfaceBody = strings.TrimSpace(subMatchList[index])
 		}
 	}
+
+	utility2.TestOutput("interfaceName = |%v|", interfaceName)
+	utility2.TestOutput("interfaceBody = |%v|", interfaceBody)
+
+	if len(interfaceBody) == 0 {
+		utility2.TestOutput("interface %v is empty interface", interfaceName)
+		return goInterfaceAnalysis
+	}
+
+	rootNode := utility3.TraitMultiPunctuationMarksContent(interfaceBody, global.GoAnalyzerScopePunctuationMarkList, 1)
+	nodeList := []*utility.NewPunctuationContent{rootNode}
+	for len(nodeList) != 0 {
+		node := nodeList[0]
+		if node == nil {
+			break
+		}
+		nodeList = nodeList[1:]
+		utility2.TestOutput("content = |%v%v%v|", string(node.LeftPunctuation), node.Content, string(node.RightPunctuation))
+		nodeList = append(nodeList, node.SubPunctuationContentList...)
+	}
+
+	interfaceScopeNode := utility3.RecursiveSplitUnderSameDeepPunctuationMarksContentNode(rootNode, global.GoSplitterStringEnter)
+	if interfaceScopeNode == nil {
+		utility2.TestOutput("nil interface scope node")
+		return goInterfaceAnalysis
+	}
+
+	if len(interfaceScopeNode.ContentList) == 0 {
+		utility2.TestOutput("interfaceScopeNode = %+v", interfaceScopeNode)
+	}
+
+	for index, functionDefinitionString := range interfaceScopeNode.ContentList {
+		utility2.TestOutput("index %v, func = |%v|", index, functionDefinitionString)
+		replacedContent, replacedString := utility.ReplaceToUniqueString(functionDefinitionString, global.GoKeywordEmptyInterface)
+		utility2.TestOutput("replace %v to %v", global.GoKeywordEmptyInterface, replacedString)
+		utility2.TestOutput("replaced content = |%v|", replacedContent)
+
+		goFunctionAnalysis := analyzeGoFunctionDefinition(replacedContent)
+		goInterfaceAnalysis.Function[goFunctionAnalysis.Name] = goFunctionAnalysis
+
+		// functionNode := utility3.TraitMultiPunctuationMarksContent(replacedContent, global.GoAnalyzerScopePunctuationMarkList, 1)
+		// subNodeCount := len(functionNode.SubPunctuationContentList)
+
+		// utility2.TestOutput("subNodeCount = %v", subNodeCount)
+		// for index, c := range functionNode.SubPunctuationContentList {
+		// 	utility2.TestOutput("index = %v, c.Content = |%v|, left index = %v, right index = %v", index, c.Content, functionNode.SubPunctuationIndexMap[index].Left, functionNode.SubPunctuationIndexMap[index].Right)
+		// }
+
+		// if functionNode == nil || subNodeCount < 1 {
+		// 	utility2.TestOutput("functionNode is %+v, len(SubPunctuationContentList) = %v", functionNode, subNodeCount)
+		// 	continue
+		// }
+
+		// functionName := strings.TrimSpace(replacedContent[:functionNode.SubPunctuationIndexMap[0].Left])
+		// if len(functionName) == 0 {
+		// 	continue
+		// }
+
+		// var functionParamListString string
+		// var functionReturnListString string
+
+		// // functionNode
+		// utility2.TestOutput("functionName = |%v|", functionName)
+		// functionParamListString = functionNode.SubPunctuationContentList[0].Content
+		// utility2.TestOutput("functionParamListString = |%v|", functionParamListString)
+		// functionParamListNode := utility3.RecursiveSplitUnderSameDeepPunctuationMarksContent(functionParamListString, global.GoAnalyzerScopePunctuationMarkList, global.GoSplitterStringComma)
+		// utility2.TestOutput("param list:")
+		// for index, param := range functionParamListNode.ContentList {
+		// 	utility2.TestOutput("index %v param = |%v|", index, param)
+		// }
+		// // return list
+		// functionReturnListString = strings.TrimSpace(replacedContent[functionNode.SubPunctuationIndexMap[0].Right+1:])
+		// functionReturnListString = strings.TrimFunc(functionReturnListString, func(r rune) bool {
+		// 	return r == global.PunctuationMarkLeftBracket || r == global.PunctuationMarkRightBracket
+		// })
+		// utility2.TestOutput("return list = |%v|", functionReturnListString)
+
+		// functionParamMap := analyzeGoFunctionDefinitionParamList(functionParamListString)
+		// functionReturnMap := analyzeGoFunctionDefinitionReturnList(functionReturnListString)
+		// goInterfaceAnalysis.Function[functionName] = &GoFunctionAnalysis{
+		// 	Name:      functionName,
+		// 	ParamsMap: functionParamMap,
+		// 	ReturnMap: functionReturnMap,
+		// }
+	}
+	utility2.TestOutput(ui.CommonNote2)
+
+	// for _, lineContent := range strings.Split(content, "\n") {
+	// 	var functionName string
+	// 	var functionParamListString string
+	// 	var functionReturnListString string
+	// 	utility3.TraitMultiPunctuationMarksContent(lineContent, )
+	// 	// for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopeInterfaceFunctionTemplate).FindAllStringSubmatch(lineContent, -1) {
+	// 	// 	if index, hasIndex := goAnalyzerInterfaceFunctionSubMatchNameIndexMap["NAME"]; hasIndex {
+	// 	// 		functionName = strings.TrimSpace(subMatchList[index])
+	// 	// 	}
+	// 	// 	if index, hasIndex := goAnalyzerInterfaceFunctionSubMatchNameIndexMap["PARAM"]; hasIndex {
+	// 	// 		functionParamListString = strings.TrimSpace(subMatchList[index])
+	// 	// 	}
+	// 	// 	if index, hasIndex := goAnalyzerInterfaceFunctionSubMatchNameIndexMap["RETURN"]; hasIndex {
+	// 	// 		functionReturnListString = strings.TrimSpace(subMatchList[index])
+	// 	// 	}
+	// 	// }
+	// 	utility2.TestOutput("lineContent = |%v|", lineContent)
+	// 	utility2.TestOutput("functionParamListString = |%v|", functionParamListString)
+	// 	utility2.TestOutput("functionReturnListString = |%v|", functionReturnListString)
+	// 	if len(functionName) == 0 {
+	// 		continue
+	// 	}
+	// 	// functionParamMap := analyzeGoFunctionDefinitionParamList(functionParamListString)
+	// 	// functionReturnMap := analyzeGoFunctionDefinitionReturnList(functionReturnListString)
+	// 	// goInterfaceAnalysis.Function[functionName] = &GoFunctionAnalysis{
+	// 	// 	Name:      functionName,
+	// 	// 	ParamsMap: functionParamMap,
+	// 	// 	ReturnMap: functionReturnMap,
+	// 	// }
+	// }
 	return goInterfaceAnalysis
 }
 
@@ -987,10 +1104,10 @@ func analyzeGoScopeFunction(functionScope *scope) *GoFunctionAnalysis {
 	utility2.TestOutput("replace %v to %v", global.GoKeywordEmptyInterface, replacedString)
 	utility2.TestOutput("replaced content = %v", replacedContent)
 
-	contentRootNode := utility3.TraitMultiPunctuationMarksContent(replacedContent, []int{global.PunctuationMarkBracket, global.PunctuationMarkCurlyBracket}, 1)
+	contentRootNode := utility3.TraitMultiPunctuationMarksContent(replacedContent, global.GoAnalyzerScopePunctuationMarkList, 1)
 	subNodeCount := len(contentRootNode.SubPunctuationContentList)
 
-	if contentRootNode == nil || len(contentRootNode.SubPunctuationContentList) < 2 {
+	if contentRootNode == nil || subNodeCount < 2 {
 		return nil
 	}
 
@@ -1000,10 +1117,15 @@ func analyzeGoScopeFunction(functionScope *scope) *GoFunctionAnalysis {
 	// var functionReturnTypeString string
 
 	functionParamListString = contentRootNode.SubPunctuationContentList[0].Content
-	utility2.TestOutput("param list = |%v|", functionParamListString)
+	utility2.TestOutput("functionParamListString = |%v|", functionParamListString)
+	functionParamListNode := utility3.RecursiveSplitUnderSameDeepPunctuationMarksContent(functionParamListString, global.GoAnalyzerScopePunctuationMarkList, global.GoSplitterStringComma)
+	utility2.TestOutput("param list:")
+	for index, param := range functionParamListNode.ContentList {
+		utility2.TestOutput("index %v param = |%v|", index, param)
+	}
 	functionBodyString = contentRootNode.SubPunctuationContentList[subNodeCount-1].Content
 	utility2.TestOutput("body content = |%v|", functionBodyString)
-	functionReturnListString = replacedContent[contentRootNode.SubPunctuationIndexMap[0][1]+1 : contentRootNode.SubPunctuationIndexMap[subNodeCount-1][0]]
+	functionReturnListString = replacedContent[contentRootNode.SubPunctuationIndexMap[0].Right+1 : contentRootNode.SubPunctuationIndexMap[subNodeCount-1].Left]
 	utility2.TestOutput("return list = |%v|", functionReturnListString)
 
 	// if subNodeCount > 2 {
@@ -1045,7 +1167,7 @@ func analyzeGoScopeFunction(functionScope *scope) *GoFunctionAnalysis {
 	// if len(functionName) == 0 {
 	// 	return nil
 	// }
-	goFunctionAnalysis.ParamsMap = analyzeGoFunctionDefinitionParamList(functionParamListString)
+	goFunctionAnalysis.ParamsMap = analyzeGoFunctionDefinitionParamList(functionParamListNode.ContentList)
 	// returnMap := make(map[string]*GoFunctionVariable)
 	// if len(functionReturnListString) != 0 {
 	// 	returnMap = analyzeGoFunctionDefinitionReturnList(functionReturnListString)
@@ -1059,27 +1181,78 @@ func analyzeGoScopeFunction(functionScope *scope) *GoFunctionAnalysis {
 	return goFunctionAnalysis
 }
 
+func analyzeGoFunctionDefinition(functionDefinitionContent string) *GoFunctionAnalysis {
+	functionDefinitionContentRootNode := utility3.TraitMultiPunctuationMarksContent(functionDefinitionContent, global.GoAnalyzerScopePunctuationMarkList, 1)
+	subNodeCount := len(functionDefinitionContentRootNode.SubPunctuationContentList)
+
+	if functionDefinitionContentRootNode == nil || subNodeCount < 1 {
+		return nil
+	}
+
+	// function name
+	name := strings.TrimSpace(functionDefinitionContent[:functionDefinitionContentRootNode.SubPunctuationIndexMap[0].Left])
+	if len(name) == 0 {
+		return nil
+	}
+
+	// param list
+	paramListString := functionDefinitionContentRootNode.SubPunctuationContentList[0].Content
+	paramListNode := utility3.RecursiveSplitUnderSameDeepPunctuationMarksContent(paramListString, global.GoAnalyzerScopePunctuationMarkList, global.GoSplitterStringComma)
+	utility2.TestOutput("param list:")
+	for index, param := range paramListNode.ContentList {
+		utility2.TestOutput("index %v param = |%v|", index, param)
+	}
+	paramMap := analyzeGoFunctionDefinitionParamList(paramListNode.ContentList)
+	for paramName, analysis := range paramMap {
+		utility2.TestOutput("paramName = %v, index = %v, type = |%v|, type from = %v", paramName, analysis.Index, analysis.Type, analysis.TypeFrom)
+	}
+
+	// return list
+	returnListString := strings.TrimSpace(functionDefinitionContent[functionDefinitionContentRootNode.SubPunctuationIndexMap[0].Right+1:])
+	returnListString = strings.TrimFunc(returnListString, func(r rune) bool {
+		return r == global.PunctuationMarkLeftBracket || r == global.PunctuationMarkRightBracket
+	})
+	utility2.TestOutput("return list = |%v|", returnListString)
+	returnListNode := utility3.RecursiveSplitUnderSameDeepPunctuationMarksContent(returnListString, global.GoAnalyzerScopePunctuationMarkList, global.GoSplitterStringComma)
+	utility2.TestOutput("return list:")
+	for index, returnType := range returnListNode.ContentList {
+		utility2.TestOutput("index %v return = |%v|", index, returnType)
+	}
+	returnMap := analyzeGoFunctionDefinitionReturnList(returnListNode.ContentList)
+	for returnName, analysis := range returnMap {
+		utility2.TestOutput("returnName = %v, index = %v, type = |%v|, type from = %v", returnName, analysis.Index, analysis.Type, analysis.TypeFrom)
+	}
+
+	return &GoFunctionAnalysis{
+		Name:      name,
+		ParamsMap: paramMap,
+		ReturnMap: returnMap,
+	}
+}
+
 // analyzeGoFunctionDefinitionParamList
 // @param paramListString 待分析的函数参数表
 // @return
-// TODO: if param is func
-func analyzeGoFunctionDefinitionParamList(paramListString string) map[string]*GoFunctionVariable {
+func analyzeGoFunctionDefinitionParamList(paramStringList []string) map[string]*GoFunctionVariable {
 	paramMap := make(map[string]*GoFunctionVariable)
 	unknownTypeParamList := make([]*GoFunctionVariable, 0)
-	for index, paramString := range strings.Split(paramListString, ",") {
-		paramStringList := strings.Split(strings.TrimSpace(paramString), " ")
-		if len(paramStringList) == 1 {
+	for index, paramString := range paramStringList {
+		// utility3.RecursiveSplitUnderSameDeepPunctuationMarksContent(strings.TrimSpace(paramString), )
+
+		paramStringTimSpace := strings.TrimSpace(paramString)
+		splitterIndex := strings.Index(paramStringTimSpace, global.GoSplitterStringSpace)
+		if splitterIndex == -1 {
 			unknownTypeParamList = append(unknownTypeParamList, &GoFunctionVariable{
 				GoVariableAnalysis: GoVariableAnalysis{
-					Name: paramStringList[0],
+					Name: paramStringTimSpace,
 				},
 				Index: index,
 			})
 		} else {
-			paramType, paramTypeFrom := analyzeGoVariableType(strings.TrimSpace(paramStringList[1]))
-			paramMap[paramStringList[0]] = &GoFunctionVariable{
+			paramType, paramTypeFrom := analyzeGoVariableType(paramStringTimSpace[splitterIndex+1:])
+			paramMap[paramStringTimSpace[:splitterIndex]] = &GoFunctionVariable{
 				GoVariableAnalysis: GoVariableAnalysis{
-					Name:     paramStringList[0],
+					Name:     paramStringTimSpace[:splitterIndex],
 					Type:     paramType,
 					TypeFrom: paramTypeFrom,
 				},
@@ -1101,25 +1274,59 @@ func analyzeGoFunctionDefinitionParamList(paramListString string) map[string]*Go
 // analyzeGoFunctionDefinitionReturnList
 // @param returnListString 待分析的返回值列表
 // @return
-// TODO: if return value is func
-func analyzeGoFunctionDefinitionReturnList(returnListString string) map[string]*GoFunctionVariable {
+func analyzeGoFunctionDefinitionReturnList(returnStringList []string) map[string]*GoFunctionVariable {
 	returnMap := make(map[string]*GoFunctionVariable)
-	for index, returnString := range strings.Split(returnListString, ",") {
-		returnStringList := strings.Split(strings.TrimSpace(returnString), " ")
-		var returnTypeString string
-		goFunctionVariable := &GoFunctionVariable{
-			GoVariableAnalysis: GoVariableAnalysis{},
-			Index:              index,
+
+	for index, returnString := range returnStringList {
+		returnStringTimSpace := strings.TrimSpace(returnString)
+		splitterIndex := strings.Index(returnStringTimSpace, global.GoSplitterStringSpace)
+		if splitterIndex == -1 {
+			returnType, returnTypeFrom := analyzeGoVariableType(returnStringTimSpace)
+			returnMap[fmt.Sprintf("%v", len(returnMap))] = &GoFunctionVariable{
+				GoVariableAnalysis: GoVariableAnalysis{
+					Type:     returnType,
+					TypeFrom: returnTypeFrom,
+				},
+				Index: index,
+			}
+		} else {
+			// TODO: return string = |v int|
+			// TODO: return string = |func(int, int) int|
+			// TODO: return string = |f func(int, int) int|
+			// TODO: return string = |struct{ int }|
+			// TODO: return string = |s struct{ int }|
+			// TODO: return string = |s struct {
+			// 	v int
+			// 	f func()
+			// })|
+
+			// TEMP:
+			keywordIndex := strings.Index(returnStringTimSpace, global.GoKeywordFunc)
+			if keywordIndex == -1 {
+				keywordIndex = strings.Index(returnStringTimSpace, global.GoKeywordStruct)
+			}
+			if keywordIndex == -1 {
+				returnName := strings.TrimSpace(returnStringTimSpace[:keywordIndex])
+				paramType, paramTypeFrom := analyzeGoVariableType(returnStringTimSpace[keywordIndex:])
+				returnMap[returnName] = &GoFunctionVariable{
+					GoVariableAnalysis: GoVariableAnalysis{
+						Name:     returnName,
+						Type:     paramType,
+						TypeFrom: paramTypeFrom,
+					},
+					Index: index,
+				}
+			} else {
+				paramType, paramTypeFrom := analyzeGoVariableType(returnStringTimSpace)
+				returnMap[fmt.Sprintf("%v", len(returnMap))] = &GoFunctionVariable{
+					GoVariableAnalysis: GoVariableAnalysis{
+						Type:     paramType,
+						TypeFrom: paramTypeFrom,
+					},
+					Index: index,
+				}
+			}
 		}
-		if len(returnStringList) == 1 {
-			returnTypeString = returnStringList[0]
-			returnMap[fmt.Sprintf("%v", len(returnMap))] = goFunctionVariable
-		} else if len(returnStringList) == 2 {
-			returnTypeString = returnStringList[1]
-			goFunctionVariable.GoVariableAnalysis.Name = returnStringList[0]
-			returnMap[returnStringList[0]] = goFunctionVariable
-		}
-		goFunctionVariable.GoVariableAnalysis.Type, goFunctionVariable.GoVariableAnalysis.TypeFrom = analyzeGoVariableType(strings.TrimSpace(returnTypeString))
 	}
 	return returnMap
 }
@@ -1129,12 +1336,20 @@ func analyzeGoFunctionDefinitionReturnList(returnListString string) map[string]*
 func analyzeGoVariableType(variableTypeString string) (string, string) {
 	var typeName string
 	var typeFrom string
-	goVariableTypeStringList := strings.Split(variableTypeString, string(global.PunctuationMarkPoint))
-	if len(goVariableTypeStringList) == 1 {
-		typeName = goVariableTypeStringList[0]
-	} else if len(goVariableTypeStringList) == 2 {
-		typeFrom = goVariableTypeStringList[0]
-		typeName = goVariableTypeStringList[1]
+	keywordIndex := strings.Index(variableTypeString, global.GoKeywordFunc)
+	if keywordIndex == -1 {
+		keywordIndex = strings.Index(variableTypeString, global.GoKeywordStruct)
+	}
+	if keywordIndex == -1 {
+		punctuationMarkPointIndex := strings.Index(variableTypeString, global.GoSplitterStringPoint)
+		if punctuationMarkPointIndex == -1 {
+			typeName = variableTypeString
+		} else {
+			typeFrom = variableTypeString[:punctuationMarkPointIndex]
+			typeName = variableTypeString[punctuationMarkPointIndex+1:]
+		}
+	} else {
+		typeName = variableTypeString
 	}
 	return typeName, typeFrom
 }
@@ -1309,9 +1524,9 @@ func analyzeGoVariableType(variableTypeString string) (string, string) {
 // 			// parse variable init by what? -> struct or function call or other variable function name
 // 			variableTypeList := make([]string, 0)
 // 			punctuationMarkLeftBracket := strings.IndexRune(variableInitString, global.PunctuationMarkLeftBracket)
-// 			punctuationMarkLeftCurlyBracesIndex := strings.IndexRune(variableInitString, global.PunctuationMarkLeftCurlyBraces)
+// 			PunctuationMarkLeftCurlyBracketIndex := strings.IndexRune(variableInitString, global.PunctuationMarkLeftCurlyBracket)
 // 			punctuationMarkPointIndex := strings.IndexRune(variableInitString, global.PunctuationMarkPoint)
-// 			if punctuationMarkLeftBracket == -1 && punctuationMarkLeftCurlyBracesIndex == -1 {
+// 			if punctuationMarkLeftBracket == -1 && PunctuationMarkLeftCurlyBracketIndex == -1 {
 // 				if variableAnalysis, isParamVariable := goFunctionAnalysis.ParamsMap[variableInitString]; isParamVariable {
 // 					utility2.TestOutput("variableInit is function param %v:%v", variableInitString, variableAnalysis.Type)
 // 					variableTypeList = append(variableTypeList, variableAnalysis.Type)
@@ -1326,13 +1541,13 @@ func analyzeGoVariableType(variableTypeString string) (string, string) {
 // 						utility2.TestOutput("variableInit is a function or variable from %v", variableInitString, variableAnalysis.Type)
 // 					}
 // 				}
-// 			} else if punctuationMarkLeftBracket != -1 && punctuationMarkLeftCurlyBracesIndex == -1 {
+// 			} else if punctuationMarkLeftBracket != -1 && PunctuationMarkLeftCurlyBracketIndex == -1 {
 // 				utility2.TestOutput("variableInit is function call return %v", variableInitString)
 // 				// if punctuationMarkPointIndex != -1 {
 
 // 				// }
-// 			} else if punctuationMarkLeftBracket == -1 && punctuationMarkLeftCurlyBracesIndex != -1 {
-// 				utility2.TestOutput("variableInit is struct instance: %v", variableInitString[0:punctuationMarkLeftCurlyBracesIndex])
+// 			} else if punctuationMarkLeftBracket == -1 && PunctuationMarkLeftCurlyBracketIndex != -1 {
+// 				utility2.TestOutput("variableInit is struct instance: %v", variableInitString[0:PunctuationMarkLeftCurlyBracketIndex])
 // 			} else {
 // 				utility2.TestOutput("variableInit is unsupport syntax")
 // 			}
