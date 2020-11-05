@@ -61,7 +61,13 @@ func TraitMultiPunctuationMarksContent(content string, punctuationMarkList []int
 		leftPunctuationMark, _ := utility2.GetPunctuationMark(punctuationMark)
 		leftPunctuationMarkList = append(leftPunctuationMarkList, leftPunctuationMark)
 	}
-	return utility.RecursiveTraitMultiPunctuationMarksContent(content, 0, 0, leftPunctuationMarkList, maxDeep, 0)
+	return utility.RecursiveTraitMultiPunctuationMarksContent(content, &utility.PunctuationMarkInfo{
+		PunctuationMark: 0,
+		Index:           -1,
+	}, &utility.PunctuationMarkInfo{
+		PunctuationMark: 0,
+		Index:           len(content),
+	}, leftPunctuationMarkList, maxDeep, 0)
 }
 
 // SplitContent 划分内容节点
@@ -83,13 +89,18 @@ func RecursiveSplitUnderSameDeepPunctuationMarksContent(content string, punctuat
 }
 
 // RecursiveSplitUnderSameDeepPunctuationMarksContentNode 相同深度的成对标点符号下的内容划分
-// @punctuationContentNode 成对标点符号的内容根节点，节点深度 >= 2
+// @punctuationContentNode 成对标点符号的内容根节点，注意：必须是根节点，不能是某个子节点，节点深度必须为 2
 // @splitter 指定分隔符
 // @return
 func RecursiveSplitUnderSameDeepPunctuationMarksContentNode(punctuationContentNode *utility.NewPunctuationContent, splitter string) *SplitContent {
 	return splitUnderSameDeepPunctuationMarksContent(punctuationContentNode, splitter, 0, 0)
 }
 
+// splitUnderSameDeepPunctuationMarksContent 相同深度的成对标点符号下的内容划分的递归算法
+// @punctuationContentNode 成对标点符号的内容根节点，注意：必须是根节点，不能是某个子节点，节点深度 >= 2，分析结果中深度大于 2 的数据不正确
+// @splitter 指定分隔符
+// @maxDeep 递归最大深度
+// @deep 当前深度
 func splitUnderSameDeepPunctuationMarksContent(punctuationContentNode *utility.NewPunctuationContent, splitter string, maxDeep, deep int) *SplitContent {
 	splitContentNode := &SplitContent{
 		ContentList:         make([]string, 0),
@@ -109,10 +120,13 @@ func splitUnderSameDeepPunctuationMarksContent(punctuationContentNode *utility.N
 		}
 		rightIndex := leftIndex + length + offset
 		inner := false
-		for subIndex := 0; subIndex != len(punctuationContentNode.SubPunctuationContentList); subIndex++ {
-			if punctuationContentNode.SubPunctuationIndexMap[subIndex].Left <= rightIndex && rightIndex <= punctuationContentNode.SubPunctuationIndexMap[subIndex].Right {
+		for _, subNode := range punctuationContentNode.SubPunctuationContentList {
+			// Note: 这里用于判断的依据是子节点相对父节点的左 区间符号 的下标
+			// Note: 但是节点的 区间符号 数据中记录的下标是相对于根节点的下标 -> 必须是根节点
+			// Note: 所以当节点数只有2时，这个下标可以代表相对父节点（根节点）的下标 -> 节点深度 >= 2
+			if subNode.LeftPunctuationMark.Index <= rightIndex && rightIndex <= subNode.RightPunctuationMark.Index {
 				inner = true
-				offset = punctuationContentNode.SubPunctuationIndexMap[subIndex].Right - leftIndex + 1
+				offset = subNode.RightPunctuationMark.Index - leftIndex + 1
 				break
 			}
 		}

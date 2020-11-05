@@ -197,4 +197,12 @@ func templateCaller() {
 	f.Println("This is Println call from alias f -> fmt")
 
 	v6 := v5
+
+	v5(
+		ts.Example(),
+		ts.TExample(
+			v4,
+			v4,
+		),
+	)
 }

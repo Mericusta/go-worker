@@ -80,6 +80,9 @@ var TEGoFileAnalyzerScopeFunction TemplateExpression = `(?ms)^func\s+(\((?P<THIS
 // TEGoFileSplitterScopeMemberFunction Go 语言文件切分器成员函数域的模板表达式
 var TEGoFileSplitterScopeMemberFunction TemplateExpression = `^func\s*(?P<MEMBER>\(.*?\))?\s*(?P<NAME>\w+)\s*(?P<PARAM>\(.*?\)){1}\s*(?P<RETURN>\(.*?\)|[\.\*\w]+)?\s*\{(?P<CONTENT>[^\}]*)*(?P<SCOPE_END>\})?(?P<COMMENT>\s*//.*)?`
 
+//
+// var TEGoFileAnalyzerScopeFunctionCall TemplateExpression = `(?P<FROM>TK_IDENTIFIER\.)?(?P<NAME>TK_IDENTIFIER){1}\(.*`
+
 // TEGoFileSplitterScopeTypeRename Go 语言文件切分器类型重命名域的模板表达式
 var TEGoFileSplitterScopeTypeRename TemplateExpression = `^type\s+(?P<NAME>TK_IDENTIFIER)\s+((?P<FROM>TK_IDENTIFIER)\.)?(?P<TYPE>TK_IDENTIFIER)$`
 
