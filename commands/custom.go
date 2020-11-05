@@ -1748,34 +1748,34 @@ func functionScope(line string, lineIndex int, gps *GoPackageScope, keyInterface
 		}
 	}
 
-	replacedLine, replacedString := utility.ReplaceToUniqueString(line, global.GoKeywordEmptyInterface)
-	utility2.TestOutput("replace %v to %v", global.GoKeywordEmptyInterface, replacedString)
-	utility2.TestOutput("replaced line = %v", replacedLine)
+	replacedLine, _ := utility.ReplaceToUniqueString(line, global.GoKeywordEmptyInterface)
+	// utility2.TestOutput("replace %v to %v", global.GoKeywordEmptyInterface, replacedString)
+	// utility2.TestOutput("replaced line = %v", replacedLine)
 
 	// scope begin
 	if len(key) == 0 {
 		var functionKey string
-		var body string
-		var definition string
+		// var body string
+		// var definition string
 		var scopeEnd string
 		for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeFunctionTemplate).FindAllStringSubmatch(replacedLine, -1) {
 			if functionNameIndex, hasIndex := goSplitterFunctionSubMatchNameIndexMap["NAME"]; hasIndex {
 				functionKey = strings.TrimSpace(subMatchList[functionNameIndex])
 			}
-			if contentIndex, hasIndex := goSplitterFunctionSubMatchNameIndexMap["BODY"]; hasIndex {
-				body = strings.TrimSpace(subMatchList[contentIndex])
-			}
-			if index, hasIndex := goSplitterFunctionSubMatchNameIndexMap["DEFINITION"]; hasIndex {
-				definition = strings.TrimSpace(subMatchList[index])
-			}
+			// if contentIndex, hasIndex := goSplitterFunctionSubMatchNameIndexMap["BODY"]; hasIndex {
+			// 	body = strings.TrimSpace(subMatchList[contentIndex])
+			// }
+			// if index, hasIndex := goSplitterFunctionSubMatchNameIndexMap["DEFINITION"]; hasIndex {
+			// 	definition = strings.TrimSpace(subMatchList[index])
+			// }
 			if scopeEndIndex, hasIndex := goSplitterFunctionSubMatchNameIndexMap["SCOPE_END"]; hasIndex {
 				scopeEnd = strings.TrimSpace(subMatchList[scopeEndIndex])
 			}
 		}
-		utility2.TestOutput("functionKey = %v", functionKey)
-		utility2.TestOutput("body = %v", body)
-		utility2.TestOutput("definition = %v", definition)
-		utility2.TestOutput("scopeEnd = %v", scopeEnd)
+		// utility2.TestOutput("functionKey = %v", functionKey)
+		// utility2.TestOutput("body = %v", body)
+		// utility2.TestOutput("definition = %v", definition)
+		// utility2.TestOutput("scopeEnd = %v", scopeEnd)
 
 		gps.FunctionDefinition[functionKey] = &scope{
 			LineStart: lineIndex,

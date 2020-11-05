@@ -605,7 +605,7 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 			}
 			utility2.TestOutput("struct %v variable list: %v", structName, len(structAnalysis.MemberVariable))
 			for variableName, variableAnalysis := range structAnalysis.MemberVariable {
-				utility2.TestOutput("- variable name: %v, type: %v.%v", variableName, variableAnalysis.TypeFrom, variableAnalysis.Type)
+				utility2.TestOutput("- variable name: %v, type: %v, from: %v", variableName, variableAnalysis.Type, variableAnalysis.TypeFrom)
 			}
 		}
 		utility2.TestOutput(ui.CommonNote2)
@@ -622,13 +622,13 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 		for functionName, functionAnalysis := range goAnalysis.PackageAnalysisMap[packagePath].FunctionAnalysisMap {
 			utility2.TestOutput("function %v", functionName)
 			for paramName, functionVariableAnalysis := range functionAnalysis.ParamsMap {
-				utility2.TestOutput("- param index: %v, name: %v, type: %v.%v", functionVariableAnalysis.Index, paramName, functionVariableAnalysis.TypeFrom, functionVariableAnalysis.Type)
+				utility2.TestOutput("- param index: %v, name: %v, type: %v, from: %v", functionVariableAnalysis.Index, paramName, functionVariableAnalysis.Type, functionVariableAnalysis.TypeFrom)
 			}
 			for _, functionVariableAnalysis := range functionAnalysis.ReturnMap {
-				utility2.TestOutput("- return index: %v, name: %v, type: %v.%v", functionVariableAnalysis.Index, functionVariableAnalysis.Name, functionVariableAnalysis.TypeFrom, functionVariableAnalysis.Type)
+				utility2.TestOutput("- return index: %v, name: %v, type: %v, from: %v", functionVariableAnalysis.Index, functionVariableAnalysis.Name, functionVariableAnalysis.Type, functionVariableAnalysis.TypeFrom)
 			}
 			for call, callAnalysisList := range functionAnalysis.CallMap {
-				utility2.TestOutput("- call: %v", call)
+				utility2.TestOutput("- call: %v, len = %v", call, len(callAnalysisList))
 				for _, callAnalysis := range callAnalysisList {
 					var paramListString string
 					for _, param := range callAnalysis.ParamList {
@@ -872,24 +872,24 @@ func analyzeGoScopeInterface(content string) *GoInterfaceAnalysis {
 		Function: make(map[string]*GoFunctionAnalysis),
 	}
 
-	utility2.TestOutput("interface content = |%v|", content)
+	// utility2.TestOutput("interface content = |%v|", content)
 
-	var interfaceName string
+	// var interfaceName string
 	var interfaceBody string
 	for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopeInterfaceTemplate).FindAllStringSubmatch(content, -1) {
-		if index, hasIndex := goAnalyzerInterfaceSubMatchNameIndexMap["NAME"]; hasIndex {
-			interfaceName = strings.TrimSpace(subMatchList[index])
-		}
+		// if index, hasIndex := goAnalyzerInterfaceSubMatchNameIndexMap["NAME"]; hasIndex {
+		// 	interfaceName = strings.TrimSpace(subMatchList[index])
+		// }
 		if index, hasIndex := goAnalyzerInterfaceSubMatchNameIndexMap["BODY"]; hasIndex {
 			interfaceBody = strings.TrimSpace(subMatchList[index])
 		}
 	}
 
-	utility2.TestOutput("interfaceName = |%v|", interfaceName)
-	utility2.TestOutput("interfaceBody = |%v|", interfaceBody)
+	// utility2.TestOutput("interfaceName = |%v|", interfaceName)
+	// utility2.TestOutput("interfaceBody = |%v|", interfaceBody)
 
 	if len(interfaceBody) == 0 {
-		utility2.TestOutput("interface %v is empty interface", interfaceName)
+		// utility2.TestOutput("interface %v is empty interface", interfaceName)
 		return goInterfaceAnalysis
 	}
 
@@ -901,30 +901,30 @@ func analyzeGoScopeInterface(content string) *GoInterfaceAnalysis {
 			break
 		}
 		nodeList = nodeList[1:]
-		utility2.TestOutput("content = |%v%v%v|", string(node.LeftPunctuationMark.PunctuationMark), node.Content, string(node.RightPunctuationMark.PunctuationMark))
+		// utility2.TestOutput("content = |%v%v%v|", string(node.LeftPunctuationMark.PunctuationMark), node.Content, string(node.RightPunctuationMark.PunctuationMark))
 		nodeList = append(nodeList, node.SubPunctuationContentList...)
 	}
 
 	interfaceScopeNode := utility3.RecursiveSplitUnderSameDeepPunctuationMarksContentNode(rootNode, global.GoSplitterStringEnter)
 	if interfaceScopeNode == nil {
-		utility2.TestOutput("nil interface scope node")
+		// utility2.TestOutput("nil interface scope node")
 		return goInterfaceAnalysis
 	}
 
-	if len(interfaceScopeNode.ContentList) == 0 {
-		utility2.TestOutput("interfaceScopeNode = %+v", interfaceScopeNode)
-	}
+	// if len(interfaceScopeNode.ContentList) == 0 {
+	// 	utility2.TestOutput("interfaceScopeNode = %+v", interfaceScopeNode)
+	// }
 
-	for index, functionDefinitionString := range interfaceScopeNode.ContentList {
-		utility2.TestOutput("index %v, func = |%v|", index, functionDefinitionString)
-		replacedContent, replacedString := utility.ReplaceToUniqueString(functionDefinitionString, global.GoKeywordEmptyInterface)
-		utility2.TestOutput("replace %v to %v", global.GoKeywordEmptyInterface, replacedString)
-		utility2.TestOutput("replaced content = |%v|", replacedContent)
+	for _, functionDefinitionString := range interfaceScopeNode.ContentList {
+		// utility2.TestOutput("index %v, func = |%v|", index, functionDefinitionString)
+		replacedContent, _ := utility.ReplaceToUniqueString(functionDefinitionString, global.GoKeywordEmptyInterface)
+		// utility2.TestOutput("replace %v to %v", global.GoKeywordEmptyInterface, replacedString)
+		// utility2.TestOutput("replaced content = |%v|", replacedContent)
 
 		goFunctionAnalysis := analyzeGoFunctionDefinition(replacedContent)
 		goInterfaceAnalysis.Function[goFunctionAnalysis.Name] = goFunctionAnalysis
 	}
-	utility2.TestOutput(ui.CommonNote2)
+	// utility2.TestOutput(ui.CommonNote2)
 
 	return goInterfaceAnalysis
 }
@@ -947,12 +947,12 @@ func analyzeGoScopeStruct(structScope *scope) *GoStructAnalysis {
 		structContent := strings.TrimSpace(rootNode.SubPunctuationContentList[0].Content)
 		goVariableAnalysis := &GoVariableAnalysis{}
 		if spaceIndex := strings.IndexRune(structContent, ' '); spaceIndex == -1 {
-			goVariableAnalysis.Type, goVariableAnalysis.TypeFrom = analyzeGoVariableType(rootNode.SubPunctuationContentList[0].Content)
+			goVariableAnalysis.Type, goVariableAnalysis.TypeFrom = analyzeGoVariableType(structContent)
 			goVariableAnalysis.Name = goVariableAnalysis.Type
 			goStructAnalysis.Base[goVariableAnalysis.Name] = goVariableAnalysis
 		} else {
-			goVariableAnalysis.Name = rootNode.SubPunctuationContentList[0].Content[0:spaceIndex]
-			goVariableAnalysis.Type, goVariableAnalysis.TypeFrom = analyzeGoVariableType(rootNode.SubPunctuationContentList[0].Content[spaceIndex:])
+			goVariableAnalysis.Name = structContent[0:spaceIndex]
+			goVariableAnalysis.Type, goVariableAnalysis.TypeFrom = analyzeGoVariableType(structContent[spaceIndex+1:])
 			goStructAnalysis.MemberVariable[goVariableAnalysis.Name] = goVariableAnalysis
 		}
 	} else {
@@ -995,19 +995,19 @@ func analyzeGoScopeFunction(functionScope *scope) *GoFunctionAnalysis {
 
 	// rootNode := utility3.TraitPunctuationMarksContent(functionScope.Content,  global.PunctuationMarkBracket)
 
-	utility2.TestOutput(ui.CommonNote2)
-	utility2.TestOutput("functionScope.Content = \n|%v|", functionScope.Content)
-	replacedContent, replacedString := utility.ReplaceToUniqueString(functionScope.Content, global.GoKeywordEmptyInterface)
-	utility2.TestOutput("replace %v to %v", global.GoKeywordEmptyInterface, replacedString)
-	utility2.TestOutput("replaced content = %v", replacedContent)
+	// utility2.TestOutput(ui.CommonNote2)
+	// utility2.TestOutput("functionScope.Content = \n|%v|", functionScope.Content)
+	replacedContent, _ := utility.ReplaceToUniqueString(functionScope.Content, global.GoKeywordEmptyInterface)
+	// utility2.TestOutput("replace %v to %v", global.GoKeywordEmptyInterface, replacedString)
+	// utility2.TestOutput("replaced content = %v", replacedContent)
 
 	contentRootNode := utility3.TraitMultiPunctuationMarksContent(replacedContent, global.GoAnalyzerScopePunctuationMarkList, 1)
 	subNodeCount := len(contentRootNode.SubPunctuationContentList)
+	// utility2.TestOutput("subNodeCount = %v", subNodeCount)
 
 	// utility2.TestOutput("contentRootNode.Content = |%v|", contentRootNode.Content)
 	// utility2.TestOutput("contentRootNode.Left = %+v", contentRootNode.LeftPunctuationMark)
 	// utility2.TestOutput("contentRootNode.Right = %+v", contentRootNode.RightPunctuationMark)
-	utility2.TestOutput("subNodeCount = %v", subNodeCount)
 	// utility2.TestOutput("contentRootNode.SubPunctuationContentList[0].Content = |%v|", contentRootNode.SubPunctuationContentList[0].Content)
 	// utility2.TestOutput("contentRootNode.SubPunctuationContentList[0].LeftPunctuationMark = %+v", contentRootNode.SubPunctuationContentList[0].LeftPunctuationMark)
 	// utility2.TestOutput("contentRootNode.SubPunctuationContentList[0].RightPunctuationMark = %+v", contentRootNode.SubPunctuationContentList[0].RightPunctuationMark)
@@ -1036,12 +1036,12 @@ func analyzeGoScopeFunction(functionScope *scope) *GoFunctionAnalysis {
 	// utility2.TestOutput("function definition string = |%v|", replacedContent[:contentRootNode.SubPunctuationIndexMap[subNodeCount-1].Left])
 	// utility2.TestOutput("subNodeCount = %v", subNodeCount)
 	// utility2.TestOutput("contentRootNode.SubPunctuationContentList[subNodeCount-1] = %+v", contentRootNode.SubPunctuationContentList[subNodeCount-1])
-	utility2.TestOutput("function definition string = |%v|", replacedContent[:contentRootNode.SubPunctuationContentList[subNodeCount-1].LeftPunctuationMark.Index])
+	// utility2.TestOutput("function definition string = |%v|", replacedContent[:contentRootNode.SubPunctuationContentList[subNodeCount-1].LeftPunctuationMark.Index])
 	// goFunctionAnalysis := analyzeGoFunctionDefinition(replacedContent[:contentRootNode.SubPunctuationIndexMap[subNodeCount-1].Left])
 	goFunctionAnalysis := analyzeGoFunctionDefinition(replacedContent[:contentRootNode.SubPunctuationContentList[subNodeCount-1].LeftPunctuationMark.Index])
 	goFunctionAnalysis.CallMap = analyzeGoFunctionBody(contentRootNode.SubPunctuationContentList[subNodeCount-1].Content)
 
-	utility2.TestOutput(ui.CommonNote2)
+	// utility2.TestOutput(ui.CommonNote2)
 
 	return goFunctionAnalysis
 }
@@ -1066,30 +1066,30 @@ func analyzeGoFunctionDefinition(functionDefinitionContent string) *GoFunctionAn
 	// param list
 	paramListString := functionDefinitionContentRootNode.SubPunctuationContentList[0].Content
 	paramListNode := utility3.RecursiveSplitUnderSameDeepPunctuationMarksContent(paramListString, global.GoAnalyzerScopePunctuationMarkList, global.GoSplitterStringComma)
-	utility2.TestOutput("param list:")
-	for index, param := range paramListNode.ContentList {
-		utility2.TestOutput("index %v param = |%v|", index, param)
-	}
+	// utility2.TestOutput("param list:")
+	// for index, param := range paramListNode.ContentList {
+	// 	utility2.TestOutput("index %v param = |%v|", index, param)
+	// }
 	paramMap := analyzeGoFunctionDefinitionParamList(paramListNode.ContentList)
-	for paramName, analysis := range paramMap {
-		utility2.TestOutput("paramName = %v, index = %v, type = |%v|, type from = %v", paramName, analysis.Index, analysis.Type, analysis.TypeFrom)
-	}
+	// for paramName, analysis := range paramMap {
+	// 	utility2.TestOutput("paramName = %v, index = %v, type = |%v|, type from = %v", paramName, analysis.Index, analysis.Type, analysis.TypeFrom)
+	// }
 
 	// return list
 	returnListString := strings.TrimSpace(functionDefinitionContent[functionDefinitionContentRootNode.SubPunctuationContentList[0].RightPunctuationMark.Index+1:])
 	returnListString = strings.TrimFunc(returnListString, func(r rune) bool {
 		return r == global.PunctuationMarkLeftBracket || r == global.PunctuationMarkRightBracket
 	})
-	utility2.TestOutput("return list = |%v|", returnListString)
+	// utility2.TestOutput("return list = |%v|", returnListString)
 	returnListNode := utility3.RecursiveSplitUnderSameDeepPunctuationMarksContent(returnListString, global.GoAnalyzerScopePunctuationMarkList, global.GoSplitterStringComma)
-	utility2.TestOutput("return list:")
-	for index, returnType := range returnListNode.ContentList {
-		utility2.TestOutput("index %v return = |%v|", index, returnType)
-	}
+	// utility2.TestOutput("return list:")
+	// for index, returnType := range returnListNode.ContentList {
+	// 	utility2.TestOutput("index %v return = |%v|", index, returnType)
+	// }
 	returnMap := analyzeGoFunctionDefinitionReturnList(returnListNode.ContentList)
-	for returnName, analysis := range returnMap {
-		utility2.TestOutput("returnName = %v, index = %v, type = |%v|, type from = %v", returnName, analysis.Index, analysis.Type, analysis.TypeFrom)
-	}
+	// for returnName, analysis := range returnMap {
+	// 	utility2.TestOutput("returnName = %v, index = %v, type = |%v|, type from = %v", returnName, analysis.Index, analysis.Type, analysis.TypeFrom)
+	// }
 
 	return &GoFunctionAnalysis{
 		Name:      name,
@@ -1177,26 +1177,30 @@ func analyzeGoFunctionDefinitionReturnList(returnStringList []string) map[string
 			if keywordIndex == -1 {
 				keywordIndex = strings.Index(returnStringTimSpace, global.GoKeywordStruct)
 			}
+			var returnMapKey string
+			var returnName string
+			var returnType string
+			var returnTypeFrom string
 			if keywordIndex != -1 {
 				returnName := strings.TrimSpace(returnStringTimSpace[:keywordIndex])
-				paramType, paramTypeFrom := analyzeGoVariableType(returnStringTimSpace[keywordIndex:])
-				returnMap[returnName] = &GoFunctionVariable{
-					GoVariableAnalysis: GoVariableAnalysis{
-						Name:     returnName,
-						Type:     paramType,
-						TypeFrom: paramTypeFrom,
-					},
-					Index: index,
+				returnType, returnTypeFrom = analyzeGoVariableType(returnStringTimSpace[keywordIndex:])
+				if len(returnName) == 0 {
+					returnMapKey = fmt.Sprintf("%v", len(returnMap))
+				} else {
+					returnMapKey = returnName
 				}
 			} else {
-				paramType, paramTypeFrom := analyzeGoVariableType(returnStringTimSpace)
-				returnMap[fmt.Sprintf("%v", len(returnMap))] = &GoFunctionVariable{
-					GoVariableAnalysis: GoVariableAnalysis{
-						Type:     paramType,
-						TypeFrom: paramTypeFrom,
-					},
-					Index: index,
-				}
+				returnType, returnTypeFrom = analyzeGoVariableType(returnStringTimSpace)
+				returnMapKey = fmt.Sprintf("%v", len(returnMap))
+			}
+
+			returnMap[returnMapKey] = &GoFunctionVariable{
+				GoVariableAnalysis: GoVariableAnalysis{
+					Name:     returnName,
+					Type:     returnType,
+					TypeFrom: returnTypeFrom,
+				},
+				Index: index,
 			}
 		}
 	}
@@ -1232,7 +1236,7 @@ func analyzeGoFunctionBody(functionBodyContent string) map[string][]*GoFunctionC
 	}
 
 	for _, bracketScopeNode := range bracketScopeNodeList {
-		utility2.TestOutput("bracketScopeNode content = |%v|", bracketScopeNode.Content)
+		// utility2.TestOutput("bracketScopeNode content = |%v|", bracketScopeNode.Content)
 		// utility2.TestOutput("bracketScopeNode left index = |%v|", bracketScopeNode.LeftPunctuationMark.Index)
 		searchIndex := bracketScopeNode.LeftPunctuationMark.Index
 		for searchIndex != -1 {
@@ -1248,7 +1252,7 @@ func analyzeGoFunctionBody(functionBodyContent string) map[string][]*GoFunctionC
 		identifierString := functionBodyContent[searchIndex+1 : bracketScopeNode.LeftPunctuationMark.Index]
 		// utility2.TestOutput("identifierString = |%v|", identifierString)
 		callIdentifier := identifierString
-		utility2.TestOutput("call |%v(%v)|", callIdentifier, bracketScopeNode.Content)
+		// utility2.TestOutput("call |%v(%v)|", callIdentifier, bracketScopeNode.Content)
 		var callIdentifierFrom string
 		punctuationMarkPointIndex := strings.Index(identifierString, global.GoSplitterStringPoint)
 		if punctuationMarkPointIndex != -1 {
@@ -1261,6 +1265,7 @@ func analyzeGoFunctionBody(functionBodyContent string) map[string][]*GoFunctionC
 		// 	utility2.TestOutput("call |%v(%v)|", callIdentifier, bracketScopeNode.Content)
 		// }
 		if _, hasCall := callMap[identifierString]; !hasCall {
+			// utility2.TestOutput("|%v| does not have list, call (%v)", identifierString, bracketScopeNode.Content)
 			callMap[identifierString] = make([]*GoFunctionCallAnalysis, 0)
 		}
 
@@ -1270,20 +1275,19 @@ func analyzeGoFunctionBody(functionBodyContent string) map[string][]*GoFunctionC
 
 		paramListRootNode := utility3.RecursiveSplitUnderSameDeepPunctuationMarksContent(bracketScopeNode.Content, global.GoAnalyzerScopePunctuationMarkList, global.GoSplitterStringComma)
 		paramList := make([]string, 0, len(paramListRootNode.ContentList))
-		for index, param := range paramListRootNode.ContentList {
+		for _, param := range paramListRootNode.ContentList {
 			if len(strings.TrimSpace(param)) != 0 {
 				paramList = append(paramList, strings.TrimSpace(param))
-				utility2.TestOutput("index %v param = %v", index, strings.TrimSpace(param))
+				// utility2.TestOutput("index %v param = %v", index, strings.TrimSpace(param))
 			}
 		}
 
-		callMap[identifierString] = append(callMap[callIdentifier], &GoFunctionCallAnalysis{
+		callMap[identifierString] = append(callMap[identifierString], &GoFunctionCallAnalysis{
 			Content:   fmt.Sprintf("%v(%v)", identifierString, bracketScopeNode.Content),
 			From:      callIdentifierFrom,
 			Call:      callIdentifier,
 			ParamList: paramList,
 		})
-		utility2.TestOutput(ui.CommonNote2)
 	}
 
 	return callMap
