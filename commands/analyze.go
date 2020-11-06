@@ -189,16 +189,16 @@ type GoAnalysis struct {
 
 // GoPackageAnalysis go 包分析结果
 type GoPackageAnalysis struct {
-	Scope                                 map[string]*GoPackageScope                           // file path : go package scope
-	PackageName                           string                                               // package name
-	PackagePath                           string                                               // package path
-	ImportAnalysis                        map[string]map[string]*GoImportAnalysis              // file path : package path : import analysis
-	VariableAnalysisMap                   map[string]*GoVariableAnalysis                       // variable name : variable analysis
-	ConstAnalysisMap                      map[string]*GoVariableAnalysis                       // const name : variable analysis
-	InterfaceAnalysis                     map[string]*GoInterfaceAnalysis                      // interface name : interface analysis
-	StructAnalysis                        map[string]*GoStructAnalysis                         // struct name : struct analysis
-	FunctionAnalysisMap                   map[string]*GoFunctionAnalysis                       // function name : function analysis
-	OtherPackageMemberFunctionAnalysisMap map[string]map[string]map[string]*GoFunctionAnalysis // package path : struct name : function name : function analysis
+	Scope               map[string]*GoPackageScope              // file path : go package scope
+	PackageName         string                                  // package name
+	PackagePath         string                                  // package path
+	ImportAnalysis      map[string]map[string]*GoImportAnalysis // file path : package path : import analysis
+	VariableAnalysisMap map[string]*GoVariableAnalysis          // variable name : variable analysis
+	ConstAnalysisMap    map[string]*GoVariableAnalysis          // const name : variable analysis
+	InterfaceAnalysis   map[string]*GoInterfaceAnalysis         // interface name : interface analysis
+	StructAnalysis      map[string]*GoStructAnalysis            // struct name : struct analysis
+	FunctionAnalysisMap map[string]*GoFunctionAnalysis          // function name : function analysis
+	// OtherPackageMemberFunctionAnalysisMap map[string]map[string]map[string]*GoFunctionAnalysis // package path : struct name : function name : function analysis
 }
 
 // GoImportAnalysis go 引入包的分析结果
@@ -231,9 +231,7 @@ type GoStructAnalysis struct {
 // GoFunctionAnalysis go 函数分析结果
 type GoFunctionAnalysis struct {
 	Class               string                                                // the struct's name of its belong struct, if it is member function
-	ClassValue          string                                                // the name of its belong struct's member 'this', if it is member function
-	ClassValueType      string                                                // the type of its belong struct's member 'this', if it is member function
-	ClassValueTypeFrom  string                                                // the package of its belong struct's member 'this', if it is member function
+	VariableThis        *GoVariableAnalysis                                   // class variable this
 	Name                string                                                // function name
 	ParamsMap           map[string]*GoFunctionVariable                        // param name : function variable
 	ReturnMap           map[string]*GoFunctionVariable                        // return name : function variable
@@ -494,16 +492,16 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 
 		if _, hasPackagePath := goAnalysis.PackageAnalysisMap[packagePath]; !hasPackagePath {
 			goAnalysis.PackageAnalysisMap[packagePath] = &GoPackageAnalysis{
-				PackageName:                           packageName,
-				PackagePath:                           packagePath,
-				ImportAnalysis:                        make(map[string]map[string]*GoImportAnalysis),
-				VariableAnalysisMap:                   make(map[string]*GoVariableAnalysis),
-				ConstAnalysisMap:                      make(map[string]*GoVariableAnalysis),
-				InterfaceAnalysis:                     make(map[string]*GoInterfaceAnalysis),
-				StructAnalysis:                        make(map[string]*GoStructAnalysis),
-				FunctionAnalysisMap:                   make(map[string]*GoFunctionAnalysis),
-				OtherPackageMemberFunctionAnalysisMap: make(map[string]map[string]map[string]*GoFunctionAnalysis),
-				Scope:                                 make(map[string]*GoPackageScope),
+				PackageName:         packageName,
+				PackagePath:         packagePath,
+				ImportAnalysis:      make(map[string]map[string]*GoImportAnalysis),
+				VariableAnalysisMap: make(map[string]*GoVariableAnalysis),
+				ConstAnalysisMap:    make(map[string]*GoVariableAnalysis),
+				InterfaceAnalysis:   make(map[string]*GoInterfaceAnalysis),
+				StructAnalysis:      make(map[string]*GoStructAnalysis),
+				FunctionAnalysisMap: make(map[string]*GoFunctionAnalysis),
+				// OtherPackageMemberFunctionAnalysisMap: make(map[string]map[string]map[string]*GoFunctionAnalysis),
+				Scope: make(map[string]*GoPackageScope),
 			}
 		}
 		goAnalysis.PackageAnalysisMap[packagePath].Scope[toAnalyzeFilePath] = splitFileResult
@@ -592,7 +590,13 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 		for structName, structScope := range splitFileResult.StructDefinition {
 			if goStructAnalysis := analyzeGoScopeStruct(structScope); goStructAnalysis != nil {
 				goStructAnalysis.Name = structName
-				goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis[structName] = goStructAnalysis
+				if _, hasAnalysis := goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis[structName]; !hasAnalysis {
+					goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis[structName] = goStructAnalysis
+				} else {
+					goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis[structName].Name = goStructAnalysis.Name
+					goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis[structName].Base = goStructAnalysis.Base
+					goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis[structName].MemberVariable = goStructAnalysis.MemberVariable
+				}
 			}
 		}
 
@@ -610,9 +614,9 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 		}
 		utility2.TestOutput(ui.CommonNote2)
 
-		// 1.1.3.1.6.1.7
+		// 4.1.3.1.6.1.7
 		for functionName, functionScope := range splitFileResult.FunctionDefinition {
-			if functionAnalysis := analyzeGoScopeFunction(functionScope); functionAnalysis != nil {
+			if functionAnalysis := analyzeGoScopeFunction(functionScope, false); functionAnalysis != nil {
 				goAnalysis.PackageAnalysisMap[packagePath].FunctionAnalysisMap[functionName] = functionAnalysis
 			}
 		}
@@ -648,9 +652,56 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 			}
 		}
 		utility2.TestOutput(ui.CommonNote2)
-	}
 
-	// 4.1.3.1.6.2
+		// 4.1.3.1.6.1.8
+		for className, functionMap := range splitFileResult.MemberFunctionDefinition {
+			for functionName, functionScope := range functionMap {
+				if functionAnalysis := analyzeGoScopeFunction(functionScope, true); functionAnalysis != nil {
+					if _, hasAnalysis := goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis[className]; !hasAnalysis {
+						goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis[className] = &GoStructAnalysis{
+							Name:           className,
+							MemberFunction: make(map[string]*GoFunctionAnalysis),
+						}
+					}
+					goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis[className].MemberFunction[functionName] = functionAnalysis
+				}
+			}
+		}
+		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("Output package member function analysis:")
+		for className, functionMap := range goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis {
+			utility2.TestOutput("class %v", className)
+			for functionName, functionAnalysis := range functionMap.MemberFunction {
+				utility2.TestOutput("\t- function %v", functionName)
+				for paramName, functionVariableAnalysis := range functionAnalysis.ParamsMap {
+					utility2.TestOutput("\t\t- param index: %v, name: %v, type: %v, from: %v", functionVariableAnalysis.Index, paramName, functionVariableAnalysis.Type, functionVariableAnalysis.TypeFrom)
+				}
+				for _, functionVariableAnalysis := range functionAnalysis.ReturnMap {
+					utility2.TestOutput("\t\t- return index: %v, name: %v, type: %v, from: %v", functionVariableAnalysis.Index, functionVariableAnalysis.Name, functionVariableAnalysis.Type, functionVariableAnalysis.TypeFrom)
+				}
+				for call, callAnalysisList := range functionAnalysis.CallMap {
+					utility2.TestOutput("\t\t- call: %v, len = %v", call, len(callAnalysisList))
+					for _, callAnalysis := range callAnalysisList {
+						var paramListString string
+						for _, param := range callAnalysis.ParamList {
+							if len(paramListString) == 0 {
+								paramListString = fmt.Sprintf("%v", param)
+							} else {
+								paramListString = fmt.Sprintf("%v, %v", paramListString, param)
+							}
+						}
+						if len(callAnalysis.From) != 0 {
+							utility2.TestOutput("\t\t\t- analysis = |%v.%v(%v)|", callAnalysis.From, callAnalysis.Call, paramListString)
+						} else {
+							utility2.TestOutput("\t\t\t- analysis = |%v(%v)|", callAnalysis.Call, paramListString)
+						}
+						utility2.TestOutput("\t\t\t- content  = |%v|", callAnalysis.Content)
+					}
+				}
+			}
+		}
+
+	}
 
 	// utility2.TestOutput(ui.CommonNote2)
 	// utility2.TestOutput("analyze go function caller")
@@ -921,7 +972,7 @@ func analyzeGoScopeInterface(content string) *GoInterfaceAnalysis {
 		// utility2.TestOutput("replace %v to %v", global.GoKeywordEmptyInterface, replacedString)
 		// utility2.TestOutput("replaced content = |%v|", replacedContent)
 
-		goFunctionAnalysis := analyzeGoFunctionDefinition(replacedContent)
+		goFunctionAnalysis := analyzeGoFunctionDefinition(replacedContent, false)
 		goInterfaceAnalysis.Function[goFunctionAnalysis.Name] = goFunctionAnalysis
 	}
 	// utility2.TestOutput(ui.CommonNote2)
@@ -990,7 +1041,7 @@ func analyzeGoScopeStruct(structScope *scope) *GoStructAnalysis {
 // analyzeGoScopeFunction
 // @param functionScope 待分析的 function 域
 // @return
-func analyzeGoScopeFunction(functionScope *scope) *GoFunctionAnalysis {
+func analyzeGoScopeFunction(functionScope *scope, isMemberFunction bool) *GoFunctionAnalysis {
 	// goFunctionAnalysis := &GoFunctionAnalysis{}
 
 	// rootNode := utility3.TraitPunctuationMarksContent(functionScope.Content,  global.PunctuationMarkBracket)
@@ -1038,8 +1089,8 @@ func analyzeGoScopeFunction(functionScope *scope) *GoFunctionAnalysis {
 	// utility2.TestOutput("contentRootNode.SubPunctuationContentList[subNodeCount-1] = %+v", contentRootNode.SubPunctuationContentList[subNodeCount-1])
 	// utility2.TestOutput("function definition string = |%v|", replacedContent[:contentRootNode.SubPunctuationContentList[subNodeCount-1].LeftPunctuationMark.Index])
 	// goFunctionAnalysis := analyzeGoFunctionDefinition(replacedContent[:contentRootNode.SubPunctuationIndexMap[subNodeCount-1].Left])
-	goFunctionAnalysis := analyzeGoFunctionDefinition(replacedContent[:contentRootNode.SubPunctuationContentList[subNodeCount-1].LeftPunctuationMark.Index])
-	goFunctionAnalysis.CallMap = analyzeGoFunctionBody(contentRootNode.SubPunctuationContentList[subNodeCount-1].Content)
+	goFunctionAnalysis := analyzeGoFunctionDefinition(replacedContent[:contentRootNode.SubPunctuationContentList[subNodeCount-1].LeftPunctuationMark.Index], isMemberFunction)
+	// goFunctionAnalysis.CallMap = analyzeGoFunctionBody(contentRootNode.SubPunctuationContentList[subNodeCount-1].Content)
 
 	// utility2.TestOutput(ui.CommonNote2)
 
@@ -1049,7 +1100,7 @@ func analyzeGoScopeFunction(functionScope *scope) *GoFunctionAnalysis {
 // analyzeGoFunctionDefinition
 // @param functionDefinitionContent 待分析的函数定义的内容
 // @return
-func analyzeGoFunctionDefinition(functionDefinitionContent string) *GoFunctionAnalysis {
+func analyzeGoFunctionDefinition(functionDefinitionContent string, isMemberFunction bool) *GoFunctionAnalysis {
 	functionDefinitionContentRootNode := utility3.TraitMultiPunctuationMarksContent(functionDefinitionContent, global.GoAnalyzerScopePunctuationMarkList, 1)
 	subNodeCount := len(functionDefinitionContentRootNode.SubPunctuationContentList)
 
@@ -1063,8 +1114,24 @@ func analyzeGoFunctionDefinition(functionDefinitionContent string) *GoFunctionAn
 		return nil
 	}
 
+	// function class
+	var functionClass string
+	var variableThis *GoVariableAnalysis
+	paramListNodeIndex := 0
+	if isMemberFunction {
+		paramListNodeIndex = 1
+		if subNodeCount < 2 {
+			return nil
+		}
+		variableThisString := functionDefinitionContentRootNode.SubPunctuationContentList[0].Content
+		functionClass, variableThis = analyzeGoMemberFunctionVariableThis(variableThisString)
+		if len(functionClass) == 0 || variableThis == nil {
+			return nil
+		}
+	}
+
 	// param list
-	paramListString := functionDefinitionContentRootNode.SubPunctuationContentList[0].Content
+	paramListString := functionDefinitionContentRootNode.SubPunctuationContentList[paramListNodeIndex].Content
 	paramListNode := utility3.RecursiveSplitUnderSameDeepPunctuationMarksContent(paramListString, global.GoAnalyzerScopePunctuationMarkList, global.GoSplitterStringComma)
 	// utility2.TestOutput("param list:")
 	// for index, param := range paramListNode.ContentList {
@@ -1076,7 +1143,7 @@ func analyzeGoFunctionDefinition(functionDefinitionContent string) *GoFunctionAn
 	// }
 
 	// return list
-	returnListString := strings.TrimSpace(functionDefinitionContent[functionDefinitionContentRootNode.SubPunctuationContentList[0].RightPunctuationMark.Index+1:])
+	returnListString := strings.TrimSpace(functionDefinitionContent[functionDefinitionContentRootNode.SubPunctuationContentList[paramListNodeIndex].RightPunctuationMark.Index+1:])
 	returnListString = strings.TrimFunc(returnListString, func(r rune) bool {
 		return r == global.PunctuationMarkLeftBracket || r == global.PunctuationMarkRightBracket
 	})
@@ -1092,10 +1159,28 @@ func analyzeGoFunctionDefinition(functionDefinitionContent string) *GoFunctionAn
 	// }
 
 	return &GoFunctionAnalysis{
-		Name:      name,
-		ParamsMap: paramMap,
-		ReturnMap: returnMap,
+		Class:        functionClass,
+		VariableThis: variableThis,
+		Name:         name,
+		ParamsMap:    paramMap,
+		ReturnMap:    returnMap,
 	}
+}
+
+// analyzeGoMemberFunctionVariableThis
+// @param variableThisString
+// @return
+func analyzeGoMemberFunctionVariableThis(variableThisString string) (string, *GoVariableAnalysis) {
+	variableThisStringList := strings.Split(strings.TrimSpace(variableThisString), " ")
+	if len(variableThisStringList) < 2 {
+		return "", nil
+	}
+	functionClass := utility.TraitStructName(variableThisStringList[1])
+	variableThisAnalysis := &GoVariableAnalysis{
+		Name: variableThisStringList[0],
+	}
+	variableThisAnalysis.Type, variableThisAnalysis.TypeFrom = analyzeGoVariableType(variableThisStringList[1])
+	return functionClass, variableThisAnalysis
 }
 
 // analyzeGoFunctionDefinitionParamList

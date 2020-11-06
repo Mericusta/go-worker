@@ -88,12 +88,8 @@ func (es ExampleStruct) TExample(t1 template.TypeName, t2 template.TypeName) {
 }
 
 // template struct implement template interface
-func (ts TemplateStruct) TExample(t1 template.TypeName, t2 template.TypeName) {
+func (ts TemplateStruct) TExample(t1 template.TypeName, t2 template.TypeName) (template.TypeName, template.TypeName) {
 	f.Println("This is TExample from TemplateStruct")
-}
-
-func (ts template.TypeName) TExample() {
-
 }
 
 // ----------------------------------------------------------------
