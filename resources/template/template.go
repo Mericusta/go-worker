@@ -3,6 +3,8 @@ package template
 // TypeName 类型关键词
 type TypeName interface{}
 
+type TemplateInt int
+
 // Go 中没有运算符重载，借助接口来让使用者自己实现重载运算
 
 // 内建支持 + - * / % ++ -- 的类型：数字类型

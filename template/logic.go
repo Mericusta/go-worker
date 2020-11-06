@@ -93,4 +93,4 @@ var TEGoFileSplitterScopeMultiLineConstStart TemplateExpression = `^const\s*\(`
 var TEGoFileSplitterScopeMultiLineConstContent TemplateExpression = `^\s*(?P<NAME>TK_IDENTIFIER)\s*(?P<TYPE>TK_IDENTIFIER)?.*`
 
 // TEGoFileSplitterScopeSingleLineConst Go 语言文件切分器单行 const 域的模板表达式
-var TEGoFileSplitterScopeSingleLineConst TemplateExpression = `^const\s+(?P<NAME>TK_IDENTIFIER)\s*(?P<TYPE>TK_IDENTIFIER)?\s*=(?P<VALUE>.*)`
+var TEGoFileSplitterScopeSingleLineConst TemplateExpression = `^const\s+(?P<NAME>TK_IDENTIFIER)\s*(?P<TYPE>TK_IDENTIFIER(\.TK_IDENTIFIER)?)?\s*=(?P<VALUE>.*)`

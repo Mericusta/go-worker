@@ -14,6 +14,21 @@ var e0 int = 1
 var e1 EmptyInterface
 var e2 template.TypeName
 
+const c1 int = 1
+const ti template.TemplateInt = 1
+const (
+	c2 int = iota
+	c3
+	c4
+)
+
+const (
+	c5 int = iota
+	c6
+	t2 template.TemplateInt = 1
+	t3
+)
+
 // common interface
 
 type EmptyInterface interface{}

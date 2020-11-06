@@ -1940,7 +1940,7 @@ func multiLineConstScope(line string, lineIndex int, gps *GoPackageScope, keyInt
 		gps.MultiLineConst = append(gps.MultiLineConst, &scope{
 			LineStart: lineIndex,
 			LineEnd:   lineIndex,
-			ScopeType: scopeSingleLineConst,
+			ScopeType: scopeMultiLineConst,
 			Content:   line,
 		})
 		return continueState, len(gps.MultiLineConst) - 1

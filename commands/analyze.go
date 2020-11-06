@@ -700,7 +700,26 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 				}
 			}
 		}
+		utility2.TestOutput(ui.CommonNote2)
 
+		// 4.1.3.1.6.1.9
+		for variableName, constScope := range splitFileResult.SingleLineConst {
+			for _, constVariableAnalysis := range analyzeGoScopeConst(constScope) {
+				goAnalysis.PackageAnalysisMap[packagePath].ConstAnalysisMap[variableName] = constVariableAnalysis
+			}
+		}
+		for _, constScope := range splitFileResult.MultiLineConst {
+			for variableName, constVariableAnalysis := range analyzeGoScopeConst(constScope) {
+				goAnalysis.PackageAnalysisMap[packagePath].ConstAnalysisMap[variableName] = constVariableAnalysis
+			}
+		}
+
+		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("Output package const variable analysis:")
+		for variableName, analysis := range goAnalysis.PackageAnalysisMap[packagePath].ConstAnalysisMap {
+			utility2.TestOutput("const variable %v, type %v, type from %v", variableName, analysis.Type, analysis.TypeFrom)
+		}
+		utility2.TestOutput(ui.CommonNote2)
 	}
 
 	// utility2.TestOutput(ui.CommonNote2)
@@ -913,6 +932,42 @@ func analyzeGoScopePackageVariable(content string) *GoVariableAnalysis {
 		return nil
 	}
 	return goPackageVariableAnalysis
+}
+
+// analyzeGoScopeConst
+// @param constScope 待分析 const 域的内容
+// @return
+func analyzeGoScopeConst(constScope *scope) map[string]*GoVariableAnalysis {
+	constVariableMap := make(map[string]*GoVariableAnalysis)
+	if constScope.isOneLineScope() {
+		constStringList := strings.Split(constScope.Content, global.GoSplitterStringSpace)
+		constVariableMap[constStringList[1]] = &GoVariableAnalysis{
+			Name: constStringList[1],
+		}
+		constVariableMap[constStringList[1]].Type, constVariableMap[constStringList[1]].TypeFrom = analyzeGoVariableType(constStringList[2])
+	} else {
+		constScopeRootNode := utility3.TraitMultiPunctuationMarksContent(constScope.Content, global.GoAnalyzerScopePunctuationMarkList, 1)
+		if len(constScopeRootNode.SubPunctuationContentList) < 1 {
+			return constVariableMap
+		}
+		var constVariableType string
+		var constVariableTypeFrom string
+		for _, constVariableString := range strings.Split(constScopeRootNode.SubPunctuationContentList[0].Content, global.GoSplitterStringEnter) {
+			constVariableStringList := strings.Split(strings.TrimSpace(constVariableString), global.GoSplitterStringSpace)
+			if len(constVariableStringList) == 0 {
+				continue
+			}
+			if len(constVariableStringList) > 1 {
+				constVariableType, constVariableTypeFrom = analyzeGoVariableType(constVariableStringList[1])
+			}
+			constVariableMap[constVariableStringList[0]] = &GoVariableAnalysis{
+				Name:     constVariableStringList[0],
+				Type:     constVariableType,
+				TypeFrom: constVariableTypeFrom,
+			}
+		}
+	}
+	return constVariableMap
 }
 
 // analyzeGoScopeInterface

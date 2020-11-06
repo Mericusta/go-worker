@@ -52,6 +52,7 @@ var (
 	ASCIISpace                        rune = ' '
 
 	GoKeywordEmptyInterface            = "interface{}"
+	GoKeywordConst                     = "const"
 	GoKeywordFunc                      = "func"
 	GoKeywordStruct                    = "struct"
 	GoSplitterStringEnter              = "\n"
