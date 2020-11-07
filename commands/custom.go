@@ -1425,8 +1425,6 @@ func SplitGoFile(filename string, output bool) *GoPackageScope {
 
 		if lineState == lineStateNone {
 			lineState = getLineState(line)
-		}
-		if output {
 			utility2.TestOutput("line state is: %v", lineState.String())
 			utility2.TestOutput("key is: %v", keyInterface)
 		}

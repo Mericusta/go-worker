@@ -198,7 +198,7 @@ type GoPackageAnalysis struct {
 	InterfaceAnalysis   map[string]*GoInterfaceAnalysis         // interface name : interface analysis
 	StructAnalysis      map[string]*GoStructAnalysis            // struct name : struct analysis
 	FunctionAnalysisMap map[string]*GoFunctionAnalysis          // function name : function analysis
-	// OtherPackageMemberFunctionAnalysisMap map[string]map[string]map[string]*GoFunctionAnalysis // package path : struct name : function name : function analysis
+	TypeRename          map[string]*GoTypeRenameAnalysis        // rename : origin type
 }
 
 // GoImportAnalysis go 引入包的分析结果
@@ -255,6 +255,13 @@ type GoFunctionCallAnalysis struct {
 type GoFunctionVariable struct {
 	GoVariableAnalysis
 	Index int
+}
+
+// GoTypeRenameAnalysis go 类型重命名分析结果
+type GoTypeRenameAnalysis struct {
+	Name     string
+	Type     string
+	TypeFrom string
 }
 
 // checkGoAnalyzerRegexp 检查 go 项目分析器的所有模板/原子表达式
@@ -500,8 +507,8 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 				InterfaceAnalysis:   make(map[string]*GoInterfaceAnalysis),
 				StructAnalysis:      make(map[string]*GoStructAnalysis),
 				FunctionAnalysisMap: make(map[string]*GoFunctionAnalysis),
-				// OtherPackageMemberFunctionAnalysisMap: make(map[string]map[string]map[string]*GoFunctionAnalysis),
-				Scope: make(map[string]*GoPackageScope),
+				TypeRename:          make(map[string]*GoTypeRenameAnalysis),
+				Scope:               make(map[string]*GoPackageScope),
 			}
 		}
 		goAnalysis.PackageAnalysisMap[packagePath].Scope[toAnalyzeFilePath] = splitFileResult
@@ -718,6 +725,23 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 		utility2.TestOutput("Output package const variable analysis:")
 		for variableName, analysis := range goAnalysis.PackageAnalysisMap[packagePath].ConstAnalysisMap {
 			utility2.TestOutput("const variable %v, type %v, type from %v", variableName, analysis.Type, analysis.TypeFrom)
+		}
+		utility2.TestOutput(ui.CommonNote2)
+
+		// 4.1.3.1.6.1.10
+		for _, renameMap := range splitFileResult.TypeRename {
+			for rename, renameScope := range renameMap {
+				utility2.TestOutput("renameScope = |%v|", renameScope.Content)
+				if typeRenameAnalysis := analyzeGoTypeRename(renameScope); typeRenameAnalysis != nil {
+					goAnalysis.PackageAnalysisMap[packagePath].TypeRename[rename] = typeRenameAnalysis
+				}
+			}
+		}
+
+		utility2.TestOutput(ui.CommonNote2)
+		utility2.TestOutput("Output package type rename analysis:")
+		for rename, analysis := range goAnalysis.PackageAnalysisMap[packagePath].TypeRename {
+			utility2.TestOutput("type rename %v, type %v, type from %v", rename, analysis.Type, analysis.TypeFrom)
 		}
 		utility2.TestOutput(ui.CommonNote2)
 	}
@@ -1462,6 +1486,20 @@ func analyzeGoVariableType(variableTypeString string) (string, string) {
 		typeName = variableTypeString
 	}
 	return typeName, typeFrom
+}
+
+// analyzeGoTypeRename
+// @param 待分析的
+func analyzeGoTypeRename(renameScope *scope) *GoTypeRenameAnalysis {
+	renameScopeRootNode := utility3.RecursiveSplitUnderSameDeepPunctuationMarksContent(renameScope.Content, global.GoAnalyzerScopePunctuationMarkList, global.GoSplitterStringSpace)
+	if renameScopeRootNode == nil || len(renameScopeRootNode.ContentList) < 3 {
+		return nil
+	}
+	typeRenameAnalysis := &GoTypeRenameAnalysis{
+		Name: renameScopeRootNode.ContentList[1],
+	}
+	typeRenameAnalysis.Type, typeRenameAnalysis.TypeFrom = analyzeGoVariableType(strings.Join(renameScopeRootNode.ContentList[2:], global.GoSplitterStringSpace))
+	return typeRenameAnalysis
 }
 
 // func outputAnalyzeGoFileResult(goFileAnalysis *goFileAnalysis) string {
