@@ -40,14 +40,18 @@ var (
 	AnalyzeRPPackageLevel               = "RP_PACKAGE_LEVEL"
 	AnalyzeRPPackageList                = "RP_PACKAGE_LIST"
 
-	PunctuationMarkLeftQuote          rune = '"'
-	PunctuationMarkRightQuote         rune = '"'
 	PunctuationMarkLeftBracket        rune = '('
 	PunctuationMarkRightBracket       rune = ')'
 	PunctuationMarkLeftCurlyBracket   rune = '{'
 	PunctuationMarkRightCurlyBracket  rune = '}'
 	PunctuationMarkLeftSquareBracket  rune = '['
 	PunctuationMarkRightSquareBracket rune = ']'
+	PunctuationMarkLeftDoubleQuotes   rune = '"'
+	PunctuationMarkRightDoubleQuotes  rune = '"'
+	PunctuationMarkLeftInverseQuotes  rune = '`'
+	PunctuationMarkRightInverseQuotes rune = '`'
+	PunctuationMarkLeftSingleQuotes   rune = '\''
+	PunctuationMarkRightSingleQuotes  rune = '\''
 	PunctuationMarkPoint              rune = '.'
 	ASCIISpace                        rune = ' '
 
@@ -63,6 +67,11 @@ var (
 		PunctuationMarkBracket,
 		PunctuationMarkCurlyBracket,
 		PunctuationMarkSquareBracket,
+	}
+	GoAnalyzerInvalidScopePunctuationMarkMap = map[rune]rune{
+		PunctuationMarkLeftDoubleQuotes:  PunctuationMarkRightDoubleQuotes,
+		PunctuationMarkLeftInverseQuotes: PunctuationMarkRightInverseQuotes,
+		PunctuationMarkLeftSingleQuotes:  PunctuationMarkRightSingleQuotes,
 	}
 )
 

@@ -2,12 +2,9 @@
 
 package templateexample
 
-import (
-	_ "math"
-)
-
-type ri int
-type r2ifunc func() (
-	interface{},
-	interface{},
-)
+func templateCaller() {
+	v9 := ts.Ts.Get1(ts.Example1('(').Get2(')')).Set(TExample(
+		ts.Example2().es.Get3(),
+		ts.Ts.Get4(),
+	))
+}

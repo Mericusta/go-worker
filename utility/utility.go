@@ -331,82 +331,12 @@ var punctuationMarkMap map[rune]rune = map[rune]rune{
 	'[': ']', ']': '[',
 }
 
-func getAnotherPunctuationMark(r rune) rune {
+// GetAnotherPunctuationMark 获取标点符号的另一对
+func GetAnotherPunctuationMark(r rune) rune {
 	if markRune, hasMark := punctuationMarkMap[r]; hasMark {
 		return markRune
 	}
 	return ' '
-}
-
-// RecursiveTraitMultiPunctuationMarksContent 混合成对标点符号的内容分类提取
-// @content 待处理内容
-// @leftPunctuationMarkInfo 根节点的左标点符号
-// @rightPunctuationMarkInfo 根节点的右标点符号
-// @scopeLeftPunctuationMarkList 所有作为划分区域的左标点符号
-// @maxDeep 待处理的最大深度
-// @deep 当前深度
-// @return 根节点
-func RecursiveTraitMultiPunctuationMarksContent(content string, leftPunctuationMarkInfo, rightPunctuationMarkInfo *PunctuationMarkInfo, scopeLeftPunctuationMarkList []rune, maxDeep, deep int) *NewPunctuationContent {
-	punctuationContent := &NewPunctuationContent{
-		Content:                   content,
-		LeftPunctuationMark:       leftPunctuationMarkInfo,
-		RightPunctuationMark:      rightPunctuationMarkInfo,
-		SubPunctuationContentList: make([]*NewPunctuationContent, 0),
-	}
-
-	passLeftLength := 0
-	for len(content) != 0 && deep != maxDeep {
-		var leftPunctuationMark rune
-		var rightPunctuationMark rune
-		leftPunctuationMarkIndex := len(content) - 1
-
-		for _, toSearchLeftPunctuationMark := range scopeLeftPunctuationMarkList {
-			toSearchLeftPunctuationMarkIndex := strings.IndexRune(content, toSearchLeftPunctuationMark)
-			if toSearchLeftPunctuationMarkIndex != -1 && toSearchLeftPunctuationMarkIndex < leftPunctuationMarkIndex {
-				leftPunctuationMarkIndex = toSearchLeftPunctuationMarkIndex
-				leftPunctuationMark = toSearchLeftPunctuationMark
-			}
-		}
-
-		rightPunctuationMark = getAnotherPunctuationMark(leftPunctuationMark)
-		if leftPunctuationMark == 0 || rightPunctuationMark == 0 || leftPunctuationMarkIndex == len(content)-1 {
-			break
-		}
-
-		afterLeftPunctuationMarkContentIndex := leftPunctuationMarkIndex + 1
-
-		leftCount := 1
-		rightCount := 0
-		rightPunctuationMarkIndex := strings.IndexFunc(content[afterLeftPunctuationMarkContentIndex:], func(r rune) bool {
-			if r == leftPunctuationMark {
-				leftCount++
-			} else if r == rightPunctuationMark {
-				rightCount++
-			}
-			return leftCount == rightCount
-		})
-		if rightPunctuationMarkIndex == -1 {
-			break
-		}
-
-		rightPunctuationMarkIndex = leftPunctuationMarkIndex + rightPunctuationMarkIndex + 1
-
-		subPunctuationContent := RecursiveTraitMultiPunctuationMarksContent(content[leftPunctuationMarkIndex+1:rightPunctuationMarkIndex], &PunctuationMarkInfo{
-			PunctuationMark: leftPunctuationMark,
-			Index:           leftPunctuationMarkInfo.Index + 1 + passLeftLength + leftPunctuationMarkIndex,
-		}, &PunctuationMarkInfo{
-			PunctuationMark: rightPunctuationMark,
-			Index:           leftPunctuationMarkInfo.Index + 1 + passLeftLength + rightPunctuationMarkIndex,
-		}, scopeLeftPunctuationMarkList, maxDeep, deep+1)
-		if subPunctuationContent != nil {
-			punctuationContent.SubPunctuationContentList = append(punctuationContent.SubPunctuationContentList, subPunctuationContent)
-		}
-
-		content = content[rightPunctuationMarkIndex+1:]
-		passLeftLength += rightPunctuationMarkIndex + 1
-	}
-
-	return punctuationContent
 }
 
 // ReplaceToUniqueString 替换内容为唯一字符串（Unix 纳秒时间戳）
@@ -428,4 +358,13 @@ func ReplaceToUniqueString(content string, toReplaceString string) (string, stri
 		return replacedContent, replaceString
 	}
 	return content, ""
+}
+
+// ReverseString 反转字符串
+func ReverseString(content string) string {
+	reverseContent := []rune(content)
+	for from, to := 0, len(content)-1; from < to; from, to = from+1, to-1 {
+		reverseContent[from], reverseContent[to] = reverseContent[to], reverseContent[from]
+	}
+	return string(reverseContent)
 }

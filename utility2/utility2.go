@@ -17,13 +17,14 @@ func TestOutput(format string, content ...interface{}) {
 	FormatOutput(global.LogMarkTest, format, content...)
 }
 
+// GetPunctuationMark 获取标点符号
 func GetPunctuationMark(punctuationMark int) (rune, rune) {
 	switch punctuationMark {
-	case global.PunctuationMarkBracket:
-		return global.PunctuationMarkLeftBracket, global.PunctuationMarkRightBracket
 	case global.PunctuationMarkCurlyBracket:
 		return global.PunctuationMarkLeftCurlyBracket, global.PunctuationMarkRightCurlyBracket
+	case global.PunctuationMarkSquareBracket:
+		return global.PunctuationMarkLeftSquareBracket, global.PunctuationMarkRightSquareBracket
 	default:
-		return global.PunctuationMarkLeftQuote, global.PunctuationMarkRightQuote
+		return global.PunctuationMarkLeftBracket, global.PunctuationMarkRightBracket
 	}
 }

@@ -245,10 +245,12 @@ type GoFunctionAnalysis struct {
 
 // GoFunctionCallAnalysis go 函数调用分析结果
 type GoFunctionCallAnalysis struct {
-	Content   string
-	From      string
-	Call      string
-	ParamList []string
+	Content      string
+	From         string
+	Call         string
+	ParamList    []string
+	PreviousCall *GoFunctionCallAnalysis
+	PostCall     *GoFunctionCallAnalysis
 }
 
 // GoFunctionVariable go 函数内变量
@@ -746,6 +748,24 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 		utility2.TestOutput(ui.CommonNote2)
 	}
 
+	// // 4.1.3.1.6.2
+	// for packagePath, packageAnalysis := range goAnalysis.PackageAnalysisMap {
+	// 	utility2.TestOutput("merge function call for package: %v", packagePath)
+	// 	// non-member function
+	// 	for functionName, functionAnalysis := range packageAnalysis.FunctionAnalysisMap {
+	// 		utility2.TestOutput("deal non-member function %v:", functionName)
+	// 		for callFunctionMame, callFunctionList := range functionAnalysis.CallMap {
+	// 			for index, functionCallAnalysis := range callFunctionList {
+	// 				utility2.TestOutput("- call: %v, index: %v, param: %v, from: %v", index, callFunctionMame, functionCallAnalysis.ParamList, functionCallAnalysis.From)
+	// 				// if len(functionCallAnalysis.From) == 0 {
+
+	// 				// }
+	// 			}
+	// 		}
+	// 		utility2.TestOutput(ui.CommonNote2)
+	// 	}
+	// }
+
 	// utility2.TestOutput(ui.CommonNote2)
 	// utility2.TestOutput("analyze go function caller")
 	// for packagePath, packageAnalysis := range goAnalysis.PackageAnalysisMap {
@@ -1169,7 +1189,7 @@ func analyzeGoScopeFunction(functionScope *scope, isMemberFunction bool) *GoFunc
 	// utility2.TestOutput("function definition string = |%v|", replacedContent[:contentRootNode.SubPunctuationContentList[subNodeCount-1].LeftPunctuationMark.Index])
 	// goFunctionAnalysis := analyzeGoFunctionDefinition(replacedContent[:contentRootNode.SubPunctuationIndexMap[subNodeCount-1].Left])
 	goFunctionAnalysis := analyzeGoFunctionDefinition(replacedContent[:contentRootNode.SubPunctuationContentList[subNodeCount-1].LeftPunctuationMark.Index], isMemberFunction)
-	// goFunctionAnalysis.CallMap = analyzeGoFunctionBody(contentRootNode.SubPunctuationContentList[subNodeCount-1].Content)
+	goFunctionAnalysis.CallMap = analyzeGoFunctionBody(contentRootNode.SubPunctuationContentList[subNodeCount-1].Content)
 
 	// utility2.TestOutput(ui.CommonNote2)
 
@@ -1381,16 +1401,17 @@ func analyzeGoFunctionBody(functionBodyContent string) map[string][]*GoFunctionC
 	bracketScopeNodeList := make([]*utility.NewPunctuationContent, 0)
 	// bracketScopeContentList := make([]string, 0)
 
+	// BF-Traversal
 	for len(toSearchNodeList) != 0 {
 		toSearchNode := toSearchNodeList[0]
 		if toSearchNode == nil {
 			continue
 		}
 
-		// fmt.Printf("content |%v%v%v|, index testContent[%v:%v]\n", string(toSearchNode.LeftPunctuationMark.PunctuationMark), toSearchNode.Content, string(toSearchNode.RightPunctuationMark.PunctuationMark), toSearchNode.LeftPunctuationMark.Index, toSearchNode.RightPunctuationMark.Index)
-		// if toSearchNode.LeftPunctuationMark.Index >= 0 && toSearchNode.RightPunctuationMark.Index < len(toSearchNode.Content) {
-		// 	fmt.Printf("content by index = |%v|\n", functionBodyContent[toSearchNode.LeftPunctuationMark.Index+1:toSearchNode.RightPunctuationMark.Index])
-		// }
+		// utility2.TestOutput("content |%v%v%v|, index testContent[%v:%v]\n", string(toSearchNode.LeftPunctuationMark.PunctuationMark), toSearchNode.Content, string(toSearchNode.RightPunctuationMark.PunctuationMark), toSearchNode.LeftPunctuationMark.Index, toSearchNode.RightPunctuationMark.Index)
+		if toSearchNode.LeftPunctuationMark.Index >= 0 && toSearchNode.RightPunctuationMark.Index < len(toSearchNode.Content) {
+			// utility2.TestOutput("content by index = |%v|\n", functionBodyContent[toSearchNode.LeftPunctuationMark.Index+1:toSearchNode.RightPunctuationMark.Index])
+		}
 
 		if toSearchNode.LeftPunctuationMark.PunctuationMark == global.PunctuationMarkLeftBracket {
 			bracketScopeNodeList = append(bracketScopeNodeList, toSearchNode)
@@ -1399,69 +1420,159 @@ func analyzeGoFunctionBody(functionBodyContent string) map[string][]*GoFunctionC
 		toSearchNodeList = append(toSearchNodeList, toSearchNode.SubPunctuationContentList...)
 	}
 
+	// merge same start
+	sameStartIndexNodeMap := make(map[int][]*utility.NewPunctuationContent)
 	for _, bracketScopeNode := range bracketScopeNodeList {
-		// utility2.TestOutput("bracketScopeNode content = |%v|", bracketScopeNode.Content)
 		// utility2.TestOutput("bracketScopeNode left index = |%v|", bracketScopeNode.LeftPunctuationMark.Index)
-		searchIndex := bracketScopeNode.LeftPunctuationMark.Index
-		for searchIndex != -1 {
-			searchIndex--
-			// utility2.TestOutput("functionBodyContent[%v] = %v", searchIndex, string(rune(functionBodyContent[searchIndex])))
-			if isIdentifierRune(rune(functionBodyContent[searchIndex])) {
+		startIndex := searchCallStartIndex(functionBodyContent, bracketScopeNode.LeftPunctuationMark.Index)
+		if startIndex == -1 {
+			// utility2.TestOutput("continue node: |%+v|", bracketScopeNode)
+			continue
+		}
+		// utility2.TestOutput("call identifier functionBody[%v:%v]", startIndex, bracketScopeNode.LeftPunctuationMark.Index)
+		// utility2.TestOutput("call identifier = |%v|", functionBodyContent[startIndex:bracketScopeNode.LeftPunctuationMark.Index])
+		// utility2.TestOutput(ui.CommonNote2)
+		if _, has := sameStartIndexNodeMap[startIndex]; !has {
+			sameStartIndexNodeMap[startIndex] = make([]*utility.NewPunctuationContent, 0)
+		}
+		// utility2.TestOutput("append start index %v, node content = |%v|", startIndex, bracketScopeNode.Content)
+		sameStartIndexNodeMap[startIndex] = append(sameStartIndexNodeMap[startIndex], bracketScopeNode)
+	}
+
+	for sameStartIndex, bracketScopeNodeList := range sameStartIndexNodeMap {
+		// utility2.TestOutput("deal start index %v call, len = %v", sameStartIndex, len(bracketScopeNodeList))
+		var rootCall *GoFunctionCallAnalysis
+		var lastCall *GoFunctionCallAnalysis
+		for index, bracketScopeNode := range bracketScopeNodeList {
+			var identifierString string
+			// utility2.TestOutput("index %v, full call chain = |%v|", index, functionBodyContent[sameStartIndex:bracketScopeNode.LeftPunctuationMark.Index])
+			if index == 0 {
+				identifierString = functionBodyContent[sameStartIndex:bracketScopeNode.LeftPunctuationMark.Index]
+			} else {
+				identifierString = functionBodyContent[bracketScopeNodeList[index-1].RightPunctuationMark.Index+2 : bracketScopeNode.LeftPunctuationMark.Index]
+			}
+			// utility2.TestOutput("index %v current call = |%v|", index, identifierString)
+			if len(identifierString) == 0 {
 				continue
 			}
-			break
-		}
-		// utility2.TestOutput("searchIndex = %v", searchIndex)
-		// utility2.TestOutput("bracketScopeNode.LeftPunctuationMark.Index = %v", bracketScopeNode.LeftPunctuationMark.Index)
-		identifierString := functionBodyContent[searchIndex+1 : bracketScopeNode.LeftPunctuationMark.Index]
-		// utility2.TestOutput("identifierString = |%v|", identifierString)
-		callIdentifier := identifierString
-		// utility2.TestOutput("call |%v(%v)|", callIdentifier, bracketScopeNode.Content)
-		var callIdentifierFrom string
-		punctuationMarkPointIndex := strings.Index(identifierString, global.GoSplitterStringPoint)
-		if punctuationMarkPointIndex != -1 {
-			callIdentifierFrom = identifierString[:punctuationMarkPointIndex]
-			callIdentifier = identifierString[punctuationMarkPointIndex+1:]
-		}
-		// if len(callIdentifierFrom) != 0 {
-		// 	utility2.TestOutput("call |%v.%v(%v)|", callIdentifierFrom, callIdentifier, bracketScopeNode.Content)
-		// } else {
-		// 	utility2.TestOutput("call |%v(%v)|", callIdentifier, bracketScopeNode.Content)
-		// }
-		if _, hasCall := callMap[identifierString]; !hasCall {
-			// utility2.TestOutput("|%v| does not have list, call (%v)", identifierString, bracketScopeNode.Content)
-			callMap[identifierString] = make([]*GoFunctionCallAnalysis, 0)
-		}
 
-		// for _, subNode := range bracketScopeNode.SubPunctuationContentList {
-		// 	utility2.TestOutput("subNode Content = |%v|", subNode.Content)
-		// }
-
-		paramListRootNode := utility3.RecursiveSplitUnderSameDeepPunctuationMarksContent(bracketScopeNode.Content, global.GoAnalyzerScopePunctuationMarkList, global.GoSplitterStringComma)
-		paramList := make([]string, 0, len(paramListRootNode.ContentList))
-		for _, param := range paramListRootNode.ContentList {
-			if len(strings.TrimSpace(param)) != 0 {
-				paramList = append(paramList, strings.TrimSpace(param))
-				// utility2.TestOutput("index %v param = %v", index, strings.TrimSpace(param))
+			callIdentifierStringList := strings.Split(identifierString, global.GoSplitterStringPoint)
+			if len(callIdentifierStringList) == 0 {
+				// utility2.TestOutput("callIdentifierStringList len is 0")
+				continue
 			}
-		}
 
-		callMap[identifierString] = append(callMap[identifierString], &GoFunctionCallAnalysis{
-			Content:   fmt.Sprintf("%v(%v)", identifierString, bracketScopeNode.Content),
-			From:      callIdentifierFrom,
-			Call:      callIdentifier,
-			ParamList: paramList,
-		})
+			callIdentifier := callIdentifierStringList[len(callIdentifierStringList)-1]
+			// utility2.TestOutput("call |%v|", callIdentifier)
+
+			var callIdentifierFrom string
+			if len(callIdentifierStringList) > 1 {
+				callIdentifierFrom = strings.Join(callIdentifierStringList[:len(callIdentifierStringList)-1], global.GoSplitterStringPoint)
+				// utility2.TestOutput("From |%v|", callIdentifierFrom)
+			}
+
+			paramListRootNode := utility3.RecursiveSplitUnderSameDeepPunctuationMarksContent(bracketScopeNode.Content, global.GoAnalyzerScopePunctuationMarkList, global.GoSplitterStringComma)
+			paramList := make([]string, 0, len(paramListRootNode.ContentList))
+			for _, param := range paramListRootNode.ContentList {
+				if len(strings.TrimSpace(param)) != 0 {
+					paramList = append(paramList, strings.TrimSpace(param))
+					// utility2.TestOutput("index %v param = %v", index, strings.TrimSpace(param))
+				}
+			}
+
+			callAnalysis := &GoFunctionCallAnalysis{
+				Content:   fmt.Sprintf("%v(%v)", identifierString, bracketScopeNode.Content),
+				From:      callIdentifierFrom,
+				Call:      callIdentifier,
+				ParamList: paramList,
+			}
+			callAnalysis.PreviousCall = lastCall
+			if lastCall != nil {
+				lastCall.PostCall = callAnalysis
+			}
+			lastCall = callAnalysis
+			if rootCall == nil {
+				rootCall = callAnalysis
+			}
+
+			callMap[identifierString] = append(callMap[identifierString], callAnalysis)
+		}
+		// utility2.TestOutput(ui.CommonNote2)
 	}
 
 	return callMap
+}
+
+// searchCallStartIndex
+// @param searchString 待查找的字符串
+// @param searchIndex 待搜索的起始下标
+// @return
+func searchCallStartIndex(searchString string, searchIndex int) int {
+	// utility2.TestOutput("searchCallStartIndex, searchIndex = %v, rune = %v", searchIndex, string(searchString[searchIndex]))
+	// utility2.TestOutput("left index content = |%v|", searchString[:searchIndex])
+	if searchIndex > len(searchString) {
+		return -1
+	}
+	invalidScope := false
+	for index := searchIndex - 1; index > -1; index-- {
+		r := rune(searchString[index])
+
+		if invalidScope {
+			continue
+		}
+
+		if isInvalidScopeRune(r) {
+			invalidScope = !invalidScope
+			continue
+		}
+
+		if isIdentifierScopeEndRune(r) {
+			// utility2.TestOutput("into scope, index = %v, rune = %v", index, string(searchString[index])) // ...(...).Func() -> ')' means into scope
+			// utility2.TestOutput("calculate from utility.ReverseString(searchString[:index] = |%v|", utility.ReverseString(searchString[:index]))
+			length := utility3.CalculatePunctuationMarksContentLength(utility.ReverseString(searchString[:index]), r, utility.GetAnotherPunctuationMark(r), global.GoAnalyzerInvalidScopePunctuationMarkMap)
+			// utility2.TestOutput("content length = %v", length)
+			if length == -1 {
+				// means the scope end rune is invalid, just continue
+				continue
+			}
+			index--         // cut ')' it self length, index points to scope content end position // searchString[:index] = '...(...).Func()'[:index] -> ...(...
+			index -= length // cut content length, index points to scope start rune // searchString[index] = '('
+			// utility2.TestOutput("scope content = |%v|", searchString[index+1:index+length+1])
+			// utility2.TestOutput("after calculate, index = %v, rune = |%v|", index, string(searchString[index]))
+			continue // index-- by cycle logic
+		}
+
+		if isIdentifierRune(r) {
+			continue
+		}
+		// utility2.TestOutput("return index = %v", index+1)
+		return index + 1
+	}
+	// utility2.TestOutput("return index = 0")
+	return 0
 }
 
 // isIdentifierRune
 // @param r 待检查的字符
 // @return
 func isIdentifierRune(r rune) bool {
+	// . || _ || A~Z || a~z
 	return r == 46 || r == 95 || (48 <= r && r <= 57) || (65 <= r && r <= 90) || (97 <= r && r <= 123)
+}
+
+func isInvalidScopeRune(r rune) bool {
+	// " || ' || `
+	return r == 34 || r == 39 || r == 96
+}
+
+func isIdentifierScopeStartRune(r rune) bool {
+	// ( || [ || {
+	return r == 40 || r == 91 || r == 121
+}
+
+func isIdentifierScopeEndRune(r rune) bool {
+	// ) || ] || }
+	return r == 41 || r == 93 || r == 125
 }
 
 // analyzeGoVariableType
