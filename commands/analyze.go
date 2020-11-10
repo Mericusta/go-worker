@@ -748,23 +748,52 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 		utility2.TestOutput(ui.CommonNote2)
 	}
 
-	// // 4.1.3.1.6.2
-	// for packagePath, packageAnalysis := range goAnalysis.PackageAnalysisMap {
-	// 	utility2.TestOutput("merge function call for package: %v", packagePath)
-	// 	// non-member function
-	// 	for functionName, functionAnalysis := range packageAnalysis.FunctionAnalysisMap {
-	// 		utility2.TestOutput("deal non-member function %v:", functionName)
-	// 		for callFunctionMame, callFunctionList := range functionAnalysis.CallMap {
-	// 			for index, functionCallAnalysis := range callFunctionList {
-	// 				utility2.TestOutput("- call: %v, index: %v, param: %v, from: %v", index, callFunctionMame, functionCallAnalysis.ParamList, functionCallAnalysis.From)
-	// 				// if len(functionCallAnalysis.From) == 0 {
-
-	// 				// }
-	// 			}
-	// 		}
-	// 		utility2.TestOutput(ui.CommonNote2)
-	// 	}
-	// }
+	// 4.1.3.1.6.2
+	for packagePath, packageAnalysis := range goAnalysis.PackageAnalysisMap {
+		utility2.TestOutput("merge function call for package: %v", packagePath)
+		// non-member function
+		for functionName, functionAnalysis := range packageAnalysis.FunctionAnalysisMap {
+			utility2.TestOutput("deal non-member function %v:", functionName)
+			for callFunctionMame, callFunctionList := range functionAnalysis.CallMap {
+				for index, functionCallAnalysis := range callFunctionList {
+					utility2.TestOutput("- call: %v, index: %v, param: %v, from: %v", index, callFunctionMame, functionCallAnalysis.ParamList, functionCallAnalysis.From)
+					if len(functionCallAnalysis.From) == 0 {
+						continue
+					}
+					var callFromPackageImportAnalysis *GoImportAnalysis
+				IMPORT_LOOP:
+					for filePath := range packageAnalysis.ImportAnalysis {
+						for packagePath := range packageAnalysis.ImportAnalysis[filePath] {
+							if packageAnalysis.ImportAnalysis[filePath][packagePath].Alias == functionCallAnalysis.From {
+								callFromPackageImportAnalysis = packageAnalysis.ImportAnalysis[filePath][packagePath]
+								break IMPORT_LOOP
+							}
+						}
+					}
+					if callFromPackageImportAnalysis == nil {
+						continue
+					}
+					callFromPackageAnalysis, hasPackagePath := goAnalysis.PackageAnalysisMap[callFromPackageImportAnalysis.Path]
+					if !hasPackagePath {
+						continue
+					}
+					callFunctionAnalysis, hasFunction := callFromPackageAnalysis.FunctionAnalysisMap[callFunctionMame]
+					if !hasFunction {
+						continue
+					}
+					if _, hasCallerPackagePath := callFunctionAnalysis.CallerMap[packagePath]; !hasCallerPackagePath {
+						callFunctionAnalysis.CallerMap[packagePath] = make(map[string]map[int]*GoFunctionCallAnalysis)
+					}
+					if _, hasCallerFunction := callFunctionAnalysis.CallerMap[packagePath]; !hasCallerFunction {
+						callFunctionAnalysis.CallerMap[packagePath][functionName] = make(map[int]*GoFunctionCallAnalysis)
+					}
+					utility2.TestOutput("package: %v, function: %v, No.%v calls package %v function %v with params: %v", packagePath, functionName, index, callFromPackageImportAnalysis.Path, callFunctionMame, functionCallAnalysis.ParamList)
+					callFunctionAnalysis.CallerMap[packagePath][functionName][index] = functionCallAnalysis
+				}
+			}
+			utility2.TestOutput(ui.CommonNote2)
+		}
+	}
 
 	// utility2.TestOutput(ui.CommonNote2)
 	// utility2.TestOutput("analyze go function caller")

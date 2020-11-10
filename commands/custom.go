@@ -873,14 +873,14 @@ func ProofOfArrayOrdered(paramList []string) {
 
 // ----------------------------------------------------------------
 
-// custom execute 6 resources/template_example.template.go
+// custom execute 6 resources/template_example
 
-// Command Example: custom execute 6 resources/template_example.template.go
+// Command Example: custom execute 6 resources/template_example
 // Command Expression:
-// - custom                                : command const content
-// - execute                               : command const content
-// - 6                                     : specify executor
-// - resources/template_example.template.go: specify a file to analyze
+// - custom                    : command const content
+// - execute                   : command const content
+// - 6                         : specify executor
+// - resources/template_example: specify a file to analyze
 
 var TemplateType string = "template.TypeName"
 var TemplateFileKey string = ".template."
@@ -904,12 +904,22 @@ func GoCommandToolTemplater(paramList []string) {
 		ui.OutputErrorInfo(ui.CMDCustomExecutorHasNotEnoughParam, 5)
 		return
 	}
-	fileRelativePath := paramList[0]
+	projectRelativePath := paramList[0]
+	projectFileRelativePathList := utility.TraverseDirectorySpecificFile(projectRelativePath, global.SyntaxGo)
 
+	projectFileAbsList := make([]string, 0, len(projectFileRelativePathList))
 	abs, _ := filepath.Abs(".")
-	fileABS := path.Join(abs, fileRelativePath)
-	fileRootPath := path.Dir(fileABS)
-	goAnalysis, analyzeError := analyzeGo(fileRootPath, []string{fileABS})
+	for _, fileRelativePath := range projectFileRelativePathList {
+		fileABS := path.Join(abs, fileRelativePath)
+		projectFileAbsList = append(projectFileAbsList, fileABS)
+	}
+
+	if len(projectFileAbsList) == 0 {
+		ui.OutputNoteInfo("to analyze project directory: %v, does not have any %v file", projectRelativePath, global.SyntaxGo)
+		return
+	}
+
+	goAnalysis, analyzeError := analyzeGo(path.Dir(projectFileAbsList[0]), projectFileAbsList)
 	if analyzeError != nil {
 		ui.OutputWarnInfo(ui.CMDAnalyzeOccursError, analyzeError)
 		return
