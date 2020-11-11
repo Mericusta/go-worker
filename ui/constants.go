@@ -72,3 +72,6 @@ var CommonNote1 string = "Unknown command option: %v"
 
 // CommonNote2 通用显示文本2：分隔线
 var CommonNote2 string = "----------------------------------------------------------------"
+
+// CommonNote3 通用显示文本3：执行指令：%v
+var CommonNote3 string = "Execute command: %v"

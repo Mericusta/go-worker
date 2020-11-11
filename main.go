@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-worker/fsm"
 	"github.com/go-worker/global"
+	"github.com/go-worker/logger"
 	"github.com/go-worker/regexpscommands"
 	"github.com/go-worker/ui"
 )
@@ -17,6 +18,8 @@ func init() {
 }
 
 func main() {
+	go logger.Run()
+
 	var input *bufio.Scanner
 	for {
 		// 等待输入
@@ -36,10 +39,12 @@ func main() {
 
 			// 执行指令
 			global.FsmState = fsm.Executing
+			logger.OutputNoteInfo(ui.CommonNote3, inputTextWithoutTrimSpace)
 			commandExecuteError := command.Execute()
 			if commandExecuteError != nil {
 				ui.OutputErrorInfo("%v", commandExecuteError)
 			}
+			logger.OutputNoteInfo(ui.CommonNote2)
 
 			// 状态机结果
 			if global.FsmState == fsm.Exiting {
@@ -49,4 +54,6 @@ func main() {
 			}
 		}
 	}
+
+	logger.LogControl <- true
 }

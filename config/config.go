@@ -1,6 +1,8 @@
 package config
 
 import (
+	"path"
+
 	"github.com/go-worker/global"
 	"github.com/go-worker/utility"
 )
@@ -11,6 +13,7 @@ type Config struct {
 	ConvertCsvHeadLine int
 	ConvertCsvTypeLine int
 	ConvertCsvSplitter string
+	LogFilePath        string
 }
 
 var WorkerConfig *Config
@@ -26,6 +29,7 @@ func initWorkerConfig() {
 		ConvertCsvTypeLine: 1,
 		ConvertCsvSplitter: "\t",
 	}
+	WorkerConfig.LogFilePath = path.Join(GetCurrentProjectPath(), "worker.log")
 }
 
 // GetCurrentProjectPath 获取当前绑定的项目
