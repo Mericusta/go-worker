@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/go-worker/global"
+	"github.com/go-worker/logger"
 	"github.com/go-worker/regexps"
 	"github.com/go-worker/ui"
 	"github.com/go-worker/utility"
@@ -45,7 +46,6 @@ func (command *Custom) Execute() error {
 	if parseCommandParamsError != nil {
 		return parseCommandParamsError
 	}
-	fmt.Println("params = %+v", command.Params)
 
 	executor, hasExecutor := CustomExecutor[command.Params.optionValue]
 	if !hasExecutor || executor == nil {
@@ -55,6 +55,7 @@ func (command *Custom) Execute() error {
 	executor(command.Params.paramList)
 	executeEndTime := time.Now()
 	ui.OutputNoteInfo("execute custom command %v done, using: %v ns", command.Params.optionValue, executeEndTime.Sub(executeBeginTime).Nanoseconds())
+	logger.OutputNoteInfo("execute custom command %v done, using: %v ns", command.Params.optionValue, executeEndTime.Sub(executeBeginTime).Nanoseconds())
 
 	return nil
 }
@@ -884,6 +885,7 @@ func ProofOfArrayOrdered(paramList []string) {
 
 var TemplateType string = "template.TypeName"
 var TemplateFileKey string = ".template."
+var TemplatePackagePath string = "resources/template"
 
 type GoTemplateFunctionAnalysis struct {
 	Analysis *GoFunctionAnalysis
@@ -919,14 +921,33 @@ func GoCommandToolTemplater(paramList []string) {
 		return
 	}
 
-	goAnalysis, analyzeError := analyzeGo(path.Dir(projectFileAbsList[0]), projectFileAbsList)
+	logger.OutputNoteInfo("analyze go root path = %v", path.Join(abs, projectRelativePath))
+	goAnalysis, analyzeError := analyzeGo(path.Join(abs, projectRelativePath), projectFileAbsList)
 	if analyzeError != nil {
 		ui.OutputWarnInfo(ui.CMDAnalyzeOccursError, analyzeError)
 		return
 	}
 
-	utility2.TestOutput(ui.CommonNote2)
-	utility2.TestOutput("goAnalysis = %+v", goAnalysis)
+	logger.OutputNoteInfo(ui.CommonNote2)
+	logger.OutputNoteInfo("goAnalysis = %+v", goAnalysis)
+	logger.OutputNoteInfo("search all template function")
+
+	// 4.1.3.2.3.1
+
+	// templatePackageAbs := path.Join(abs, TemplatePackagePath)
+
+	// for packagePath, packageAnalysis := range goAnalysis.PackageAnalysisMap {
+	// 	logger.OutputNoteInfo("search template function in package %v", packagePath)
+	// 	for _, importPackageMap := range packageAnalysis.ImportAnalysis {
+
+	// 	}
+	// 	// non-member function
+	// 	for functionName, functionAnalysis := range packageAnalysis.FunctionAnalysisMap {
+	// 		for _, paramAnalysis := range functionAnalysis.ParamsMap {
+	// 			// if paramAnalysis.TypeFrom
+	// 		}
+	// 	}
+	// }
 
 	// for fileNo, goFileAnalysis := range goAnalysis.FileNoAnalysisMap {
 	// 	utility2.TestOutput("fileNo = %v, goFileAnalysis.FilePath = %v", fileNo, goFileAnalysis.FilePath)
@@ -1434,9 +1455,14 @@ func SplitGoFile(filename string, output bool) *GoPackageScope {
 		}
 
 		if lineState == lineStateNone {
+			if output {
+				utility2.TestOutput("get line state by |%v|", line)
+			}
 			lineState = getLineState(line)
-			utility2.TestOutput("line state is: %v", lineState.String())
-			utility2.TestOutput("key is: %v", keyInterface)
+			if output {
+				utility2.TestOutput("line state is: %v", lineState.String())
+				utility2.TestOutput("key is: %v", keyInterface)
+			}
 		}
 
 		switch lineState {
@@ -1474,79 +1500,81 @@ func SplitGoFile(filename string, output bool) *GoPackageScope {
 		return true
 	})
 
-	if gps.Package != nil {
-		ui.OutputNoteInfo(ui.CommonNote2)
-		ui.OutputNoteInfo("package scope = |%v|", gps.Package.Content)
-	}
-	if gps.MultiLineImport != nil {
-		ui.OutputNoteInfo(ui.CommonNote2)
-		ui.OutputNoteInfo("multi-line import scope = |%v|", gps.MultiLineImport.Content)
-	}
-	if gps.SingleLineImport != nil {
-		ui.OutputNoteInfo(ui.CommonNote2)
-		ui.OutputNoteInfo("single-line import scope:")
-		for _, scopeData := range gps.SingleLineImport {
-			ui.OutputNoteInfo("|%v|", scopeData.Content)
+	if output {
+		if gps.Package != nil {
+			ui.OutputNoteInfo(ui.CommonNote2)
+			ui.OutputNoteInfo("package scope = |%v|", gps.Package.Content)
 		}
-	}
-	if gps.PackageVariable != nil {
-		ui.OutputNoteInfo(ui.CommonNote2)
-		ui.OutputNoteInfo("package variable scope:")
-		for _, scopeData := range gps.PackageVariable {
-			ui.OutputNoteInfo("|%v|", scopeData.Content)
+		if gps.MultiLineImport != nil {
+			ui.OutputNoteInfo(ui.CommonNote2)
+			ui.OutputNoteInfo("multi-line import scope = |%v|", gps.MultiLineImport.Content)
 		}
-	}
-	if gps.InterfaceDefinition != nil {
-		ui.OutputNoteInfo(ui.CommonNote2)
-		ui.OutputNoteInfo("interface scope:")
-		for _, scopeData := range gps.InterfaceDefinition {
-			ui.OutputNoteInfo("|%v|", scopeData.Content)
-		}
-	}
-	if gps.StructDefinition != nil {
-		ui.OutputNoteInfo(ui.CommonNote2)
-		ui.OutputNoteInfo("struct scope:")
-		for _, scopeData := range gps.StructDefinition {
-			ui.OutputNoteInfo("|%v|", scopeData.Content)
-		}
-	}
-	if gps.FunctionDefinition != nil {
-		ui.OutputNoteInfo(ui.CommonNote2)
-		ui.OutputNoteInfo("function scope:")
-		for _, scopeData := range gps.FunctionDefinition {
-			ui.OutputNoteInfo("|%v|", scopeData.Content)
-		}
-	}
-	if gps.MemberFunctionDefinition != nil {
-		ui.OutputNoteInfo(ui.CommonNote2)
-		ui.OutputNoteInfo("member function scope:")
-		for _, functionMap := range gps.MemberFunctionDefinition {
-			for _, scopeData := range functionMap {
+		if gps.SingleLineImport != nil {
+			ui.OutputNoteInfo(ui.CommonNote2)
+			ui.OutputNoteInfo("single-line import scope:")
+			for _, scopeData := range gps.SingleLineImport {
 				ui.OutputNoteInfo("|%v|", scopeData.Content)
 			}
 		}
-	}
-	if gps.TypeRename != nil {
-		ui.OutputNoteInfo(ui.CommonNote2)
-		ui.OutputNoteInfo("type rename scope:")
-		for _, renameMap := range gps.TypeRename {
-			for _, scopeData := range renameMap {
+		if gps.PackageVariable != nil {
+			ui.OutputNoteInfo(ui.CommonNote2)
+			ui.OutputNoteInfo("package variable scope:")
+			for _, scopeData := range gps.PackageVariable {
 				ui.OutputNoteInfo("|%v|", scopeData.Content)
 			}
 		}
-	}
-	if gps.MultiLineConst != nil {
-		ui.OutputNoteInfo(ui.CommonNote2)
-		ui.OutputNoteInfo("multi-line const scope:")
-		for _, scopeData := range gps.MultiLineConst {
-			ui.OutputNoteInfo("|%v|", scopeData.Content)
+		if gps.InterfaceDefinition != nil {
+			ui.OutputNoteInfo(ui.CommonNote2)
+			ui.OutputNoteInfo("interface scope:")
+			for _, scopeData := range gps.InterfaceDefinition {
+				ui.OutputNoteInfo("|%v|", scopeData.Content)
+			}
 		}
-	}
-	if gps.SingleLineConst != nil {
-		ui.OutputNoteInfo(ui.CommonNote2)
-		ui.OutputNoteInfo("const value scope:")
-		for _, scopeData := range gps.SingleLineConst {
-			ui.OutputNoteInfo("|%v|", scopeData.Content)
+		if gps.StructDefinition != nil {
+			ui.OutputNoteInfo(ui.CommonNote2)
+			ui.OutputNoteInfo("struct scope:")
+			for _, scopeData := range gps.StructDefinition {
+				ui.OutputNoteInfo("|%v|", scopeData.Content)
+			}
+		}
+		if gps.FunctionDefinition != nil {
+			ui.OutputNoteInfo(ui.CommonNote2)
+			ui.OutputNoteInfo("function scope:")
+			for _, scopeData := range gps.FunctionDefinition {
+				ui.OutputNoteInfo("|%v|", scopeData.Content)
+			}
+		}
+		if gps.MemberFunctionDefinition != nil {
+			ui.OutputNoteInfo(ui.CommonNote2)
+			ui.OutputNoteInfo("member function scope:")
+			for _, functionMap := range gps.MemberFunctionDefinition {
+				for _, scopeData := range functionMap {
+					ui.OutputNoteInfo("|%v|", scopeData.Content)
+				}
+			}
+		}
+		if gps.TypeRename != nil {
+			ui.OutputNoteInfo(ui.CommonNote2)
+			ui.OutputNoteInfo("type rename scope:")
+			for _, renameMap := range gps.TypeRename {
+				for _, scopeData := range renameMap {
+					ui.OutputNoteInfo("|%v|", scopeData.Content)
+				}
+			}
+		}
+		if gps.MultiLineConst != nil {
+			ui.OutputNoteInfo(ui.CommonNote2)
+			ui.OutputNoteInfo("multi-line const scope:")
+			for _, scopeData := range gps.MultiLineConst {
+				ui.OutputNoteInfo("|%v|", scopeData.Content)
+			}
+		}
+		if gps.SingleLineConst != nil {
+			ui.OutputNoteInfo(ui.CommonNote2)
+			ui.OutputNoteInfo("const value scope:")
+			for _, scopeData := range gps.SingleLineConst {
+				ui.OutputNoteInfo("|%v|", scopeData.Content)
+			}
 		}
 	}
 
@@ -1554,7 +1582,6 @@ func SplitGoFile(filename string, output bool) *GoPackageScope {
 }
 
 func getLineState(line string) goFileLineState {
-	utility2.TestOutput("get line state by |%v|", line)
 	if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopePackageTemplate).MatchString(line) {
 		return lineStatePackageScope
 	} else if regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeMultiLineImportStartTemplate).MatchString(line) {
@@ -1653,13 +1680,13 @@ func interfaceScope(line string, lineIndex int, gps *GoPackageScope, keyInterfac
 		}
 	}
 
-	utility2.TestOutput("key = %v", key)
+	// utility2.TestOutput("key = %v", key)
 
 	// scope begin
 	if len(key) == 0 {
 		var interfaceKey string
 		var scopeEnd string
-		utility2.TestOutput("goSplitterInterfaceSubMatchNameIndexMap = %v", goSplitterInterfaceSubMatchNameIndexMap)
+		// utility2.TestOutput("goSplitterInterfaceSubMatchNameIndexMap = %v", goSplitterInterfaceSubMatchNameIndexMap)
 		for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileSplitterScopeInterfaceTemplate).FindAllStringSubmatch(line, -1) {
 			if index, hasIndex := goSplitterInterfaceSubMatchNameIndexMap["NAME"]; hasIndex {
 				interfaceKey = strings.TrimSpace(subMatchList[index])
@@ -1677,10 +1704,10 @@ func interfaceScope(line string, lineIndex int, gps *GoPackageScope, keyInterfac
 		}
 		// one line interface
 		if len(scopeEnd) != 0 {
-			utility2.TestOutput("interface %v is one line interface", interfaceKey)
+			// utility2.TestOutput("interface %v is one line interface", interfaceKey)
 			return endState, nil
 		}
-		utility2.TestOutput("interface line = %v", line)
+		// utility2.TestOutput("interface line = %v", line)
 		return continueState, interfaceKey
 	}
 
@@ -1690,7 +1717,7 @@ func interfaceScope(line string, lineIndex int, gps *GoPackageScope, keyInterfac
 	// scope end
 	if regexps.AtomicExpressionEnumRegexpMap[global.AEGoFileSplitterScopeEnd].MatchString(line) {
 		gps.InterfaceDefinition[key].LineEnd = lineIndex
-		utility2.TestOutput("interface scope is end at line %v", lineIndex)
+		// utility2.TestOutput("interface scope is end at line %v", lineIndex)
 		return endState, nil
 	}
 
@@ -1938,7 +1965,7 @@ func multiLineConstScope(line string, lineIndex int, gps *GoPackageScope, keyInt
 		key, ok = keyInterface.(int)
 		if !ok {
 			ui.OutputErrorInfo(ui.CommonError19, "keyInterface", "*multiLineConstKey")
-			utility2.TestOutput("key = %+v", key)
+			// utility2.TestOutput("key = %+v", key)
 			return endState, nil
 		}
 	}

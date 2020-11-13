@@ -59,6 +59,11 @@ func OutputErrorInfo(format string, content ...interface{}) {
 	sendLogMsg(global.LogMarkError, format, content...)
 }
 
+// OutputEmptyLine 输出空白行
+func OutputEmptyLine() {
+	LogChan <- []byte("\n")
+}
+
 func sendLogMsg(logMark, format string, content ...interface{}) {
 	formatContent := fmt.Sprintf(format, content...)
 	LogChan <- []byte(fmt.Sprintf("[%v] %v\n", logMark, formatContent))

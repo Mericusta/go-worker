@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/go-worker/global"
+	"github.com/go-worker/logger"
 	"github.com/go-worker/regexps"
 	"github.com/go-worker/ui"
 	"github.com/go-worker/utility"
@@ -207,11 +208,16 @@ type GoImportAnalysis struct {
 	Path  string
 }
 
+type GoTypeAnalysis struct {
+	Name            string
+	From            string
+	FromPackagePath string
+}
+
 // GoVariableAnalysis go 变量分析结果
 type GoVariableAnalysis struct {
-	Name     string
-	Type     string
-	TypeFrom string
+	Name string
+	Type *GoTypeAnalysis
 }
 
 // GoInterfaceAnalysis go 接口分析结果
@@ -245,12 +251,13 @@ type GoFunctionAnalysis struct {
 
 // GoFunctionCallAnalysis go 函数调用分析结果
 type GoFunctionCallAnalysis struct {
-	Content      string
-	From         string
-	Call         string
-	ParamList    []string
-	PreviousCall *GoFunctionCallAnalysis
-	PostCall     *GoFunctionCallAnalysis
+	Content         string
+	From            string
+	FromPackagePath string
+	Call            string
+	ParamList       []string
+	PreviousCall    *GoFunctionCallAnalysis
+	PostCall        *GoFunctionCallAnalysis
 }
 
 // GoFunctionVariable go 函数内变量
@@ -261,9 +268,8 @@ type GoFunctionVariable struct {
 
 // GoTypeRenameAnalysis go 类型重命名分析结果
 type GoTypeRenameAnalysis struct {
-	Name     string
-	Type     string
-	TypeFrom string
+	Name string
+	Type *GoTypeAnalysis
 }
 
 // checkGoAnalyzerRegexp 检查 go 项目分析器的所有模板/原子表达式
@@ -436,57 +442,13 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 		return nil, nil
 	}
 
-	// const mainPackageNo = 0
-	// packageNo := mainPackageNo
-	// fileNo := 0
 	goAnalysis := &GoAnalysis{
-		// FileNoAnalysisMap:    make(map[int]*goFileAnalysis),
-		// PackageNoAnalysisMap: make(map[int]*GoPackageAnalysis),
-		// PackageFunctionMap:   make(map[string]string),
 		RootPath:           rootPath,
 		PackageAnalysisMap: make(map[string]*GoPackageAnalysis),
 	}
-	// packagePathAnalysisMap := make(map[string]*GoPackageAnalysis)
 
 	// 4.1.3.1.6.1
 	for _, toAnalyzeFilePath := range toAnalyzePathList {
-		// var toWriteFile *os.File
-		// defer func() {
-		// 	if toWriteFile != nil {
-		// 		toWriteFile.Close()
-		// 	}
-		// }()
-		// if toWriteFilePath := toAnalyzeWriteFilePathMap[toAnalyzeFilePath]; len(toWriteFilePath) != 0 {
-		// 	if utility.IsExist(toWriteFilePath) {
-		// 		var openFileError error
-		// 		toWriteFile, openFileError = os.OpenFile(toWriteFilePath, os.O_RDWR|os.O_TRUNC, 0644)
-		// 		if openFileError != nil {
-		// 			return goAnalysis, openFileError
-		// 		}
-		// 	} else {
-		// 		var createFileError error
-		// 		toWriteFile, createFileError = utility.CreateFile(toWriteFilePath)
-		// 		if createFileError != nil {
-		// 			return goAnalysis, createFileError
-		// 		}
-		// 	}
-		// 	if toWriteFile == nil {
-		// 		return goAnalysis, fmt.Errorf("analyze to write file is nil")
-		// 	}
-		// }
-
-		// toAnalyzeFile, inputError := os.Open(toAnalyzeFilePath)
-		// defer toAnalyzeFile.Close()
-		// if inputError != nil || toAnalyzeFile == nil {
-		// 	return goAnalysis, fmt.Errorf(ui.CommonError5, toAnalyzeFilePath, inputError.Error())
-		// }
-
-		// fileAnalysis, analyzeError := analyzeGoFile(toAnalyzeFile)
-		// if analyzeError != nil {
-		// 	ui.OutputWarnInfo(ui.CMDAnalyzeOccursError, analyzeError)
-		// }
-		// fileAnalysis.No = fileNo
-
 		// 4.1.3.1.6.1.1
 		splitFileResult := SplitGoFile(toAnalyzeFilePath, false)
 
@@ -495,9 +457,6 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 		if analyzeGoScopePackageError != nil {
 			return nil, analyzeGoScopePackageError
 		}
-
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("packageName = %v, packagePath = %v", packageName, packagePath)
 
 		if _, hasPackagePath := goAnalysis.PackageAnalysisMap[packagePath]; !hasPackagePath {
 			goAnalysis.PackageAnalysisMap[packagePath] = &GoPackageAnalysis{
@@ -533,71 +492,26 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 			}
 		}
 
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("Output package import analysis:")
-		for filePath, importAnlysisMap := range goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis {
-			utility2.TestOutput("filePath = %v", filePath)
-			for alias, analysis := range importAnlysisMap {
-				utility2.TestOutput("alias = %v, importPath = %v", alias, analysis.Path)
-			}
-		}
-		utility2.TestOutput(ui.CommonNote2)
+		fileImportAnalysisMap := goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis[toAnalyzeFilePath]
 
 		// 4.1.3.1.6.1.4
 		for _, packageVariableScope := range splitFileResult.PackageVariable {
-			if goPackageVariableAnalysis := analyzeGoScopePackageVariable(packageVariableScope.Content); goPackageVariableAnalysis != nil {
+			if goPackageVariableAnalysis := analyzeGoScopePackageVariable(packageVariableScope.Content, fileImportAnalysisMap); goPackageVariableAnalysis != nil {
 				goAnalysis.PackageAnalysisMap[packagePath].VariableAnalysisMap[goPackageVariableAnalysis.Name] = goPackageVariableAnalysis
 			}
 		}
 
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("Output package variable analysis:")
-		for name, analysis := range goAnalysis.PackageAnalysisMap[packagePath].VariableAnalysisMap {
-			utility2.TestOutput("name = %v, type = %v, type from = %v", name, analysis.Type, analysis.TypeFrom)
-		}
-		utility2.TestOutput(ui.CommonNote2)
-
 		// 4.1.3.1.6.1.5
 		for interfaceName, interfaceScope := range splitFileResult.InterfaceDefinition {
-			if goInterfaceAnalysis := analyzeGoScopeInterface(interfaceScope.Content); goInterfaceAnalysis != nil {
+			if goInterfaceAnalysis := analyzeGoScopeInterface(interfaceScope.Content, fileImportAnalysisMap); goInterfaceAnalysis != nil {
 				goInterfaceAnalysis.Name = interfaceName
 				goAnalysis.PackageAnalysisMap[packagePath].InterfaceAnalysis[interfaceName] = goInterfaceAnalysis
 			}
 		}
 
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("Output package interface analysis:")
-		for interfaceName, interfaceAnalysis := range goAnalysis.PackageAnalysisMap[packagePath].InterfaceAnalysis {
-			utility2.TestOutput("interface %v function list: %v", interfaceName, len(interfaceAnalysis.Function))
-			for functionName, functionAnalysis := range interfaceAnalysis.Function {
-				utility2.TestOutput("function: %v", functionName)
-				utility2.TestOutput("- param list:")
-				for paramName, paramAnalysis := range functionAnalysis.ParamsMap {
-					var paramTypeString string
-					if len(paramAnalysis.TypeFrom) != 0 {
-						paramTypeString = fmt.Sprintf("%v.%v", paramAnalysis.TypeFrom, paramAnalysis.Type)
-					} else {
-						paramTypeString = paramAnalysis.Type
-					}
-					utility2.TestOutput("\t- Index: %v, Name: %v, Type: %v", paramAnalysis.Index, paramName, paramTypeString)
-				}
-				utility2.TestOutput("- return list:")
-				for returnIndex, returnAnalysis := range functionAnalysis.ReturnMap {
-					var returnTypeString string
-					if len(returnAnalysis.TypeFrom) != 0 {
-						returnTypeString = fmt.Sprintf("%v.%v", returnAnalysis.TypeFrom, returnAnalysis.Type)
-					} else {
-						returnTypeString = returnAnalysis.Type
-					}
-					utility2.TestOutput("\t- Index: %v, Name: %v, Type: %v", returnIndex, returnAnalysis.Name, returnTypeString)
-				}
-			}
-		}
-		utility2.TestOutput(ui.CommonNote2)
-
 		// 4.1.3.1.6.1.6
 		for structName, structScope := range splitFileResult.StructDefinition {
-			if goStructAnalysis := analyzeGoScopeStruct(structScope); goStructAnalysis != nil {
+			if goStructAnalysis := analyzeGoScopeStruct(structScope, fileImportAnalysisMap); goStructAnalysis != nil {
 				goStructAnalysis.Name = structName
 				if _, hasAnalysis := goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis[structName]; !hasAnalysis {
 					goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis[structName] = goStructAnalysis
@@ -609,63 +523,17 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 			}
 		}
 
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("Output package struct analysis:")
-		for structName, structAnalysis := range goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis {
-			utility2.TestOutput("struct %v base struct list: %v", structName, len(structAnalysis.Base))
-			for baseType, baseVariableAnalysis := range structAnalysis.Base {
-				utility2.TestOutput("- base type: %v, from %v", baseType, baseVariableAnalysis.TypeFrom)
-			}
-			utility2.TestOutput("struct %v variable list: %v", structName, len(structAnalysis.MemberVariable))
-			for variableName, variableAnalysis := range structAnalysis.MemberVariable {
-				utility2.TestOutput("- variable name: %v, type: %v, from: %v", variableName, variableAnalysis.Type, variableAnalysis.TypeFrom)
-			}
-		}
-		utility2.TestOutput(ui.CommonNote2)
-
 		// 4.1.3.1.6.1.7
 		for functionName, functionScope := range splitFileResult.FunctionDefinition {
-			if functionAnalysis := analyzeGoScopeFunction(functionScope, false); functionAnalysis != nil {
+			if functionAnalysis := analyzeGoScopeFunction(functionScope, false, fileImportAnalysisMap); functionAnalysis != nil {
 				goAnalysis.PackageAnalysisMap[packagePath].FunctionAnalysisMap[functionName] = functionAnalysis
 			}
 		}
 
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("Output package function analysis:")
-		for functionName, functionAnalysis := range goAnalysis.PackageAnalysisMap[packagePath].FunctionAnalysisMap {
-			utility2.TestOutput("function %v", functionName)
-			for paramName, functionVariableAnalysis := range functionAnalysis.ParamsMap {
-				utility2.TestOutput("- param index: %v, name: %v, type: %v, from: %v", functionVariableAnalysis.Index, paramName, functionVariableAnalysis.Type, functionVariableAnalysis.TypeFrom)
-			}
-			for _, functionVariableAnalysis := range functionAnalysis.ReturnMap {
-				utility2.TestOutput("- return index: %v, name: %v, type: %v, from: %v", functionVariableAnalysis.Index, functionVariableAnalysis.Name, functionVariableAnalysis.Type, functionVariableAnalysis.TypeFrom)
-			}
-			for call, callAnalysisList := range functionAnalysis.CallMap {
-				utility2.TestOutput("- call: %v, len = %v", call, len(callAnalysisList))
-				for _, callAnalysis := range callAnalysisList {
-					var paramListString string
-					for _, param := range callAnalysis.ParamList {
-						if len(paramListString) == 0 {
-							paramListString = fmt.Sprintf("%v", param)
-						} else {
-							paramListString = fmt.Sprintf("%v, %v", paramListString, param)
-						}
-					}
-					if len(callAnalysis.From) != 0 {
-						utility2.TestOutput("\t- analysis = |%v.%v(%v)|", callAnalysis.From, callAnalysis.Call, paramListString)
-					} else {
-						utility2.TestOutput("\t- analysis = |%v(%v)|", callAnalysis.Call, paramListString)
-					}
-					utility2.TestOutput("\t- content  = |%v|", callAnalysis.Content)
-				}
-			}
-		}
-		utility2.TestOutput(ui.CommonNote2)
-
 		// 4.1.3.1.6.1.8
 		for className, functionMap := range splitFileResult.MemberFunctionDefinition {
 			for functionName, functionScope := range functionMap {
-				if functionAnalysis := analyzeGoScopeFunction(functionScope, true); functionAnalysis != nil {
+				if functionAnalysis := analyzeGoScopeFunction(functionScope, true, fileImportAnalysisMap); functionAnalysis != nil {
 					if _, hasAnalysis := goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis[className]; !hasAnalysis {
 						goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis[className] = &GoStructAnalysis{
 							Name:           className,
@@ -676,20 +544,140 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 				}
 			}
 		}
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("Output package member function analysis:")
+
+		// 4.1.3.1.6.1.9
+		for variableName, constScope := range splitFileResult.SingleLineConst {
+			for _, constVariableAnalysis := range analyzeGoScopeConst(constScope, fileImportAnalysisMap) {
+				goAnalysis.PackageAnalysisMap[packagePath].ConstAnalysisMap[variableName] = constVariableAnalysis
+			}
+		}
+		for _, constScope := range splitFileResult.MultiLineConst {
+			for variableName, constVariableAnalysis := range analyzeGoScopeConst(constScope, fileImportAnalysisMap) {
+				goAnalysis.PackageAnalysisMap[packagePath].ConstAnalysisMap[variableName] = constVariableAnalysis
+			}
+		}
+
+		// 4.1.3.1.6.1.10
+		for _, renameMap := range splitFileResult.TypeRename {
+			for rename, renameScope := range renameMap {
+				if typeRenameAnalysis := analyzeGoTypeRename(renameScope, fileImportAnalysisMap); typeRenameAnalysis != nil {
+					goAnalysis.PackageAnalysisMap[packagePath].TypeRename[rename] = typeRenameAnalysis
+				}
+			}
+		}
+	}
+
+	for packagePath, packageAnalysis := range goAnalysis.PackageAnalysisMap {
+		logger.OutputNoteInfo(ui.CommonNote2)
+		logger.OutputNoteInfo("packageName = %v, packagePath = %v", packageAnalysis.PackageName, packagePath)
+
+		logger.OutputNoteInfo(ui.CommonNote2)
+		logger.OutputNoteInfo("Output package import analysis:")
+		for filePath, importAnlysisMap := range goAnalysis.PackageAnalysisMap[packagePath].ImportAnalysis {
+			logger.OutputNoteInfo("import list from file: %v", filePath)
+			for alias, analysis := range importAnlysisMap {
+				logger.OutputNoteInfo("alias = %v, importPath = %v", alias, analysis.Path)
+			}
+		}
+		logger.OutputNoteInfo(ui.CommonNote2)
+
+		logger.OutputNoteInfo(ui.CommonNote2)
+		logger.OutputNoteInfo("Output package variable analysis:")
+		for name, analysis := range goAnalysis.PackageAnalysisMap[packagePath].VariableAnalysisMap {
+			logger.OutputNoteInfo("name = %v, type = %v, type from = |%v %v|", name, analysis.Type.Name, analysis.Type.From, analysis.Type.FromPackagePath)
+		}
+		logger.OutputNoteInfo(ui.CommonNote2)
+
+		logger.OutputNoteInfo(ui.CommonNote2)
+		logger.OutputNoteInfo("Output package interface analysis:")
+		for interfaceName, interfaceAnalysis := range goAnalysis.PackageAnalysisMap[packagePath].InterfaceAnalysis {
+			logger.OutputNoteInfo("interface %v function list: %v", interfaceName, len(interfaceAnalysis.Function))
+			for functionName, functionAnalysis := range interfaceAnalysis.Function {
+				logger.OutputNoteInfo("function: %v", functionName)
+				logger.OutputNoteInfo("- param list:")
+				for paramName, paramAnalysis := range functionAnalysis.ParamsMap {
+					var paramTypeString string
+					if len(paramAnalysis.Type.From) != 0 {
+						paramTypeString = fmt.Sprintf("(%v).%v", paramAnalysis.Type.FromPackagePath, paramAnalysis.Type.Name)
+					} else {
+						paramTypeString = paramAnalysis.Type.Name
+					}
+					logger.OutputNoteInfo("\t- Index: %v, Name: %v, Type: %v", paramAnalysis.Index, paramName, paramTypeString)
+				}
+				logger.OutputNoteInfo("- return list:")
+				for returnIndex, returnAnalysis := range functionAnalysis.ReturnMap {
+					var returnTypeString string
+					if len(returnAnalysis.Type.From) != 0 {
+						returnTypeString = fmt.Sprintf("(%v).%v", returnAnalysis.Type.FromPackagePath, returnAnalysis.Type)
+					} else {
+						returnTypeString = returnAnalysis.Type.Name
+					}
+					logger.OutputNoteInfo("\t- Index: %v, Name: %v, Type: %v", returnIndex, returnAnalysis.Name, returnTypeString)
+				}
+			}
+		}
+		logger.OutputNoteInfo(ui.CommonNote2)
+
+		logger.OutputNoteInfo(ui.CommonNote2)
+		logger.OutputNoteInfo("Output package struct analysis:")
+		for structName, structAnalysis := range goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis {
+			logger.OutputNoteInfo("struct %v base struct list: %v", structName, len(structAnalysis.Base))
+			for baseType, baseVariableAnalysis := range structAnalysis.Base {
+				logger.OutputNoteInfo("- base type: %v, from |%v %v|", baseType, baseVariableAnalysis.Type.From, baseVariableAnalysis.Type.FromPackagePath)
+			}
+			logger.OutputNoteInfo("struct %v variable list: %v", structName, len(structAnalysis.MemberVariable))
+			for variableName, variableAnalysis := range structAnalysis.MemberVariable {
+				logger.OutputNoteInfo("- variable name: %v, type: %v, from: |%v %v|", variableName, variableAnalysis.Type.Name, variableAnalysis.Type.From, variableAnalysis.Type.FromPackagePath)
+			}
+		}
+		logger.OutputNoteInfo(ui.CommonNote2)
+
+		logger.OutputNoteInfo(ui.CommonNote2)
+		logger.OutputNoteInfo("Output package function analysis:")
+		for functionName, functionAnalysis := range goAnalysis.PackageAnalysisMap[packagePath].FunctionAnalysisMap {
+			logger.OutputNoteInfo("function %v", functionName)
+			for paramName, functionVariableAnalysis := range functionAnalysis.ParamsMap {
+				logger.OutputNoteInfo("- param index: %v, name: %v, type: %v, from: |%v %v|", functionVariableAnalysis.Index, paramName, functionVariableAnalysis.Type.Name, functionVariableAnalysis.Type.From, functionVariableAnalysis.Type.FromPackagePath)
+			}
+			for _, functionVariableAnalysis := range functionAnalysis.ReturnMap {
+				logger.OutputNoteInfo("- return index: %v, name: %v, type: %v, from: |%v %v|", functionVariableAnalysis.Index, functionVariableAnalysis.Name, functionVariableAnalysis.Type.Name, functionVariableAnalysis.Type.From, functionVariableAnalysis.Type.FromPackagePath)
+			}
+			for call, callAnalysisList := range functionAnalysis.CallMap {
+				logger.OutputNoteInfo("- call: %v, len = %v", call, len(callAnalysisList))
+				for _, callAnalysis := range callAnalysisList {
+					var paramListString string
+					for _, param := range callAnalysis.ParamList {
+						if len(paramListString) == 0 {
+							paramListString = fmt.Sprintf("%v", param)
+						} else {
+							paramListString = fmt.Sprintf("%v, %v", paramListString, param)
+						}
+					}
+					if len(callAnalysis.From) != 0 {
+						logger.OutputNoteInfo("\t- analysis = |%v.%v(%v)|", callAnalysis.From, callAnalysis.Call, paramListString)
+					} else {
+						logger.OutputNoteInfo("\t- analysis = |%v(%v)|", callAnalysis.Call, paramListString)
+					}
+					logger.OutputNoteInfo("\t- content  = |%v|", callAnalysis.Content)
+				}
+			}
+		}
+		logger.OutputNoteInfo(ui.CommonNote2)
+
+		logger.OutputNoteInfo(ui.CommonNote2)
+		logger.OutputNoteInfo("Output package member function analysis:")
 		for className, functionMap := range goAnalysis.PackageAnalysisMap[packagePath].StructAnalysis {
-			utility2.TestOutput("class %v", className)
+			logger.OutputNoteInfo("class %v", className)
 			for functionName, functionAnalysis := range functionMap.MemberFunction {
-				utility2.TestOutput("\t- function %v", functionName)
+				logger.OutputNoteInfo("\t- function %v", functionName)
 				for paramName, functionVariableAnalysis := range functionAnalysis.ParamsMap {
-					utility2.TestOutput("\t\t- param index: %v, name: %v, type: %v, from: %v", functionVariableAnalysis.Index, paramName, functionVariableAnalysis.Type, functionVariableAnalysis.TypeFrom)
+					logger.OutputNoteInfo("\t\t- param index: %v, name: %v, type: %v, from: |%v %v|", functionVariableAnalysis.Index, paramName, functionVariableAnalysis.Type.Name, functionVariableAnalysis.Type.From, functionVariableAnalysis.Type.FromPackagePath)
 				}
 				for _, functionVariableAnalysis := range functionAnalysis.ReturnMap {
-					utility2.TestOutput("\t\t- return index: %v, name: %v, type: %v, from: %v", functionVariableAnalysis.Index, functionVariableAnalysis.Name, functionVariableAnalysis.Type, functionVariableAnalysis.TypeFrom)
+					logger.OutputNoteInfo("\t\t- return index: %v, name: %v, type: %v, from: |%v %v", functionVariableAnalysis.Index, functionVariableAnalysis.Name, functionVariableAnalysis.Type.Name, functionVariableAnalysis.Type.From, functionVariableAnalysis.Type.FromPackagePath)
 				}
 				for call, callAnalysisList := range functionAnalysis.CallMap {
-					utility2.TestOutput("\t\t- call: %v, len = %v", call, len(callAnalysisList))
+					logger.OutputNoteInfo("\t\t- call: %v, len = %v", call, len(callAnalysisList))
 					for _, callAnalysis := range callAnalysisList {
 						var paramListString string
 						for _, param := range callAnalysis.ParamList {
@@ -700,85 +688,56 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 							}
 						}
 						if len(callAnalysis.From) != 0 {
-							utility2.TestOutput("\t\t\t- analysis = |%v.%v(%v)|", callAnalysis.From, callAnalysis.Call, paramListString)
+							logger.OutputNoteInfo("\t\t\t- analysis = |%v.%v(%v)|", callAnalysis.From, callAnalysis.Call, paramListString)
 						} else {
-							utility2.TestOutput("\t\t\t- analysis = |%v(%v)|", callAnalysis.Call, paramListString)
+							logger.OutputNoteInfo("\t\t\t- analysis = |%v(%v)|", callAnalysis.Call, paramListString)
 						}
-						utility2.TestOutput("\t\t\t- content  = |%v|", callAnalysis.Content)
+						logger.OutputNoteInfo("\t\t\t- content = |%v|", callAnalysis.Content)
 					}
 				}
 			}
 		}
-		utility2.TestOutput(ui.CommonNote2)
+		logger.OutputNoteInfo(ui.CommonNote2)
 
-		// 4.1.3.1.6.1.9
-		for variableName, constScope := range splitFileResult.SingleLineConst {
-			for _, constVariableAnalysis := range analyzeGoScopeConst(constScope) {
-				goAnalysis.PackageAnalysisMap[packagePath].ConstAnalysisMap[variableName] = constVariableAnalysis
-			}
-		}
-		for _, constScope := range splitFileResult.MultiLineConst {
-			for variableName, constVariableAnalysis := range analyzeGoScopeConst(constScope) {
-				goAnalysis.PackageAnalysisMap[packagePath].ConstAnalysisMap[variableName] = constVariableAnalysis
-			}
-		}
-
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("Output package const variable analysis:")
+		logger.OutputNoteInfo(ui.CommonNote2)
+		logger.OutputNoteInfo("Output package const variable analysis:")
 		for variableName, analysis := range goAnalysis.PackageAnalysisMap[packagePath].ConstAnalysisMap {
-			utility2.TestOutput("const variable %v, type %v, type from %v", variableName, analysis.Type, analysis.TypeFrom)
+			logger.OutputNoteInfo("const variable %v, type %v, type from |%v %v|", variableName, analysis.Type.Name, analysis.Type.From, analysis.Type.FromPackagePath)
 		}
-		utility2.TestOutput(ui.CommonNote2)
+		logger.OutputNoteInfo(ui.CommonNote2)
 
-		// 4.1.3.1.6.1.10
-		for _, renameMap := range splitFileResult.TypeRename {
-			for rename, renameScope := range renameMap {
-				utility2.TestOutput("renameScope = |%v|", renameScope.Content)
-				if typeRenameAnalysis := analyzeGoTypeRename(renameScope); typeRenameAnalysis != nil {
-					goAnalysis.PackageAnalysisMap[packagePath].TypeRename[rename] = typeRenameAnalysis
-				}
-			}
-		}
-
-		utility2.TestOutput(ui.CommonNote2)
-		utility2.TestOutput("Output package type rename analysis:")
+		logger.OutputNoteInfo(ui.CommonNote2)
+		logger.OutputNoteInfo("Output package type rename analysis:")
 		for rename, analysis := range goAnalysis.PackageAnalysisMap[packagePath].TypeRename {
-			utility2.TestOutput("type rename %v, type %v, type from %v", rename, analysis.Type, analysis.TypeFrom)
+			logger.OutputNoteInfo("type rename %v, type %v, type from |%v %v|", rename, analysis.Type.Name, analysis.Type.From, analysis.Type.FromPackagePath)
 		}
-		utility2.TestOutput(ui.CommonNote2)
+		logger.OutputNoteInfo(ui.CommonNote2)
 	}
 
-	// 4.1.3.1.6.2
+	// 4.1.3.1.6.2.2
 	for packagePath, packageAnalysis := range goAnalysis.PackageAnalysisMap {
-		utility2.TestOutput("merge function call for package: %v", packagePath)
+		logger.OutputNoteInfo("merge function call for package: %v", packagePath)
 		// non-member function
 		for functionName, functionAnalysis := range packageAnalysis.FunctionAnalysisMap {
-			utility2.TestOutput("deal non-member function %v:", functionName)
+			logger.OutputNoteInfo("deal non-member function %v:", functionName)
 			for callFunctionMame, callFunctionList := range functionAnalysis.CallMap {
 				for index, functionCallAnalysis := range callFunctionList {
-					utility2.TestOutput("- call: %v, index: %v, param: %v, from: %v", index, callFunctionMame, functionCallAnalysis.ParamList, functionCallAnalysis.From)
-					if len(functionCallAnalysis.From) == 0 {
+					logger.OutputNoteInfo("- call: %v, index: %v, param: %v, from: |%v %v|", index, callFunctionMame, functionCallAnalysis.ParamList, functionCallAnalysis.From, functionCallAnalysis.FromPackagePath)
+					if len(functionCallAnalysis.From) == 0 || len(functionCallAnalysis.FromPackagePath) == 0 {
+						utility2.TestOutput("callFunctionMame %v continue 1", callFunctionMame)
 						continue
 					}
-					var callFromPackageImportAnalysis *GoImportAnalysis
-				IMPORT_LOOP:
-					for filePath := range packageAnalysis.ImportAnalysis {
-						for packagePath := range packageAnalysis.ImportAnalysis[filePath] {
-							if packageAnalysis.ImportAnalysis[filePath][packagePath].Alias == functionCallAnalysis.From {
-								callFromPackageImportAnalysis = packageAnalysis.ImportAnalysis[filePath][packagePath]
-								break IMPORT_LOOP
-							}
-						}
-					}
-					if callFromPackageImportAnalysis == nil {
-						continue
-					}
-					callFromPackageAnalysis, hasPackagePath := goAnalysis.PackageAnalysisMap[callFromPackageImportAnalysis.Path]
+					callFromPackageAnalysis, hasPackagePath := goAnalysis.PackageAnalysisMap[functionCallAnalysis.FromPackagePath]
 					if !hasPackagePath {
+						for key := range goAnalysis.PackageAnalysisMap {
+							utility2.TestOutput("key = %v", key)
+						}
+						utility2.TestOutput("callFunctionMame %v continue 2: %v", callFunctionMame, functionCallAnalysis.FromPackagePath)
 						continue
 					}
 					callFunctionAnalysis, hasFunction := callFromPackageAnalysis.FunctionAnalysisMap[callFunctionMame]
 					if !hasFunction {
+						utility2.TestOutput("callFunctionMame %v continue 3", callFunctionMame)
 						continue
 					}
 					if _, hasCallerPackagePath := callFunctionAnalysis.CallerMap[packagePath]; !hasCallerPackagePath {
@@ -787,134 +746,13 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 					if _, hasCallerFunction := callFunctionAnalysis.CallerMap[packagePath]; !hasCallerFunction {
 						callFunctionAnalysis.CallerMap[packagePath][functionName] = make(map[int]*GoFunctionCallAnalysis)
 					}
-					utility2.TestOutput("package: %v, function: %v, No.%v calls package %v function %v with params: %v", packagePath, functionName, index, callFromPackageImportAnalysis.Path, callFunctionMame, functionCallAnalysis.ParamList)
+					logger.OutputNoteInfo("package: %v, function: %v, No.%v calls package %v function %v with params: %v", packagePath, functionName, index, functionCallAnalysis.FromPackagePath, callFunctionMame, functionCallAnalysis.ParamList)
 					callFunctionAnalysis.CallerMap[packagePath][functionName][index] = functionCallAnalysis
 				}
 			}
-			utility2.TestOutput(ui.CommonNote2)
+			logger.OutputNoteInfo(ui.CommonNote2)
 		}
 	}
-
-	// utility2.TestOutput(ui.CommonNote2)
-	// utility2.TestOutput("analyze go function caller")
-	// for packagePath, packageAnalysis := range goAnalysis.PackageAnalysisMap {
-	// 	utility2.TestOutput("packagePath = %v", packagePath)
-	// 	for functionName, functionAnalysis := range packageAnalysis.FunctionAnalysisMap {
-	// 		// Outer Package Call
-	// 		for callFromPackagePath, callFunctionMap := range functionAnalysis.OuterPackageCallMap {
-	// 			callFromPackageAnalysis, hasCallFromPackageAnalysis := goAnalysis.PackageAnalysisMap[callFromPackagePath]
-	// 			if !hasCallFromPackageAnalysis {
-	// 				ui.OutputWarnInfo(ui.CMDAnalyzeGoPackageAnalysisNotExist, callFromPackagePath)
-	// 				continue
-	// 			}
-	// 			for callFunction, functionCallAnalysisMap := range callFunctionMap {
-	// 				callFunctionAnalysis, hasCallFunctionAnalysis := callFromPackageAnalysis.FunctionAnalysisMap[callFunction]
-	// 				if !hasCallFunctionAnalysis {
-	// 					ui.OutputWarnInfo(ui.CMDAnalyzeGoFunctionAnalysisNotExist, callFunction)
-	// 					continue
-	// 				}
-	// 				for callIndex, functionCallAnalysis := range functionCallAnalysisMap {
-	// 					callFunctionAnalysis.CallerMap[packagePath][functionName][callIndex] = functionCallAnalysis
-	// 					utility2.TestOutput("package %v function %v call package %v function %v by params %+v", packagePath, functionName, callFromPackagePath, callFunctionAnalysis.Name, functionCallAnalysis)
-	// 				}
-	// 			}
-	// 		}
-
-	// 		// Member Call
-	// 		for callFromPackagePath, callFunctionMap := range functionAnalysis.MemberCallMap {
-	// 			callFromPackageAnalysis, hasCallFromPackageAnalysis := goAnalysis.PackageAnalysisMap[callFromPackagePath]
-	// 			if !hasCallFromPackageAnalysis {
-	// 				ui.OutputWarnInfo(ui.CMDAnalyzeGoPackageAnalysisNotExist, callFromPackagePath)
-	// 				continue
-	// 			}
-	// 			for callFunction, functionCallAnalysisMap := range callFunctionMap {
-	// 				callFunctionAnalysis, hasCallFunctionAnalysis := callFromPackageAnalysis.FunctionAnalysisMap[callFunction]
-	// 				if !hasCallFunctionAnalysis {
-	// 					ui.OutputWarnInfo(ui.CMDAnalyzeGoFunctionAnalysisNotExist, callFunction)
-	// 					continue
-	// 				}
-	// 				for callIndex, functionCallAnalysis := range functionCallAnalysisMap {
-	// 					callFunctionAnalysis.CallerMap[packagePath][functionName][callIndex] = functionCallAnalysis
-	// 					utility2.TestOutput("package %v function %v call package %v function %v by params %+v", packagePath, functionName, callFromPackagePath, callFunctionAnalysis.Name, functionCallAnalysis)
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
-	// utility2.TestOutput(ui.CommonNote2)
-
-	// if mainPackageAnalysis, hasMainPackage := goAnalysis.PackageNoAnalysisMap[mainPackageNo]; hasMainPackage {
-	// 	goAnalysis.MainPackageAnalysis = mainPackageAnalysis
-	// }
-
-	// for _, packageAnalysis := range packagePathAnalysisMap {
-	// 	for _, fileNo := range packageAnalysis.FileNoList {
-	// 		if fileAnalysis, hasFileAnalysis := goAnalysis.FileNoAnalysisMap[fileNo]; hasFileAnalysis {
-	// 			for _, importPackagePath := range fileAnalysis.ImportAliasMap {
-	// 				if importPackageAnalysis, hasImportPackageAnalysis := packagePathAnalysisMap[importPackagePath]; hasImportPackageAnalysis {
-	// 					found := false
-	// 					for _, importPackageNo := range packageAnalysis.ImportPackageAnalysisNoList {
-	// 						if importPackageNo == importPackageAnalysis.No {
-	// 							found = true
-	// 							break
-	// 						}
-	// 					}
-	// 					if found {
-	// 						continue
-	// 					}
-	// 					packageAnalysis.ImportPackageAnalysisNoList = append(packageAnalysis.ImportPackageAnalysisNoList, importPackageAnalysis.No)
-	// 				} else {
-	// 					ui.OutputWarnInfo(ui.CMDAnalyzeGoPackageAnalysisNotExist, importPackagePath)
-	// 				}
-	// 			}
-	// 		} else {
-	// 			ui.OutputWarnInfo(ui.CMDAnalyzeGoFileAnalysisNotExist, fileNo)
-	// 		}
-	// 	}
-	// }
-
-	// for packagePath, packageAnalysis := range packagePathAnalysisMap {
-	// 	utility2.TestOutput("No: %v, Package Path: %v, Import: %v", packageAnalysis.No, packagePath, packageAnalysis.ImportPackageAnalysisNoList)
-	// 	goAnalysis.PackageNoAnalysisMap[packageAnalysis.No] = packageAnalysis
-	// }
-
-	// nTreeNodeChildrenMap := makeUpNTreeNodeChildrenMapByGoPackage(goAnalysis.PackageNoAnalysisMap)
-	// utility2.TestOutput("nTreeNodeChildrenMap = %+v", nTreeNodeChildrenMap)
-
-	// if len(nTreeNodeChildrenMap) != 0 {
-	// 	mergedNTree := utility.NTreeHierarchicalMergeAlgorithmImproved(nTreeNodeChildrenMap)
-	// 	for level, node := range mergedNTree {
-	// 		utility2.TestOutput("level = %v, node = %v", level, node)
-	// 	}
-
-	// 	// 输出包级有向图
-	// 	abs, getAbsError := filepath.Abs(toAnalyzePath)
-	// 	if getAbsError != nil {
-	// 		return getAbsError
-	// 	}
-	// 	utility2.TestOutput("%v", filepath.Base(abs))
-	// 	var toWriteGoAnalysisFile *os.File
-	// 	toWriteGoAnalysisFilePath := fmt.Sprintf("%v.%v", filepath.Base(abs), global.SyntaxMarkdown)
-	// 	if utility.IsExist(toWriteGoAnalysisFilePath) {
-	// 		var openFileError error
-	// 		toWriteGoAnalysisFile, openFileError = os.OpenFile(toWriteGoAnalysisFilePath, os.O_RDWR|os.O_TRUNC, 0644)
-	// 		if openFileError != nil {
-	// 			return openFileError
-	// 		}
-	// 	} else {
-	// 		var createFileError error
-	// 		toWriteGoAnalysisFile, createFileError = utility.CreateFile(toWriteGoAnalysisFilePath)
-	// 		if createFileError != nil {
-	// 			return createFileError
-	// 		}
-	// 	}
-
-	// 	goPackageLevelDirectedGraph := outputGoPackageLevelDirectedGraph(mergedNTree)
-	// 	_, writeError := toWriteGoAnalysisFile.WriteString(goPackageLevelDirectedGraph)
-	// 	if writeError != nil {
-	// 		return writeError
-	// 	}
-	// }
 
 	return goAnalysis, nil
 }
@@ -991,17 +829,17 @@ func analyzeGoScopeImportContent(content string) *GoImportAnalysis {
 // analyzeGoScopePackageVariable
 // @param content 待分析 variable 域的内容
 // @return
-func analyzeGoScopePackageVariable(content string) *GoVariableAnalysis {
+func analyzeGoScopePackageVariable(content string, importAnalysisMap map[string]*GoImportAnalysis) *GoVariableAnalysis {
 	goPackageVariableAnalysis := &GoVariableAnalysis{}
 	for _, subMatchList := range regexps.GetRegexpByTemplateEnum(global.GoFileAnalyzerScopePackageVariableTemplate).FindAllStringSubmatch(content, -1) {
 		if index, hasIndex := goAnalyzerPackageVariableSubMatchNameIndexMap["NAME"]; hasIndex {
 			goPackageVariableAnalysis.Name = strings.TrimSpace(subMatchList[index])
 		}
 		if index, hasIndex := goAnalyzerPackageVariableSubMatchNameIndexMap["TYPE"]; hasIndex {
-			goPackageVariableAnalysis.Type, goPackageVariableAnalysis.TypeFrom = analyzeGoVariableType(strings.TrimSpace(subMatchList[index]))
+			goPackageVariableAnalysis.Type = analyzeGoVariableType(strings.TrimSpace(subMatchList[index]), importAnalysisMap)
 		}
 	}
-	if len(goPackageVariableAnalysis.Name) == 0 || len(goPackageVariableAnalysis.Type) == 0 {
+	if len(goPackageVariableAnalysis.Name) == 0 || goPackageVariableAnalysis.Type == nil {
 		return nil
 	}
 	return goPackageVariableAnalysis
@@ -1010,33 +848,31 @@ func analyzeGoScopePackageVariable(content string) *GoVariableAnalysis {
 // analyzeGoScopeConst
 // @param constScope 待分析 const 域的内容
 // @return
-func analyzeGoScopeConst(constScope *scope) map[string]*GoVariableAnalysis {
+func analyzeGoScopeConst(constScope *scope, importAnalysisMap map[string]*GoImportAnalysis) map[string]*GoVariableAnalysis {
 	constVariableMap := make(map[string]*GoVariableAnalysis)
 	if constScope.isOneLineScope() {
 		constStringList := strings.Split(constScope.Content, global.GoSplitterStringSpace)
 		constVariableMap[constStringList[1]] = &GoVariableAnalysis{
 			Name: constStringList[1],
 		}
-		constVariableMap[constStringList[1]].Type, constVariableMap[constStringList[1]].TypeFrom = analyzeGoVariableType(constStringList[2])
+		constVariableMap[constStringList[1]].Type = analyzeGoVariableType(constStringList[2], importAnalysisMap)
 	} else {
 		constScopeRootNode := utility3.TraitMultiPunctuationMarksContent(constScope.Content, global.GoAnalyzerScopePunctuationMarkList, 1)
 		if len(constScopeRootNode.SubPunctuationContentList) < 1 {
 			return constVariableMap
 		}
-		var constVariableType string
-		var constVariableTypeFrom string
+		var constVariableType *GoTypeAnalysis
 		for _, constVariableString := range strings.Split(constScopeRootNode.SubPunctuationContentList[0].Content, global.GoSplitterStringEnter) {
 			constVariableStringList := strings.Split(strings.TrimSpace(constVariableString), global.GoSplitterStringSpace)
 			if len(constVariableStringList) == 0 {
 				continue
 			}
 			if len(constVariableStringList) > 1 {
-				constVariableType, constVariableTypeFrom = analyzeGoVariableType(constVariableStringList[1])
+				constVariableType = analyzeGoVariableType(constVariableStringList[1], importAnalysisMap)
 			}
 			constVariableMap[constVariableStringList[0]] = &GoVariableAnalysis{
-				Name:     constVariableStringList[0],
-				Type:     constVariableType,
-				TypeFrom: constVariableTypeFrom,
+				Name: constVariableStringList[0],
+				Type: constVariableType,
 			}
 		}
 	}
@@ -1046,7 +882,7 @@ func analyzeGoScopeConst(constScope *scope) map[string]*GoVariableAnalysis {
 // analyzeGoScopeInterface
 // @param content 待分析 interface 域的内容
 // @return
-func analyzeGoScopeInterface(content string) *GoInterfaceAnalysis {
+func analyzeGoScopeInterface(content string, importAnalysisMap map[string]*GoImportAnalysis) *GoInterfaceAnalysis {
 	goInterfaceAnalysis := &GoInterfaceAnalysis{
 		Function: make(map[string]*GoFunctionAnalysis),
 	}
@@ -1100,7 +936,7 @@ func analyzeGoScopeInterface(content string) *GoInterfaceAnalysis {
 		// utility2.TestOutput("replace %v to %v", global.GoKeywordEmptyInterface, replacedString)
 		// utility2.TestOutput("replaced content = |%v|", replacedContent)
 
-		goFunctionAnalysis := analyzeGoFunctionDefinition(replacedContent, false)
+		goFunctionAnalysis := analyzeGoFunctionDefinition(replacedContent, false, importAnalysisMap)
 		goInterfaceAnalysis.Function[goFunctionAnalysis.Name] = goFunctionAnalysis
 	}
 	// utility2.TestOutput(ui.CommonNote2)
@@ -1111,7 +947,7 @@ func analyzeGoScopeInterface(content string) *GoInterfaceAnalysis {
 // analyzeGoScopeStruct
 // @param structScope 待分析的 struct 域
 // @return
-func analyzeGoScopeStruct(structScope *scope) *GoStructAnalysis {
+func analyzeGoScopeStruct(structScope *scope, importAnalysisMap map[string]*GoImportAnalysis) *GoStructAnalysis {
 	goStructAnalysis := &GoStructAnalysis{
 		Base:           make(map[string]*GoVariableAnalysis),
 		MemberVariable: make(map[string]*GoVariableAnalysis),
@@ -1126,12 +962,12 @@ func analyzeGoScopeStruct(structScope *scope) *GoStructAnalysis {
 		structContent := strings.TrimSpace(rootNode.SubPunctuationContentList[0].Content)
 		goVariableAnalysis := &GoVariableAnalysis{}
 		if spaceIndex := strings.IndexRune(structContent, ' '); spaceIndex == -1 {
-			goVariableAnalysis.Type, goVariableAnalysis.TypeFrom = analyzeGoVariableType(structContent)
-			goVariableAnalysis.Name = goVariableAnalysis.Type
+			goVariableAnalysis.Type = analyzeGoVariableType(structContent, importAnalysisMap)
+			goVariableAnalysis.Name = goVariableAnalysis.Type.Name
 			goStructAnalysis.Base[goVariableAnalysis.Name] = goVariableAnalysis
 		} else {
 			goVariableAnalysis.Name = structContent[0:spaceIndex]
-			goVariableAnalysis.Type, goVariableAnalysis.TypeFrom = analyzeGoVariableType(structContent[spaceIndex+1:])
+			goVariableAnalysis.Type = analyzeGoVariableType(structContent[spaceIndex+1:], importAnalysisMap)
 			goStructAnalysis.MemberVariable[goVariableAnalysis.Name] = goVariableAnalysis
 		}
 	} else {
@@ -1147,15 +983,15 @@ func analyzeGoScopeStruct(structScope *scope) *GoStructAnalysis {
 					goVariableAnalysis.Name = strings.TrimSpace(subMatchList[index])
 				}
 				if index, hasIndex := goAnalyzerStructVariableSubMatchNameIndexMap["TYPE"]; hasIndex {
-					goVariableAnalysis.Type, goVariableAnalysis.TypeFrom = analyzeGoVariableType(strings.TrimSpace(subMatchList[index]))
+					goVariableAnalysis.Type = analyzeGoVariableType(strings.TrimSpace(subMatchList[index]), importAnalysisMap)
 				}
 			}
 			if len(goVariableAnalysis.Name) == 0 {
 				continue
 			}
-			if len(goVariableAnalysis.Type) == 0 && len(goVariableAnalysis.TypeFrom) == 0 {
-				goVariableAnalysis.Type, goVariableAnalysis.TypeFrom = analyzeGoVariableType(strings.TrimSpace(goVariableAnalysis.Name))
-				goVariableAnalysis.Name = goVariableAnalysis.Type
+			if goVariableAnalysis.Type == nil {
+				goVariableAnalysis.Type = analyzeGoVariableType(strings.TrimSpace(goVariableAnalysis.Name), importAnalysisMap)
+				goVariableAnalysis.Name = goVariableAnalysis.Type.Name
 				goStructAnalysis.Base[goVariableAnalysis.Name] = goVariableAnalysis
 			} else {
 				goStructAnalysis.MemberVariable[goVariableAnalysis.Name] = goVariableAnalysis
@@ -1169,7 +1005,7 @@ func analyzeGoScopeStruct(structScope *scope) *GoStructAnalysis {
 // analyzeGoScopeFunction
 // @param functionScope 待分析的 function 域
 // @return
-func analyzeGoScopeFunction(functionScope *scope, isMemberFunction bool) *GoFunctionAnalysis {
+func analyzeGoScopeFunction(functionScope *scope, isMemberFunction bool, importAnalysisMap map[string]*GoImportAnalysis) *GoFunctionAnalysis {
 	// goFunctionAnalysis := &GoFunctionAnalysis{}
 
 	// rootNode := utility3.TraitPunctuationMarksContent(functionScope.Content,  global.PunctuationMarkBracket)
@@ -1217,8 +1053,8 @@ func analyzeGoScopeFunction(functionScope *scope, isMemberFunction bool) *GoFunc
 	// utility2.TestOutput("contentRootNode.SubPunctuationContentList[subNodeCount-1] = %+v", contentRootNode.SubPunctuationContentList[subNodeCount-1])
 	// utility2.TestOutput("function definition string = |%v|", replacedContent[:contentRootNode.SubPunctuationContentList[subNodeCount-1].LeftPunctuationMark.Index])
 	// goFunctionAnalysis := analyzeGoFunctionDefinition(replacedContent[:contentRootNode.SubPunctuationIndexMap[subNodeCount-1].Left])
-	goFunctionAnalysis := analyzeGoFunctionDefinition(replacedContent[:contentRootNode.SubPunctuationContentList[subNodeCount-1].LeftPunctuationMark.Index], isMemberFunction)
-	goFunctionAnalysis.CallMap = analyzeGoFunctionBody(contentRootNode.SubPunctuationContentList[subNodeCount-1].Content)
+	goFunctionAnalysis := analyzeGoFunctionDefinition(replacedContent[:contentRootNode.SubPunctuationContentList[subNodeCount-1].LeftPunctuationMark.Index], isMemberFunction, importAnalysisMap)
+	goFunctionAnalysis.CallMap = analyzeGoFunctionBody(contentRootNode.SubPunctuationContentList[subNodeCount-1].Content, importAnalysisMap)
 
 	// utility2.TestOutput(ui.CommonNote2)
 
@@ -1228,7 +1064,7 @@ func analyzeGoScopeFunction(functionScope *scope, isMemberFunction bool) *GoFunc
 // analyzeGoFunctionDefinition
 // @param functionDefinitionContent 待分析的函数定义的内容
 // @return
-func analyzeGoFunctionDefinition(functionDefinitionContent string, isMemberFunction bool) *GoFunctionAnalysis {
+func analyzeGoFunctionDefinition(functionDefinitionContent string, isMemberFunction bool, importAnalysisMap map[string]*GoImportAnalysis) *GoFunctionAnalysis {
 	functionDefinitionContentRootNode := utility3.TraitMultiPunctuationMarksContent(functionDefinitionContent, global.GoAnalyzerScopePunctuationMarkList, 1)
 	subNodeCount := len(functionDefinitionContentRootNode.SubPunctuationContentList)
 
@@ -1252,7 +1088,7 @@ func analyzeGoFunctionDefinition(functionDefinitionContent string, isMemberFunct
 			return nil
 		}
 		variableThisString := functionDefinitionContentRootNode.SubPunctuationContentList[0].Content
-		functionClass, variableThis = analyzeGoMemberFunctionVariableThis(variableThisString)
+		functionClass, variableThis = analyzeGoMemberFunctionVariableThis(variableThisString, importAnalysisMap)
 		if len(functionClass) == 0 || variableThis == nil {
 			return nil
 		}
@@ -1265,7 +1101,7 @@ func analyzeGoFunctionDefinition(functionDefinitionContent string, isMemberFunct
 	// for index, param := range paramListNode.ContentList {
 	// 	utility2.TestOutput("index %v param = |%v|", index, param)
 	// }
-	paramMap := analyzeGoFunctionDefinitionParamList(paramListNode.ContentList)
+	paramMap := analyzeGoFunctionDefinitionParamList(paramListNode.ContentList, importAnalysisMap)
 	// for paramName, analysis := range paramMap {
 	// 	utility2.TestOutput("paramName = %v, index = %v, type = |%v|, type from = %v", paramName, analysis.Index, analysis.Type, analysis.TypeFrom)
 	// }
@@ -1281,7 +1117,7 @@ func analyzeGoFunctionDefinition(functionDefinitionContent string, isMemberFunct
 	// for index, returnType := range returnListNode.ContentList {
 	// 	utility2.TestOutput("index %v return = |%v|", index, returnType)
 	// }
-	returnMap := analyzeGoFunctionDefinitionReturnList(returnListNode.ContentList)
+	returnMap := analyzeGoFunctionDefinitionReturnList(returnListNode.ContentList, importAnalysisMap)
 	// for returnName, analysis := range returnMap {
 	// 	utility2.TestOutput("returnName = %v, index = %v, type = |%v|, type from = %v", returnName, analysis.Index, analysis.Type, analysis.TypeFrom)
 	// }
@@ -1298,7 +1134,7 @@ func analyzeGoFunctionDefinition(functionDefinitionContent string, isMemberFunct
 // analyzeGoMemberFunctionVariableThis
 // @param variableThisString
 // @return
-func analyzeGoMemberFunctionVariableThis(variableThisString string) (string, *GoVariableAnalysis) {
+func analyzeGoMemberFunctionVariableThis(variableThisString string, importAnalysisMap map[string]*GoImportAnalysis) (string, *GoVariableAnalysis) {
 	variableThisStringList := strings.Split(strings.TrimSpace(variableThisString), " ")
 	if len(variableThisStringList) < 2 {
 		return "", nil
@@ -1307,14 +1143,14 @@ func analyzeGoMemberFunctionVariableThis(variableThisString string) (string, *Go
 	variableThisAnalysis := &GoVariableAnalysis{
 		Name: variableThisStringList[0],
 	}
-	variableThisAnalysis.Type, variableThisAnalysis.TypeFrom = analyzeGoVariableType(variableThisStringList[1])
+	variableThisAnalysis.Type = analyzeGoVariableType(variableThisStringList[1], importAnalysisMap)
 	return functionClass, variableThisAnalysis
 }
 
 // analyzeGoFunctionDefinitionParamList
 // @param paramListString 待分析的函数参数表
 // @return
-func analyzeGoFunctionDefinitionParamList(paramStringList []string) map[string]*GoFunctionVariable {
+func analyzeGoFunctionDefinitionParamList(paramStringList []string, importAnalysisMap map[string]*GoImportAnalysis) map[string]*GoFunctionVariable {
 	paramMap := make(map[string]*GoFunctionVariable)
 	unknownTypeParamList := make([]*GoFunctionVariable, 0)
 	for index, paramString := range paramStringList {
@@ -1331,19 +1167,17 @@ func analyzeGoFunctionDefinitionParamList(paramStringList []string) map[string]*
 				Index: index,
 			})
 		} else {
-			paramType, paramTypeFrom := analyzeGoVariableType(paramStringTimSpace[splitterIndex+1:])
+			paramType := analyzeGoVariableType(paramStringTimSpace[splitterIndex+1:], importAnalysisMap)
 			paramMap[paramStringTimSpace[:splitterIndex]] = &GoFunctionVariable{
 				GoVariableAnalysis: GoVariableAnalysis{
-					Name:     paramStringTimSpace[:splitterIndex],
-					Type:     paramType,
-					TypeFrom: paramTypeFrom,
+					Name: paramStringTimSpace[:splitterIndex],
+					Type: paramType,
 				},
 				Index: index,
 			}
 			if len(unknownTypeParamList) != 0 {
 				for _, unknownTypeParam := range unknownTypeParamList {
 					unknownTypeParam.GoVariableAnalysis.Type = paramType
-					unknownTypeParam.GoVariableAnalysis.TypeFrom = paramTypeFrom
 					paramMap[unknownTypeParam.Name] = unknownTypeParam
 				}
 				unknownTypeParamList = make([]*GoFunctionVariable, 0)
@@ -1356,7 +1190,7 @@ func analyzeGoFunctionDefinitionParamList(paramStringList []string) map[string]*
 // analyzeGoFunctionDefinitionReturnList
 // @param returnListString 待分析的返回值列表
 // @return
-func analyzeGoFunctionDefinitionReturnList(returnStringList []string) map[string]*GoFunctionVariable {
+func analyzeGoFunctionDefinitionReturnList(returnStringList []string, importAnalysisMap map[string]*GoImportAnalysis) map[string]*GoFunctionVariable {
 	returnMap := make(map[string]*GoFunctionVariable)
 
 	for index, returnString := range returnStringList {
@@ -1366,11 +1200,10 @@ func analyzeGoFunctionDefinitionReturnList(returnStringList []string) map[string
 		}
 		splitterIndex := strings.Index(returnStringTimSpace, global.GoSplitterStringSpace)
 		if splitterIndex == -1 {
-			returnType, returnTypeFrom := analyzeGoVariableType(returnStringTimSpace)
+			returnType := analyzeGoVariableType(returnStringTimSpace, importAnalysisMap)
 			returnMap[fmt.Sprintf("%v", len(returnMap))] = &GoFunctionVariable{
 				GoVariableAnalysis: GoVariableAnalysis{
-					Type:     returnType,
-					TypeFrom: returnTypeFrom,
+					Type: returnType,
 				},
 				Index: index,
 			}
@@ -1392,26 +1225,24 @@ func analyzeGoFunctionDefinitionReturnList(returnStringList []string) map[string
 			}
 			var returnMapKey string
 			var returnName string
-			var returnType string
-			var returnTypeFrom string
+			var returnType *GoTypeAnalysis
 			if keywordIndex != -1 {
 				returnName := strings.TrimSpace(returnStringTimSpace[:keywordIndex])
-				returnType, returnTypeFrom = analyzeGoVariableType(returnStringTimSpace[keywordIndex:])
+				returnType = analyzeGoVariableType(returnStringTimSpace[keywordIndex:], importAnalysisMap)
 				if len(returnName) == 0 {
 					returnMapKey = fmt.Sprintf("%v", len(returnMap))
 				} else {
 					returnMapKey = returnName
 				}
 			} else {
-				returnType, returnTypeFrom = analyzeGoVariableType(returnStringTimSpace)
+				returnType = analyzeGoVariableType(returnStringTimSpace, importAnalysisMap)
 				returnMapKey = fmt.Sprintf("%v", len(returnMap))
 			}
 
 			returnMap[returnMapKey] = &GoFunctionVariable{
 				GoVariableAnalysis: GoVariableAnalysis{
-					Name:     returnName,
-					Type:     returnType,
-					TypeFrom: returnTypeFrom,
+					Name: returnName,
+					Type: returnType,
 				},
 				Index: index,
 			}
@@ -1423,7 +1254,7 @@ func analyzeGoFunctionDefinitionReturnList(returnStringList []string) map[string
 // analyzeGoFunctionBody
 // @functionBodyContent 待分析的函数体的内容
 // @return
-func analyzeGoFunctionBody(functionBodyContent string) map[string][]*GoFunctionCallAnalysis {
+func analyzeGoFunctionBody(functionBodyContent string, importAnalysisMap map[string]*GoImportAnalysis) map[string][]*GoFunctionCallAnalysis {
 	callMap := make(map[string][]*GoFunctionCallAnalysis)
 	bodyContentRootNode := utility3.TraitMultiPunctuationMarksContent(functionBodyContent, global.GoAnalyzerScopePunctuationMarkList, -1)
 	toSearchNodeList := []*utility.NewPunctuationContent{bodyContentRootNode}
@@ -1492,11 +1323,19 @@ func analyzeGoFunctionBody(functionBodyContent string) map[string][]*GoFunctionC
 			}
 
 			callIdentifier := callIdentifierStringList[len(callIdentifierStringList)-1]
+			if callIdentifier == global.GoKeywordFunc {
+				continue
+			}
 			// utility2.TestOutput("call |%v|", callIdentifier)
 
 			var callIdentifierFrom string
+			var callIdentifierFromPackagePath string
 			if len(callIdentifierStringList) > 1 {
 				callIdentifierFrom = strings.Join(callIdentifierStringList[:len(callIdentifierStringList)-1], global.GoSplitterStringPoint)
+				if _, hasAlias := importAnalysisMap[callIdentifierFrom]; hasAlias {
+					callIdentifierFromPackagePath = importAnalysisMap[callIdentifierFrom].Path
+				}
+				// for
 				// utility2.TestOutput("From |%v|", callIdentifierFrom)
 			}
 
@@ -1510,10 +1349,11 @@ func analyzeGoFunctionBody(functionBodyContent string) map[string][]*GoFunctionC
 			}
 
 			callAnalysis := &GoFunctionCallAnalysis{
-				Content:   fmt.Sprintf("%v(%v)", identifierString, bracketScopeNode.Content),
-				From:      callIdentifierFrom,
-				Call:      callIdentifier,
-				ParamList: paramList,
+				Content:         fmt.Sprintf("%v(%v)", identifierString, bracketScopeNode.Content),
+				From:            callIdentifierFrom,
+				FromPackagePath: callIdentifierFromPackagePath,
+				Call:            callIdentifier,
+				ParamList:       paramList,
 			}
 			callAnalysis.PreviousCall = lastCall
 			if lastCall != nil {
@@ -1607,9 +1447,10 @@ func isIdentifierScopeEndRune(r rune) bool {
 // analyzeGoVariableType
 // @param variableTypeString 待分析变量的类型字符串
 // @return
-func analyzeGoVariableType(variableTypeString string) (string, string) {
+func analyzeGoVariableType(variableTypeString string, importAnalysisMap map[string]*GoImportAnalysis) *GoTypeAnalysis {
 	var typeName string
 	var typeFrom string
+	var typeFromPackagePath string
 	keywordIndex := strings.Index(variableTypeString, global.GoKeywordFunc)
 	if keywordIndex == -1 {
 		keywordIndex = strings.Index(variableTypeString, global.GoKeywordStruct)
@@ -1625,12 +1466,27 @@ func analyzeGoVariableType(variableTypeString string) (string, string) {
 	} else {
 		typeName = variableTypeString
 	}
-	return typeName, typeFrom
+
+	if len(typeName) == 0 {
+		return nil
+	}
+
+	if len(typeFrom) != 0 {
+		if _, hasAlias := importAnalysisMap[typeFrom]; hasAlias {
+			typeFromPackagePath = importAnalysisMap[typeFrom].Path
+		}
+	}
+
+	return &GoTypeAnalysis{
+		Name:            typeName,
+		From:            typeFrom,
+		FromPackagePath: typeFromPackagePath,
+	}
 }
 
 // analyzeGoTypeRename
 // @param 待分析的
-func analyzeGoTypeRename(renameScope *scope) *GoTypeRenameAnalysis {
+func analyzeGoTypeRename(renameScope *scope, importAnalysisMap map[string]*GoImportAnalysis) *GoTypeRenameAnalysis {
 	renameScopeRootNode := utility3.RecursiveSplitUnderSameDeepPunctuationMarksContent(renameScope.Content, global.GoAnalyzerScopePunctuationMarkList, global.GoSplitterStringSpace)
 	if renameScopeRootNode == nil || len(renameScopeRootNode.ContentList) < 3 {
 		return nil
@@ -1638,7 +1494,7 @@ func analyzeGoTypeRename(renameScope *scope) *GoTypeRenameAnalysis {
 	typeRenameAnalysis := &GoTypeRenameAnalysis{
 		Name: renameScopeRootNode.ContentList[1],
 	}
-	typeRenameAnalysis.Type, typeRenameAnalysis.TypeFrom = analyzeGoVariableType(strings.Join(renameScopeRootNode.ContentList[2:], global.GoSplitterStringSpace))
+	typeRenameAnalysis.Type = analyzeGoVariableType(strings.Join(renameScopeRootNode.ContentList[2:], global.GoSplitterStringSpace), importAnalysisMap)
 	return typeRenameAnalysis
 }
 

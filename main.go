@@ -44,7 +44,7 @@ func main() {
 			if commandExecuteError != nil {
 				ui.OutputErrorInfo("%v", commandExecuteError)
 			}
-			logger.OutputNoteInfo(ui.CommonNote2)
+			logger.OutputEmptyLine()
 
 			// 状态机结果
 			if global.FsmState == fsm.Exiting {
