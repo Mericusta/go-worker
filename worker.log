@@ -1757,3 +1757,2580 @@
 
 [Note] Execute command: exit
 
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] analyze go root path = C:\Users\joy403\go\src\github.com\go-worker/resources/template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example/nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker/resources/template_example/nontemplatefolder/examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example/templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker/resources/template_example/templatecaller.go
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker/resources/template_example/templatefolder/tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker/resources/template_example/templatefolder/tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - variable name: iV, type: int, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateOperatorPlus
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example/nontemplatefolder
+[Note] merge function call for package: github.com\go-worker\resources\template_example/templateexample
+[Note] deal non-member function templateCaller:
+[Note] - call: 0, index: float32, param: [2.0], from: | |
+[Note] - call: 1, index: float32, param: [1], from: | |
+[Note] - call: 0, index: v8.Result, param: [], from: |v8 |
+[Note] - call: 0, index: templatefolder.TemplateOperatorPlus, param: [float32(1) float32(2.0)], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 1, index: templatefolder.TemplateOperatorPlus, param: [1+2i 1.1+2.2i], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 2, index: templatefolder.TemplateOperatorPlus, param: [1 2], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 3, index: templatefolder.TemplateOperatorPlus, param: [[]int{1} []int{2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 4, index: templatefolder.TemplateOperatorPlus, param: [&nontemplatefolder.ExampleStruct{v: 1} &nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 5, index: templatefolder.TemplateOperatorPlus, param: [1 2.0], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 6, index: templatefolder.TemplateOperatorPlus, param: [nontemplatefolder.ExampleStruct{v: 1} nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example/templatefolder
+[Note] deal non-member function TemplateSelfIncrease:
+[Note] ----------------------------------------------------------------
+[Note] deal non-member function TemplateOperatorPlus:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] goAnalysis = &{RootPath:C:\Users\joy403\go\src\github.com\go-worker/resources/template_example PackageAnalysisMap:map[github.com\go-worker\resources\template_example/nontemplatefolder:0xc000178600 github.com\go-worker\resources\template_example/templateexample:0xc000178b40 github.com\go-worker\resources\template_example/templatefolder:0xc000242180]}
+[Note] search all template function
+[Note] execute custom command 6 done, using: 17568000 ns
+
+[Note] Execute command: exit
+
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] analyze go root path = C:/Users/joy403/go/src/github.com/go-worker/resources/template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example/nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:/Users/joy403/go/src/github.com/go-worker/resources/template_example/nontemplatefolder/examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example/templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:/Users/joy403/go/src/github.com/go-worker/resources/template_example/templatecaller.go
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:/Users/joy403/go/src/github.com/go-worker/resources/template_example/templatefolder/tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:/Users/joy403/go/src/github.com/go-worker/resources/template_example/templatefolder/tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - variable name: iV, type: int, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateOperatorPlus
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example/nontemplatefolder
+[Note] merge function call for package: github.com\go-worker\resources\template_example/templateexample
+[Note] deal non-member function templateCaller:
+[Note] - call: 0, index: templatefolder.TemplateOperatorPlus, param: [float32(1) float32(2.0)], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 1, index: templatefolder.TemplateOperatorPlus, param: [1 2.0], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 2, index: templatefolder.TemplateOperatorPlus, param: [&nontemplatefolder.ExampleStruct{v: 1} &nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 3, index: templatefolder.TemplateOperatorPlus, param: [1+2i 1.1+2.2i], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 4, index: templatefolder.TemplateOperatorPlus, param: [1 2], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 5, index: templatefolder.TemplateOperatorPlus, param: [nontemplatefolder.ExampleStruct{v: 1} nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 6, index: templatefolder.TemplateOperatorPlus, param: [[]int{1} []int{2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 0, index: v8.Result, param: [], from: |v8 |
+[Note] - call: 0, index: float32, param: [1], from: | |
+[Note] - call: 1, index: float32, param: [2.0], from: | |
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example/templatefolder
+[Note] deal non-member function TemplateOperatorPlus:
+[Note] ----------------------------------------------------------------
+[Note] deal non-member function TemplateSelfIncrease:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] goAnalysis = &{RootPath:C:/Users/joy403/go/src/github.com/go-worker/resources/template_example PackageAnalysisMap:map[github.com\go-worker\resources\template_example/nontemplatefolder:0xc00017a600 github.com\go-worker\resources\template_example/templateexample:0xc00017ab40 github.com\go-worker\resources\template_example/templatefolder:0xc000244180]}
+[Note] search all template function
+[Note] execute custom command 6 done, using: 46847000 ns
+
+[Note] Execute command: exit
+
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] analyze go root path = C:/Users/joy403/go/src/github.com/go-worker/resources/template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example/nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:/Users/joy403/go/src/github.com/go-worker/resources/template_example/nontemplatefolder/examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example/templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:/Users/joy403/go/src/github.com/go-worker/resources/template_example/templatecaller.go
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:/Users/joy403/go/src/github.com/go-worker/resources/template_example/templatefolder/tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:/Users/joy403/go/src/github.com/go-worker/resources/template_example/templatefolder/tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - variable name: iV, type: int, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateOperatorPlus
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example/nontemplatefolder
+[Note] merge function call for package: github.com\go-worker\resources\template_example/templateexample
+[Note] deal non-member function templateCaller:
+[Note] - call: 0, index: v8.Result, param: [], from: |v8 |
+[Note] - call: 0, index: templatefolder.TemplateOperatorPlus, param: [float32(1) float32(2.0)], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 1, index: templatefolder.TemplateOperatorPlus, param: [1+2i 1.1+2.2i], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 2, index: templatefolder.TemplateOperatorPlus, param: [1 2], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 3, index: templatefolder.TemplateOperatorPlus, param: [&nontemplatefolder.ExampleStruct{v: 1} &nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 4, index: templatefolder.TemplateOperatorPlus, param: [1 2.0], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 5, index: templatefolder.TemplateOperatorPlus, param: [[]int{1} []int{2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 6, index: templatefolder.TemplateOperatorPlus, param: [nontemplatefolder.ExampleStruct{v: 1} nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 0, index: float32, param: [1], from: | |
+[Note] - call: 1, index: float32, param: [2.0], from: | |
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example/templatefolder
+[Note] deal non-member function TemplateOperatorPlus:
+[Note] ----------------------------------------------------------------
+[Note] deal non-member function TemplateSelfIncrease:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] goAnalysis = &{RootPath:C:/Users/joy403/go/src/github.com/go-worker/resources/template_example PackageAnalysisMap:map[github.com\go-worker\resources\template_example/nontemplatefolder:0xc00015e660 github.com\go-worker\resources\template_example/templateexample:0xc00015eba0 github.com\go-worker\resources\template_example/templatefolder:0xc0002261e0]}
+[Note] search all template function
+[Note] execute custom command 6 done, using: 19520300 ns
+
+[Note] Execute command: exit
+
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] analyze go root path = C:/Users/joy403/go/src/github.com/go-worker/resources/template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example/templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:/Users/joy403/go/src/github.com/go-worker/resources/template_example/templatecaller.go
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:/Users/joy403/go/src/github.com/go-worker/resources/template_example/templatefolder/tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:/Users/joy403/go/src/github.com/go-worker/resources/template_example/templatefolder/tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - variable name: iV, type: int, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateOperatorPlus
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example/nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:/Users/joy403/go/src/github.com/go-worker/resources/template_example/nontemplatefolder/examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example/nontemplatefolder
+[Note] merge function call for package: github.com\go-worker\resources\template_example/templateexample
+[Note] deal non-member function templateCaller:
+[Note] - call: 0, index: templatefolder.TemplateOperatorPlus, param: [nontemplatefolder.ExampleStruct{v: 1} nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 1, index: templatefolder.TemplateOperatorPlus, param: [&nontemplatefolder.ExampleStruct{v: 1} &nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 2, index: templatefolder.TemplateOperatorPlus, param: [float32(1) float32(2.0)], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 3, index: templatefolder.TemplateOperatorPlus, param: [1 2], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 4, index: templatefolder.TemplateOperatorPlus, param: [[]int{1} []int{2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 5, index: templatefolder.TemplateOperatorPlus, param: [1 2.0], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 6, index: templatefolder.TemplateOperatorPlus, param: [1+2i 1.1+2.2i], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 0, index: v8.Result, param: [], from: |v8 |
+[Note] - call: 0, index: float32, param: [1], from: | |
+[Note] - call: 1, index: float32, param: [2.0], from: | |
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example/templatefolder
+[Note] deal non-member function TemplateSelfIncrease:
+[Note] ----------------------------------------------------------------
+[Note] deal non-member function TemplateOperatorPlus:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] goAnalysis = &{RootPath:C:/Users/joy403/go/src/github.com/go-worker/resources/template_example PackageAnalysisMap:map[github.com\go-worker\resources\template_example/nontemplatefolder:0xc000178600 github.com\go-worker\resources\template_example/templateexample:0xc000178b40 github.com\go-worker\resources\template_example/templatefolder:0xc000242180]}
+[Note] search all template function
+[Note] execute custom command 6 done, using: 41966800 ns
+
+[Note] Execute command: exit
+
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] analyze go root path = C:/Users/joy403/go/src/github.com/go-worker/resources/template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example/nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:/Users/joy403/go/src/github.com/go-worker/resources/template_example/nontemplatefolder/examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example/templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:/Users/joy403/go/src/github.com/go-worker/resources/template_example/templatecaller.go
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:/Users/joy403/go/src/github.com/go-worker/resources/template_example/templatefolder/tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:/Users/joy403/go/src/github.com/go-worker/resources/template_example/templatefolder/tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - variable name: iV, type: int, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateOperatorPlus
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example/templatefolder
+[Note] deal non-member function TemplateOperatorPlus:
+[Note] ----------------------------------------------------------------
+[Note] deal non-member function TemplateSelfIncrease:
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example/nontemplatefolder
+[Note] merge function call for package: github.com\go-worker\resources\template_example/templateexample
+[Note] deal non-member function templateCaller:
+[Note] - call: 0, index: float32, param: [2.0], from: | |
+[Note] - call: 1, index: float32, param: [1], from: | |
+[Note] - call: 0, index: templatefolder.TemplateOperatorPlus, param: [[]int{1} []int{2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 1, index: templatefolder.TemplateOperatorPlus, param: [nontemplatefolder.ExampleStruct{v: 1} nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 2, index: templatefolder.TemplateOperatorPlus, param: [&nontemplatefolder.ExampleStruct{v: 1} &nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 3, index: templatefolder.TemplateOperatorPlus, param: [1+2i 1.1+2.2i], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 4, index: templatefolder.TemplateOperatorPlus, param: [1 2], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 5, index: templatefolder.TemplateOperatorPlus, param: [1 2.0], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 6, index: templatefolder.TemplateOperatorPlus, param: [float32(1) float32(2.0)], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 0, index: v8.Result, param: [], from: |v8 |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] goAnalysis = &{RootPath:C:/Users/joy403/go/src/github.com/go-worker/resources/template_example PackageAnalysisMap:map[github.com\go-worker\resources\template_example/nontemplatefolder:0xc00015e660 github.com\go-worker\resources\template_example/templateexample:0xc00015eba0 github.com\go-worker\resources\template_example/templatefolder:0xc0002261e0]}
+[Note] search all template function
+[Note] execute custom command 6 done, using: 98111100 ns
+
+[Note] Execute command: exit
+
+[Note] Execute command: exit
+
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] analyze go root path = C:\Users\joy403\go\src\github.com\go-worker\resources\template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example/nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\nontemplatefolder\examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example/templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatecaller.go
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - variable name: iV, type: int, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateOperatorPlus
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example/templateexample
+[Note] deal non-member function templateCaller:
+[Note] - call: 0, index: v8.Result, param: [], from: |v8 |
+[Note] - call: 0, index: templatefolder.TemplateOperatorPlus, param: [float32(1) float32(2.0)], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 1, index: templatefolder.TemplateOperatorPlus, param: [1 2.0], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 2, index: templatefolder.TemplateOperatorPlus, param: [[]int{1} []int{2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 3, index: templatefolder.TemplateOperatorPlus, param: [1+2i 1.1+2.2i], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 4, index: templatefolder.TemplateOperatorPlus, param: [&nontemplatefolder.ExampleStruct{v: 1} &nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 5, index: templatefolder.TemplateOperatorPlus, param: [1 2], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 6, index: templatefolder.TemplateOperatorPlus, param: [nontemplatefolder.ExampleStruct{v: 1} nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 0, index: float32, param: [2.0], from: | |
+[Note] - call: 1, index: float32, param: [1], from: | |
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example/templatefolder
+[Note] deal non-member function TemplateSelfIncrease:
+[Note] ----------------------------------------------------------------
+[Note] deal non-member function TemplateOperatorPlus:
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example/nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] goAnalysis = &{RootPath:C:\Users\joy403\go\src\github.com\go-worker\resources\template_example PackageAnalysisMap:map[github.com\go-worker\resources\template_example/nontemplatefolder:0xc000174600 github.com\go-worker\resources\template_example/templateexample:0xc000174b40 github.com\go-worker\resources\template_example/templatefolder:0xc000242180]}
+[Note] search all template function
+[Note] execute custom command 6 done, using: 128364800 ns
+
+[Note] Execute command: exit
+
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] analyze go root path = C:\Users\joy403\go\src\github.com\go-worker\resources\template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example/templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatecaller.go
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - variable name: iV, type: int, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateOperatorPlus
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example/nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\nontemplatefolder\examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example/nontemplatefolder
+[Note] merge function call for package: github.com\go-worker\resources\template_example/templateexample
+[Note] deal non-member function templateCaller:
+[Note] - call: 0, index: templatefolder.TemplateOperatorPlus, param: [1+2i 1.1+2.2i], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 1, index: templatefolder.TemplateOperatorPlus, param: [float32(1) float32(2.0)], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 2, index: templatefolder.TemplateOperatorPlus, param: [nontemplatefolder.ExampleStruct{v: 1} nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 3, index: templatefolder.TemplateOperatorPlus, param: [1 2], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 4, index: templatefolder.TemplateOperatorPlus, param: [&nontemplatefolder.ExampleStruct{v: 1} &nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 5, index: templatefolder.TemplateOperatorPlus, param: [1 2.0], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 6, index: templatefolder.TemplateOperatorPlus, param: [[]int{1} []int{2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 0, index: float32, param: [1], from: | |
+[Note] - call: 1, index: float32, param: [2.0], from: | |
+[Note] - call: 0, index: v8.Result, param: [], from: |v8 |
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example/templatefolder
+[Note] deal non-member function TemplateOperatorPlus:
+[Note] ----------------------------------------------------------------
+[Note] deal non-member function TemplateSelfIncrease:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] goAnalysis = &{RootPath:C:\Users\joy403\go\src\github.com\go-worker\resources\template_example PackageAnalysisMap:map[github.com\go-worker\resources\template_example/nontemplatefolder:0xc00003d620 github.com\go-worker\resources\template_example/templateexample:0xc00003db60 github.com\go-worker\resources\template_example/templatefolder:0xc0002051a0]}
+[Note] search all template function
+[Note] execute custom command 6 done, using: 76126800 ns
+
+[Note] Execute command: exit
+
+[Note] Execute command: exit
+
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] analyze go root path = C:\Users\joy403\go\src\github.com\go-worker\resources\template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example\templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatecaller.go
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example\templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - variable name: iV, type: int, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateOperatorPlus
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example\nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\nontemplatefolder\examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example\templateexample
+[Note] deal non-member function templateCaller:
+[Note] - call: 0, index: templatefolder.TemplateOperatorPlus, param: [&nontemplatefolder.ExampleStruct{v: 1} &nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 1, index: templatefolder.TemplateOperatorPlus, param: [nontemplatefolder.ExampleStruct{v: 1} nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 2, index: templatefolder.TemplateOperatorPlus, param: [[]int{1} []int{2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 3, index: templatefolder.TemplateOperatorPlus, param: [1 2.0], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 4, index: templatefolder.TemplateOperatorPlus, param: [float32(1) float32(2.0)], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 5, index: templatefolder.TemplateOperatorPlus, param: [1+2i 1.1+2.2i], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 6, index: templatefolder.TemplateOperatorPlus, param: [1 2], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 0, index: v8.Result, param: [], from: |v8 |
+[Note] - call: 0, index: float32, param: [1], from: | |
+[Note] - call: 1, index: float32, param: [2.0], from: | |
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example\templatefolder
+[Note] deal non-member function TemplateOperatorPlus:
+[Note] ----------------------------------------------------------------
+[Note] deal non-member function TemplateSelfIncrease:
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example\nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] goAnalysis = &{RootPath:C:\Users\joy403\go\src\github.com\go-worker\resources\template_example PackageAnalysisMap:map[github.com\go-worker\resources\template_example\nontemplatefolder:0xc000178600 github.com\go-worker\resources\template_example\templateexample:0xc000178b40 github.com\go-worker\resources\template_example\templatefolder:0xc000242180]}
+[Note] search all template function
+[Note] execute custom command 6 done, using: 35134800 ns
+
+[Note] Execute command: exit
+
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] analyze go root path = C:\Users\joy403\go\src\github.com\go-worker\resources\template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example\nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\nontemplatefolder\examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example\templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatecaller.go
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example\templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - variable name: iV, type: int, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateOperatorPlus
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example\nontemplatefolder
+[Note] merge function call for package: github.com\go-worker\resources\template_example\templateexample
+[Note] deal non-member function templateCaller:
+[Note] - call: 0, index: float32, param: [1], from: | |
+[Note] - call: 1, index: float32, param: [2.0], from: | |
+[Note] - call: 0, index: v8.Result, param: [], from: |v8 |
+[Note] - call: 0, index: templatefolder.TemplateOperatorPlus, param: [[]int{1} []int{2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 1, index: templatefolder.TemplateOperatorPlus, param: [1 2], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 2, index: templatefolder.TemplateOperatorPlus, param: [1 2.0], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 3, index: templatefolder.TemplateOperatorPlus, param: [&nontemplatefolder.ExampleStruct{v: 1} &nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 4, index: templatefolder.TemplateOperatorPlus, param: [float32(1) float32(2.0)], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 5, index: templatefolder.TemplateOperatorPlus, param: [1+2i 1.1+2.2i], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 6, index: templatefolder.TemplateOperatorPlus, param: [nontemplatefolder.ExampleStruct{v: 1} nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example\templatefolder
+[Note] deal non-member function TemplateSelfIncrease:
+[Note] ----------------------------------------------------------------
+[Note] deal non-member function TemplateOperatorPlus:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] goAnalysis = &{RootPath:C:\Users\joy403\go\src\github.com\go-worker\resources\template_example PackageAnalysisMap:map[github.com\go-worker\resources\template_example\nontemplatefolder:0xc00015e660 github.com\go-worker\resources\template_example\templateexample:0xc00015eba0 github.com\go-worker\resources\template_example\templatefolder:0xc0002261e0]}
+[Note] search all template function
+[Note] execute custom command 6 done, using: 17566500 ns
+
+[Note] Execute command: exit
+
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] analyze go root path = C:\Users\joy403\go\src\github.com\go-worker\resources\template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example\nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\nontemplatefolder\examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example\templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatecaller.go
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example\templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - variable name: iV, type: int, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateOperatorPlus
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example\nontemplatefolder
+[Note] merge function call for package: github.com\go-worker\resources\template_example\templateexample
+[Note] deal non-member function templateCaller:
+[Note] - call: 0, index: templatefolder.TemplateOperatorPlus, param: [&nontemplatefolder.ExampleStruct{v: 1} &nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 1, index: templatefolder.TemplateOperatorPlus, param: [1+2i 1.1+2.2i], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 2, index: templatefolder.TemplateOperatorPlus, param: [1 2.0], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 3, index: templatefolder.TemplateOperatorPlus, param: [nontemplatefolder.ExampleStruct{v: 1} nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 4, index: templatefolder.TemplateOperatorPlus, param: [[]int{1} []int{2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 5, index: templatefolder.TemplateOperatorPlus, param: [1 2], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 6, index: templatefolder.TemplateOperatorPlus, param: [float32(1) float32(2.0)], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 0, index: v8.Result, param: [], from: |v8 |
+[Note] - call: 0, index: float32, param: [1], from: | |
+[Note] - call: 1, index: float32, param: [2.0], from: | |
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example\templatefolder
+[Note] deal non-member function TemplateOperatorPlus:
+[Note] ----------------------------------------------------------------
+[Note] deal non-member function TemplateSelfIncrease:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] goAnalysis = &{RootPath:C:\Users\joy403\go\src\github.com\go-worker\resources\template_example PackageAnalysisMap:map[github.com\go-worker\resources\template_example\nontemplatefolder:0xc000171500 github.com\go-worker\resources\template_example\templateexample:0xc000171a40 github.com\go-worker\resources\template_example\templatefolder:0xc00022f080]}
+[Note] search all template function
+[Note] execute custom command 6 done, using: 21472300 ns
+
+[Note] Execute command: exit
+
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] analyze go root path = C:\Users\joy403\go\src\github.com\go-worker\resources\template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example\nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\nontemplatefolder\examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example\templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatecaller.go
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example\templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - variable name: iV, type: int, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateOperatorPlus
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example\templateexample
+[Note] deal non-member function templateCaller:
+[Note] - call: 0, index: templatefolder.TemplateOperatorPlus, param: [&nontemplatefolder.ExampleStruct{v: 1} &nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 1, index: templatefolder.TemplateOperatorPlus, param: [float32(1) float32(2.0)], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 2, index: templatefolder.TemplateOperatorPlus, param: [1+2i 1.1+2.2i], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 3, index: templatefolder.TemplateOperatorPlus, param: [1 2], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 4, index: templatefolder.TemplateOperatorPlus, param: [[]int{1} []int{2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 5, index: templatefolder.TemplateOperatorPlus, param: [nontemplatefolder.ExampleStruct{v: 1} nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 6, index: templatefolder.TemplateOperatorPlus, param: [1 2.0], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 0, index: v8.Result, param: [], from: |v8 |
+[Note] - call: 0, index: float32, param: [1], from: | |
+[Note] - call: 1, index: float32, param: [2.0], from: | |
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example\templatefolder
+[Note] deal non-member function TemplateOperatorPlus:
+[Note] ----------------------------------------------------------------
+[Note] deal non-member function TemplateSelfIncrease:
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example\nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] goAnalysis = &{RootPath:C:\Users\joy403\go\src\github.com\go-worker\resources\template_example PackageAnalysisMap:map[github.com\go-worker\resources\template_example\nontemplatefolder:0xc000178600 github.com\go-worker\resources\template_example\templateexample:0xc000178b40 github.com\go-worker\resources\template_example\templatefolder:0xc000242180]}
+[Note] search all template function
+[Note] execute custom command 6 done, using: 21470900 ns
+
+[Note] Execute command: exit
+
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example\templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatecaller.go
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example\templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - variable name: iV, type: int, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateOperatorPlus
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example\nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\nontemplatefolder\examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example\nontemplatefolder
+[Note] merge function call for package: github.com\go-worker\resources\template_example\templateexample
+[Note] deal non-member function templateCaller:
+[Note] - call: 0, index: templatefolder.TemplateOperatorPlus, param: [1 2], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 1, index: templatefolder.TemplateOperatorPlus, param: [nontemplatefolder.ExampleStruct{v: 1} nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 2, index: templatefolder.TemplateOperatorPlus, param: [float32(1) float32(2.0)], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 3, index: templatefolder.TemplateOperatorPlus, param: [&nontemplatefolder.ExampleStruct{v: 1} &nontemplatefolder.ExampleStruct{v: 2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 4, index: templatefolder.TemplateOperatorPlus, param: [1 2.0], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 5, index: templatefolder.TemplateOperatorPlus, param: [[]int{1} []int{2}], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 6, index: templatefolder.TemplateOperatorPlus, param: [1+2i 1.1+2.2i], from: |templatefolder github.com/go-worker/resources/template_example/templatefolder|
+[Note] - call: 0, index: float32, param: [1], from: | |
+[Note] - call: 1, index: float32, param: [2.0], from: | |
+[Note] - call: 0, index: v8.Result, param: [], from: |v8 |
+[Note] ----------------------------------------------------------------
+[Note] merge function call for package: github.com\go-worker\resources\template_example\templatefolder
+[Note] deal non-member function TemplateOperatorPlus:
+[Note] ----------------------------------------------------------------
+[Note] deal non-member function TemplateSelfIncrease:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] goAnalysis = &{RootPath:C:\Users\joy403\go\src\github.com\go-worker\resources\template_example PackageAnalysisMap:map[github.com\go-worker\resources\template_example\nontemplatefolder:0xc00015e660 github.com\go-worker\resources\template_example\templateexample:0xc00015eba0 github.com\go-worker\resources\template_example\templatefolder:0xc0002261e0]}
+[Note] search all template function
+[Note] execute custom command 6 done, using: 9757300 ns
+
+[Note] Execute command: exit
+
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example\templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: iV, type: int, from: | |
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateOperatorPlus
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example\nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\nontemplatefolder\examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example\templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatecaller.go
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] goAnalysis = &{RootPath:C:\Users\joy403\go\src\github.com\go-worker\resources\template_example PackageAnalysisMap:map[github.com\go-worker\resources\template_example\nontemplatefolder:0xc000178600 github.com\go-worker\resources\template_example\templateexample:0xc000178b40 github.com\go-worker\resources\template_example\templatefolder:0xc000242180]}
+[Note] search all template function
+[Note] execute custom command 6 done, using: 9759400 ns
+
+[Note] Execute command: exit
+
+[Note] Execute command: exit
+
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example\nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\nontemplatefolder\examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example\templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatecaller.go
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example\templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: iV, type: int, from: | |
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateOperatorPlus
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] goAnalysis = &{RootPath:C:\Users\joy403\go\src\github.com\go-worker\resources\template_example PackageAnalysisMap:map[github.com\go-worker\resources\template_example\nontemplatefolder:0xc000178600 github.com\go-worker\resources\template_example\templateexample:0xc000178b40 github.com\go-worker\resources\template_example\templatefolder:0xc000242180]}
+[Note] search all template function
+[Note] execute custom command 6 done, using: 29279900 ns
+
+[Note] Execute command: exit
+
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example\nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\nontemplatefolder\examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example\templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatecaller.go
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example\templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - variable name: iV, type: int, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateOperatorPlus
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example\templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatecaller.go
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example\templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - variable name: iV, type: int, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateOperatorPlus
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example\nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\nontemplatefolder\examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] Execute command: custom execute 6 resources/template_example
+[Note] ----------------------------------------------------------------
+[Note] packageName = templatefolder, packagePath = github.com\go-worker\resources\template_example\templatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tfunction.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatefolder\tstruct.template.go
+[Note] alias = template, importPath = github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct TemplateStruct base struct list: 0
+[Note] struct TemplateStruct variable list: 2
+[Note] - variable name: tV, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - variable name: iV, type: int, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function TemplateOperatorPlus
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - param index: 1, name: t2, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] function TemplateSelfIncrease
+[Note] - param index: 0, name: t1, type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] - return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class TemplateStruct
+[Note] 	- function Result
+[Note] 		- return index: 0, name: , type: TypeName, from: |template github.com/go-worker/resources/template
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = nontemplatefolder, packagePath = github.com\go-worker\resources\template_example\nontemplatefolder
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\nontemplatefolder\examplestruct.go
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] struct ExampleStruct base struct list: 0
+[Note] struct ExampleStruct variable list: 1
+[Note] - variable name: v, type: int // This is a struct member, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] class ExampleStruct
+[Note] 	- function Plus
+[Note] 		- param index: 0, name: oes, type: ExampleStruct, from: | |
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] packageName = templateexample, packagePath = github.com\go-worker\resources\template_example\templateexample
+[Note] ----------------------------------------------------------------
+[Note] Output package import analysis:
+[Note] import list from file: C:\Users\joy403\go\src\github.com\go-worker\resources\template_example\templatecaller.go
+[Note] alias = nontemplatefolder, importPath = github.com/go-worker/resources/template_example/nontemplatefolder
+[Note] alias = templatefolder, importPath = github.com/go-worker/resources/template_example/templatefolder
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package interface analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package struct analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package function analysis:
+[Note] function templateCaller
+[Note] - call: float32, len = 2
+[Note] 	- analysis = |float32(2.0)|
+[Note] 	- content  = |float32(2.0)|
+[Note] 	- analysis = |float32(1)|
+[Note] 	- content  = |float32(1)|
+[Note] - call: v8.Result, len = 1
+[Note] 	- analysis = |v8.Result()|
+[Note] 	- content  = |v8.Result()|
+[Note] - call: templatefolder.TemplateOperatorPlus, len = 7
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2.0)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(&nontemplatefolder.ExampleStruct{v: 1}, &nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(float32(1), float32(2.0))|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1, 2)|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus([]int{1}, []int{2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(nontemplatefolder.ExampleStruct{v: 1}, nontemplatefolder.ExampleStruct{v: 2})|
+[Note] 	- analysis = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] 	- content  = |templatefolder.TemplateOperatorPlus(1+2i, 1.1+2.2i)|
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package member function analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package const variable analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] Output package type rename analysis:
+[Note] ----------------------------------------------------------------
+[Note] ----------------------------------------------------------------
+[Note] goAnalysis = &{RootPath:C:\Users\joy403\go\src\github.com\go-worker\resources\template_example PackageAnalysisMap:map[github.com\go-worker\resources\template_example\nontemplatefolder:0xc00015e660 github.com\go-worker\resources\template_example\templateexample:0xc00015eba0 github.com\go-worker\resources\template_example\templatefolder:0xc0002261e0]}
+[Note] search all template function
+[Note] execute custom command 6 done, using: 17567700 ns
+
+[Note] Execute command: exit
+

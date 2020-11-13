@@ -242,7 +242,7 @@ type GoFunctionAnalysis struct {
 	ParamsMap           map[string]*GoFunctionVariable                        // param name : function variable
 	ReturnMap           map[string]*GoFunctionVariable                        // return name : function variable
 	VariableMap         map[string]*GoFunctionVariable                        // variable name : function variable
-	CallMap             map[string][]*GoFunctionCallAnalysis                  // call function : function call analysis
+	CallMap             map[string][]*GoFunctionCallAnalysis                  // call function identifier : function call analysis
 	InnerPackageCallMap map[string]map[int]*GoFunctionCallAnalysis            // call function from inner package
 	OuterPackageCallMap map[string]map[string]map[int]*GoFunctionCallAnalysis // call function from outer package
 	MemberCallMap       map[string]map[string]map[int]*GoFunctionCallAnalysis // call member function
@@ -454,6 +454,7 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 
 		// 4.1.3.1.6.1.2
 		packageName, packagePath, analyzeGoScopePackageError := analyzeGoScopePackage(splitFileResult.Package.Content, rootPath)
+		// utility2.TestOutput("analyze scope package: packagePath = %v, rootPath = %v", packagePath, rootPath)
 		if analyzeGoScopePackageError != nil {
 			return nil, analyzeGoScopePackageError
 		}
@@ -720,33 +721,36 @@ func analyzeGo(rootPath string, toAnalyzePathList []string) (*GoAnalysis, error)
 		// non-member function
 		for functionName, functionAnalysis := range packageAnalysis.FunctionAnalysisMap {
 			logger.OutputNoteInfo("deal non-member function %v:", functionName)
-			for callFunctionMame, callFunctionList := range functionAnalysis.CallMap {
+			for callFunctionIdentifier, callFunctionList := range functionAnalysis.CallMap {
 				for index, functionCallAnalysis := range callFunctionList {
-					logger.OutputNoteInfo("- call: %v, index: %v, param: %v, from: |%v %v|", index, callFunctionMame, functionCallAnalysis.ParamList, functionCallAnalysis.From, functionCallAnalysis.FromPackagePath)
+					logger.OutputNoteInfo("- call: %v, index: %v, param: %v, from: |%v %v|", index, callFunctionIdentifier, functionCallAnalysis.ParamList, functionCallAnalysis.From, functionCallAnalysis.FromPackagePath)
 					if len(functionCallAnalysis.From) == 0 || len(functionCallAnalysis.FromPackagePath) == 0 {
-						utility2.TestOutput("callFunctionMame %v continue 1", callFunctionMame)
+						// utility2.TestOutput("callFunctionIdentifier %v continue 1", callFunctionIdentifier)
 						continue
 					}
-					callFromPackageAnalysis, hasPackagePath := goAnalysis.PackageAnalysisMap[functionCallAnalysis.FromPackagePath]
+
+					formatPackagePath := utility2.FormatFilePathWithOS(functionCallAnalysis.FromPackagePath)
+
+					callFromPackageAnalysis, hasPackagePath := goAnalysis.PackageAnalysisMap[formatPackagePath]
 					if !hasPackagePath {
-						for key := range goAnalysis.PackageAnalysisMap {
-							utility2.TestOutput("key = %v", key)
-						}
-						utility2.TestOutput("callFunctionMame %v continue 2: %v", callFunctionMame, functionCallAnalysis.FromPackagePath)
+						// utility2.TestOutput("callFunctionIdentifier %v continue 2: %v", callFunctionIdentifier, formatPackagePath)
 						continue
 					}
-					callFunctionAnalysis, hasFunction := callFromPackageAnalysis.FunctionAnalysisMap[callFunctionMame]
+					callFunctionAnalysis, hasFunction := callFromPackageAnalysis.FunctionAnalysisMap[functionCallAnalysis.Call]
 					if !hasFunction {
-						utility2.TestOutput("callFunctionMame %v continue 3", callFunctionMame)
+						// utility2.TestOutput("functionCallAnalysis.Call %v continue 3", functionCallAnalysis.Call)
 						continue
+					}
+					if callFunctionAnalysis.CallerMap == nil {
+						callFunctionAnalysis.CallerMap = make(map[string]map[string]map[int]*GoFunctionCallAnalysis)
 					}
 					if _, hasCallerPackagePath := callFunctionAnalysis.CallerMap[packagePath]; !hasCallerPackagePath {
 						callFunctionAnalysis.CallerMap[packagePath] = make(map[string]map[int]*GoFunctionCallAnalysis)
 					}
-					if _, hasCallerFunction := callFunctionAnalysis.CallerMap[packagePath]; !hasCallerFunction {
+					if _, hasCallerFunction := callFunctionAnalysis.CallerMap[packagePath][functionName]; !hasCallerFunction {
 						callFunctionAnalysis.CallerMap[packagePath][functionName] = make(map[int]*GoFunctionCallAnalysis)
 					}
-					logger.OutputNoteInfo("package: %v, function: %v, No.%v calls package %v function %v with params: %v", packagePath, functionName, index, functionCallAnalysis.FromPackagePath, callFunctionMame, functionCallAnalysis.ParamList)
+					logger.OutputNoteInfo("package: %v, function: %v, No.%v calls package %v function %v with params: %v", packagePath, functionName, index, formatPackagePath, functionCallAnalysis.Call, functionCallAnalysis.ParamList)
 					callFunctionAnalysis.CallerMap[packagePath][functionName][index] = functionCallAnalysis
 				}
 			}
@@ -776,10 +780,13 @@ func analyzeGoScopePackage(content, fileABS string) (packageName string, package
 		}
 	}
 
+	// utility2.TestOutput("global.GoPathSrc = %v, fileABS = %v", global.GoPathSrc, fileABS)
 	packagePath, analyzeError = filepath.Rel(global.GoPathSrc, fileABS)
+	// utility2.TestOutput("in analyzeGoScopePackage, before join, packagePath = %v", packagePath)
 	if packageName != "main" {
-		packagePath = path.Join(packagePath, packageName)
+		packagePath = filepath.Join(packagePath, packageName)
 	}
+	// utility2.TestOutput("in analyzeGoScopePackage, after join, packagePath = %v", packagePath)
 
 	return packageName, packagePath, analyzeError
 }

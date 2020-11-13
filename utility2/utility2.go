@@ -2,6 +2,7 @@ package utility2
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/go-worker/global"
 )
@@ -27,4 +28,14 @@ func GetPunctuationMark(punctuationMark int) (rune, rune) {
 	default:
 		return global.PunctuationMarkLeftBracket, global.PunctuationMarkRightBracket
 	}
+}
+
+// FormatFilePathWithOS 根据操作系统格式化路径
+func FormatFilePathWithOS(filePath string) string {
+	beReplaced := "/"
+	toReplace := "\\"
+	if global.OperationSystem == global.OSLinux {
+		beReplaced, toReplace = toReplace, beReplaced
+	}
+	return strings.ReplaceAll(filePath, beReplaced, toReplace)
 }

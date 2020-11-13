@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -912,7 +911,9 @@ func GoCommandToolTemplater(paramList []string) {
 	projectFileAbsList := make([]string, 0, len(projectFileRelativePathList))
 	abs, _ := filepath.Abs(".")
 	for _, fileRelativePath := range projectFileRelativePathList {
-		fileABS := path.Join(abs, fileRelativePath)
+		fileABS := filepath.Join(abs, fileRelativePath)
+		// fileABS = utility2.FormatFilePathWithOS(fileABS)
+		// utility2.TestOutput("fileABS = %v", fileABS)
 		projectFileAbsList = append(projectFileAbsList, fileABS)
 	}
 
@@ -921,8 +922,9 @@ func GoCommandToolTemplater(paramList []string) {
 		return
 	}
 
-	logger.OutputNoteInfo("analyze go root path = %v", path.Join(abs, projectRelativePath))
-	goAnalysis, analyzeError := analyzeGo(path.Join(abs, projectRelativePath), projectFileAbsList)
+	goRootAbs := utility2.FormatFilePathWithOS(filepath.Join(abs, projectRelativePath))
+	// logger.OutputNoteInfo("analyze go root path = %v", goRootAbs)
+	goAnalysis, analyzeError := analyzeGo(goRootAbs, projectFileAbsList)
 	if analyzeError != nil {
 		ui.OutputWarnInfo(ui.CMDAnalyzeOccursError, analyzeError)
 		return
@@ -934,7 +936,7 @@ func GoCommandToolTemplater(paramList []string) {
 
 	// 4.1.3.2.3.1
 
-	// templatePackageAbs := path.Join(abs, TemplatePackagePath)
+	// templatePackageAbs := filepath.Join(abs, TemplatePackagePath)
 
 	// for packagePath, packageAnalysis := range goAnalysis.PackageAnalysisMap {
 	// 	logger.OutputNoteInfo("search template function in package %v", packagePath)

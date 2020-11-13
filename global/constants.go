@@ -90,6 +90,8 @@ var (
 	SyntaxCpp         = "cpp"
 	SyntaxMarkdown    = "md"
 	ResourceDirectory = "resources"
+	OSWindows         = "windows"
+	OSLinux           = "linux"
 )
 
 // 外部常量
