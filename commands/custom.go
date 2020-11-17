@@ -887,14 +887,17 @@ var TemplateFileKey string = ".template."
 var TemplatePackagePath string = "resources/template"
 
 type GoTemplateFunctionAnalysis struct {
-	Analysis *GoFunctionAnalysis
+	Analysis               *GoFunctionAnalysis
+	ParamDeductionGroupMap map[string]map[string]map[int]map[int]*goValueType // package path : function : call index : param index : param type
+
+	// ReturnDeductionGroupMap map[string]map[string]map[int]map[int]goValueType // package path : function : call index : return index : return type
+
 	// DeductionAnalysis *GoFunctionAnalysis
 	// ToDeductionTemplateParamIndexList  []int
-	ToDeductionTemplateReturnIndexList []int
-	ParamDeductionGroupMap             map[int]map[int]goValueType
+	// ToDeductionTemplateReturnIndexList []int
 	// ParamDeductionAnalysisList         []*GoTemplateFunctionAnalysis
-	ReturnDeductionGroupMap map[int]map[int]goValueType
-	DeductionFunctionMap    map[int]string // deduction group : deduction function
+	// ReturnDeductionGroupMap map[int]map[int]goValueType
+	// DeductionFunctionMap    map[int]string // deduction group : deduction function
 }
 
 // GoCommandToolTemplater go 语言命令行工具：模板代码生成器
@@ -923,7 +926,7 @@ func GoCommandToolTemplater(paramList []string) {
 	}
 
 	goRootAbs := utility2.FormatFilePathWithOS(filepath.Join(abs, projectRelativePath))
-	// logger.OutputNoteInfo("analyze go root path = %v", goRootAbs)
+	logger.OutputNoteInfo("analyze go root path = %v", goRootAbs)
 	goAnalysis, analyzeError := analyzeGo(goRootAbs, projectFileAbsList)
 	if analyzeError != nil {
 		ui.OutputWarnInfo(ui.CMDAnalyzeOccursError, analyzeError)
@@ -936,20 +939,66 @@ func GoCommandToolTemplater(paramList []string) {
 
 	// 4.1.3.2.3.1
 
-	// templatePackageAbs := filepath.Join(abs, TemplatePackagePath)
+	templatePackagePath, filepathRelError := filepath.Rel(global.GoPathSrc, filepath.Join(abs, TemplatePackagePath))
+	if filepathRelError != nil {
+		ui.OutputWarnInfo(ui.CMDAnalyzeOccursError, filepathRelError)
+		return
+	}
+	utility2.TestOutput("templatePackagePath = %v", templatePackagePath)
 
-	// for packagePath, packageAnalysis := range goAnalysis.PackageAnalysisMap {
-	// 	logger.OutputNoteInfo("search template function in package %v", packagePath)
-	// 	for _, importPackageMap := range packageAnalysis.ImportAnalysis {
+	templateFunctionAnalysisMap := make(map[string]map[string]*GoTemplateFunctionAnalysis) // package path : function name : function analysis
 
-	// 	}
-	// 	// non-member function
-	// 	for functionName, functionAnalysis := range packageAnalysis.FunctionAnalysisMap {
-	// 		for _, paramAnalysis := range functionAnalysis.ParamsMap {
-	// 			// if paramAnalysis.TypeFrom
-	// 		}
-	// 	}
-	// }
+	for packagePath, packageAnalysis := range goAnalysis.PackageAnalysisMap {
+		ui.OutputNoteInfo("search template function in package %v", packagePath)
+		isImportTemplatePackagePath := false
+	ITPCheck:
+		for _, importPackageMap := range packageAnalysis.ImportAnalysis {
+			for _, importAnalysis := range importPackageMap {
+				if utility2.FormatFilePathWithOS(importAnalysis.Path) == templatePackagePath {
+					isImportTemplatePackagePath = true
+					break ITPCheck
+				} else {
+					utility2.TestOutput("importAnalysis.Path = %v", importAnalysis.Path)
+				}
+			}
+		}
+
+		if !isImportTemplatePackagePath {
+			utility2.TestOutput("%v is not import template package path", packagePath)
+			continue
+		}
+
+		// non-member function
+		for functionName, functionAnalysis := range packageAnalysis.FunctionAnalysisMap {
+			var templateFunctionAnalysis *GoTemplateFunctionAnalysis
+
+			templateParamIndexMap := make(map[int]*GoFunctionVariable)
+			for _, paramAnalysis := range functionAnalysis.ParamsMap {
+				if utility2.FormatFilePathWithOS(paramAnalysis.Type.FromPackagePath) == templatePackagePath {
+					utility2.TestOutput("function %v is template function, param is template type", functionName)
+					templateParamIndexMap[paramAnalysis.Index] = paramAnalysis
+				}
+			}
+
+			templateReturnIndexMap := make(map[int]*GoFunctionVariable)
+			for _, returnAnalysis := range functionAnalysis.ReturnMap {
+				if utility2.FormatFilePathWithOS(returnAnalysis.Type.FromPackagePath) == templatePackagePath {
+					utility2.TestOutput("function %v is template function, return is template type", functionName)
+					templateReturnIndexMap[returnAnalysis.Index] = returnAnalysis
+				}
+			}
+
+			if len(templateParamIndexMap) != 0 || len(templateReturnIndexMap) != 0 {
+				templateFunctionAnalysis = &GoTemplateFunctionAnalysis{}
+			}
+			templateFunctionAnalysis.ParamDeductionGroupMap = paramDeduction(templateParamIndexMap, functionAnalysis.CallerMap)
+			// templateFunctionAnalysis.
+
+			if templateFunctionAnalysis != nil {
+				templateFunctionAnalysisMap[packagePath][functionName] = templateFunctionAnalysis
+			}
+		}
+	}
 
 	// for fileNo, goFileAnalysis := range goAnalysis.FileNoAnalysisMap {
 	// 	utility2.TestOutput("fileNo = %v, goFileAnalysis.FilePath = %v", fileNo, goFileAnalysis.FilePath)
@@ -1121,22 +1170,45 @@ func GoCommandToolTemplater(paramList []string) {
 
 }
 
-func paramDeduction(callFunctionAnalysisMap map[string][]*GoFunctionCallAnalysis, templateFunctionAnalysisMap map[string]*GoTemplateFunctionAnalysis, testLog1 func(string, []string), testLog2 func(string, goValueType)) {
-	for callFunction, callAnalysisList := range callFunctionAnalysisMap {
-		if templateFunctionAnalysis, isTemplateFunction := templateFunctionAnalysisMap[callFunction]; isTemplateFunction {
-			for deductionGroup, callAnalysis := range callAnalysisList {
-				testLog1(callFunction, callAnalysis.ParamList)
-				paramDeductionMap := make(map[int]goValueType)
-				for index, param := range callAnalysis.ParamList {
-					paramType := goValueTypeDeduction(param)
-					testLog2(param, paramType)
-					paramDeductionMap[index] = paramType
+func paramDeduction(templateParamIndexMap map[int]*GoFunctionVariable, templateFunctionCallerMap map[string]map[string]map[int]*GoFunctionCallAnalysis) map[string]map[string]map[int]map[int]*goValueType {
+	deductionMap := make(map[string]map[string]map[int]map[int]*goValueType)
+	for packagePath, callerMap := range templateFunctionCallerMap {
+		if _, hasPackagePath := deductionMap[packagePath]; !hasPackagePath {
+			deductionMap[packagePath] = make(map[string]map[int]map[int]*goValueType)
+		}
+		for functionName, callIndexMap := range callerMap {
+			if _, hasFunction := deductionMap[packagePath][functionName]; !hasFunction {
+				deductionMap[packagePath][functionName] = make(map[int]map[int]*goValueType)
+			}
+			for callIndex, callAnalysis := range callIndexMap {
+				deductionMap[packagePath][functionName][callIndex] = make(map[int]*goValueType)
+				for paramIndex, param := range callAnalysis.ParamList {
+					if deductionType := goValueTypeDeduction(param); deductionType != nil {
+						deductionMap[packagePath][functionName][callIndex][paramIndex] = deductionType
+					}
 				}
-				templateFunctionAnalysis.ParamDeductionGroupMap[deductionGroup] = paramDeductionMap
 			}
 		}
 	}
+	return deductionMap
 }
+
+// func paramDeduction(callFunctionAnalysisMap map[string][]*GoFunctionCallAnalysis, templateFunctionAnalysisMap map[string]*GoTemplateFunctionAnalysis, testLog1 func(string, []string), testLog2 func(string, goValueType)) {
+// 	for callFunction, callAnalysisList := range callFunctionAnalysisMap {
+// 		if templateFunctionAnalysis, isTemplateFunction := templateFunctionAnalysisMap[callFunction]; isTemplateFunction {
+// 			for deductionGroup, callAnalysis := range callAnalysisList {
+// 				testLog1(callFunction, callAnalysis.ParamList)
+// 				paramDeductionMap := make(map[int]goValueType)
+// 				for index, param := range callAnalysis.ParamList {
+// 					paramType := goValueTypeDeduction(param)
+// 					testLog2(param, paramType)
+// 					paramDeductionMap[index] = paramType
+// 				}
+// 				templateFunctionAnalysis.ParamDeductionGroupMap[deductionGroup] = paramDeductionMap
+// 			}
+// 		}
+// 	}
+// }
 
 // after param deduction
 // for each param deduction result
@@ -1178,37 +1250,46 @@ var goTemplateRPFunctionReturnTypeKey string = "RETURN_TYPE"
 
 var goTemplateRPFunctionBodyKey = "RP_FUNCTION_BODY"
 
-type goValueType int
+type goValueTypeEnum int
+
+type goValueType struct {
+	Enum      goValueTypeEnum
+	InnerType *goValueType
+}
+
+func (t goValueType) String() string {
+	return ""
+}
 
 const (
-	tUnknown    goValueType = iota // 0
-	tInt                           // 1
-	tInt8                          // 2
-	tInt16                         // 3
-	tInt32                         // 4
-	tInt64                         // 5
-	tUint                          // 6
-	tUint8                         // 7
-	tUint16                        // 8
-	tUint32                        // 9
-	tUint64                        // 10
-	tFloat32                       // 11
-	tFloat64                       // 12
-	tComplex64                     // 13
-	tComplex128                    // 14
-	tBool                          // 15
-	tString                        // 16
-	tUintptr                       // 17
-	fFunc                          // 18
+	tUnknown    goValueTypeEnum = iota // 0
+	tInt                               // 1
+	tInt8                              // 2
+	tInt16                             // 3
+	tInt32                             // 4
+	tInt64                             // 5
+	tUint                              // 6
+	tUint8                             // 7
+	tUint16                            // 8
+	tUint32                            // 9
+	tUint64                            // 10
+	tFloat32                           // 11
+	tFloat64                           // 12
+	tComplex64                         // 13
+	tComplex128                        // 14
+	tBool                              // 15
+	tString                            // 16
+	tUintptr                           // 17
+	fFunc                              // 18
 )
 
-var atomicExpressionEnumGoValueTypeMap map[global.AtomicExpressionEnum]goValueType
+var atomicExpressionEnumGoValueTypeMap map[global.AtomicExpressionEnum]goValueTypeEnum
 var goTypeConvertRegexp *regexp.Regexp
-var valueTypeStringMap map[string]goValueType
-var typeStringMap map[goValueType]string
+var valueTypeStringMap map[string]goValueTypeEnum
+var typeStringMap map[goValueTypeEnum]string
 
 func checkTypeAtomicExpression() {
-	atomicExpressionEnumGoValueTypeMap = map[global.AtomicExpressionEnum]goValueType{
+	atomicExpressionEnumGoValueTypeMap = map[global.AtomicExpressionEnum]goValueTypeEnum{
 		global.AEInteger: tInt,
 		global.AEFloat:   tFloat64,
 		global.AEComplex: tComplex128,
@@ -1223,7 +1304,7 @@ func checkTypeAtomicExpression() {
 		ui.OutputWarnInfo(ui.CommonError18, global.GoTypeConvertTemplate)
 	}
 
-	valueTypeStringMap = map[string]goValueType{
+	valueTypeStringMap = map[string]goValueTypeEnum{
 		"int":        tInt,
 		"int8":       tInt8,
 		"int16":      tInt16,
@@ -1243,28 +1324,38 @@ func checkTypeAtomicExpression() {
 		"uintptr":    tUintptr,
 	}
 
-	typeStringMap = make(map[goValueType]string)
+	typeStringMap = make(map[goValueTypeEnum]string)
 	typeStringMap[tUnknown] = TemplateType
 	for typeString, typeEnum := range valueTypeStringMap {
 		typeStringMap[typeEnum] = typeString
 	}
 }
 
-func goValueTypeDeduction(valueString string) goValueType {
-	for toCheckTypeAtomicExpressionEnum, goValueType := range atomicExpressionEnumGoValueTypeMap {
+func goValueTypeDeduction(valueString string) *goValueType {
+	// int, float, complex
+	for toCheckTypeAtomicExpressionEnum, goValueTypeEnum := range atomicExpressionEnumGoValueTypeMap {
 		if regexps.AtomicExpressionEnumRegexpMap[toCheckTypeAtomicExpressionEnum].MatchString(valueString) {
-			return goValueType
+			return &goValueType{
+				Enum: goValueTypeEnum,
+			}
 		}
 	}
 
+	// inner type convert: type(x)
 	if goTypeConvertRegexp.MatchString(valueString) {
 		identifier := goTypeConvertRegexp.ReplaceAllString(valueString, "$IDENTIFIER")
-		if goValueType, isGoType := valueTypeStringMap[identifier]; isGoType {
-			return goValueType
+		if goValueTypeEnum, isGoType := valueTypeStringMap[identifier]; isGoType {
+			return &goValueType{
+				Enum: goValueTypeEnum,
+			}
 		}
 	}
 
-	return tUnknown
+	// slice
+
+	// map
+
+	return nil
 }
 
 // ----------------------------------------------------------------

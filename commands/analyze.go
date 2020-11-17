@@ -193,7 +193,7 @@ type GoPackageAnalysis struct {
 	Scope               map[string]*GoPackageScope              // file path : go package scope
 	PackageName         string                                  // package name
 	PackagePath         string                                  // package path
-	ImportAnalysis      map[string]map[string]*GoImportAnalysis // file path : package path : import analysis
+	ImportAnalysis      map[string]map[string]*GoImportAnalysis // file path : import alias : import analysis
 	VariableAnalysisMap map[string]*GoVariableAnalysis          // variable name : variable analysis
 	ConstAnalysisMap    map[string]*GoVariableAnalysis          // const name : variable analysis
 	InterfaceAnalysis   map[string]*GoInterfaceAnalysis         // interface name : interface analysis
